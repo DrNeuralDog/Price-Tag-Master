@@ -1,0 +1,804 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "PriceTagMaster.exe"
+		},
+		{
+			"path" : "PriceTagMaster.pdb"
+		}
+	],
+	"backtrace" : 4,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"_qt_internal_create_executable",
+			"qt6_add_executable",
+			"qt_add_executable",
+			"install",
+			"target_link_libraries",
+			"set_target_properties",
+			"include",
+			"find_package",
+			"find_dependency",
+			"_qt_internal_find_qt_dependencies",
+			"add_compile_options",
+			"target_include_directories"
+		],
+		"files" : 
+		[
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6Core/Qt6CoreMacros.cmake",
+			"CMakeLists.txt",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6AxContainer/Qt6AxContainerTargets.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6AxContainer/Qt6AxContainerConfig.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6/Qt6Config.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6AxBasePrivate/Qt6AxBasePrivateTargets.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6AxBasePrivate/Qt6AxBasePrivateConfig.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/Tools/CMake_64/share/cmake-3.27/Modules/CMakeFindDependencyMacro.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6AxContainer/Qt6AxContainerDependencies.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6PrintSupport/Qt6PrintSupportTargets.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6PrintSupport/Qt6PrintSupportConfig.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6Gui/Qt6GuiTargets.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6Gui/Qt6GuiConfig.cmake",
+			"3rdparty/qxlsx/QXlsx/CMakeLists.txt",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6Core/Qt6CoreTargets.cmake",
+			"D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/lib/cmake/Qt6Core/Qt6CoreConfig.cmake"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 50,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 931,
+				"parent" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 622,
+				"parent" : 2
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 676,
+				"parent" : 3
+			},
+			{
+				"command" : 4,
+				"file" : 1,
+				"line" : 111,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 1,
+				"line" : 119,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 1,
+				"line" : 98,
+				"parent" : 0
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 33,
+				"parent" : 0
+			},
+			{
+				"file" : 4,
+				"parent" : 8
+			},
+			{
+				"command" : 8,
+				"file" : 4,
+				"line" : 178,
+				"parent" : 9
+			},
+			{
+				"file" : 3,
+				"parent" : 10
+			},
+			{
+				"command" : 7,
+				"file" : 3,
+				"line" : 55,
+				"parent" : 11
+			},
+			{
+				"file" : 2,
+				"parent" : 12
+			},
+			{
+				"command" : 6,
+				"file" : 2,
+				"line" : 61,
+				"parent" : 13
+			},
+			{
+				"command" : 7,
+				"file" : 3,
+				"line" : 43,
+				"parent" : 11
+			},
+			{
+				"file" : 9,
+				"parent" : 15
+			},
+			{
+				"command" : 10,
+				"file" : 9,
+				"line" : 42,
+				"parent" : 16
+			},
+			{
+				"command" : 9,
+				"file" : 8,
+				"line" : 111,
+				"parent" : 17
+			},
+			{
+				"command" : 8,
+				"file" : 7,
+				"line" : 76,
+				"parent" : 18
+			},
+			{
+				"file" : 6,
+				"parent" : 19
+			},
+			{
+				"command" : 7,
+				"file" : 6,
+				"line" : 55,
+				"parent" : 20
+			},
+			{
+				"file" : 5,
+				"parent" : 21
+			},
+			{
+				"command" : 6,
+				"file" : 5,
+				"line" : 61,
+				"parent" : 22
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 623,
+				"parent" : 2
+			},
+			{
+				"command" : 8,
+				"file" : 4,
+				"line" : 178,
+				"parent" : 9
+			},
+			{
+				"file" : 11,
+				"parent" : 25
+			},
+			{
+				"command" : 7,
+				"file" : 11,
+				"line" : 55,
+				"parent" : 26
+			},
+			{
+				"file" : 10,
+				"parent" : 27
+			},
+			{
+				"command" : 6,
+				"file" : 10,
+				"line" : 61,
+				"parent" : 28
+			},
+			{
+				"file" : 14
+			},
+			{
+				"command" : 8,
+				"file" : 14,
+				"line" : 19,
+				"parent" : 30
+			},
+			{
+				"file" : 4,
+				"parent" : 31
+			},
+			{
+				"command" : 8,
+				"file" : 4,
+				"line" : 178,
+				"parent" : 32
+			},
+			{
+				"file" : 13,
+				"parent" : 33
+			},
+			{
+				"command" : 7,
+				"file" : 13,
+				"line" : 55,
+				"parent" : 34
+			},
+			{
+				"file" : 12,
+				"parent" : 35
+			},
+			{
+				"command" : 6,
+				"file" : 12,
+				"line" : 93,
+				"parent" : 36
+			},
+			{
+				"command" : 8,
+				"file" : 4,
+				"line" : 178,
+				"parent" : 9
+			},
+			{
+				"file" : 13,
+				"parent" : 38
+			},
+			{
+				"command" : 7,
+				"file" : 13,
+				"line" : 55,
+				"parent" : 39
+			},
+			{
+				"file" : 12,
+				"parent" : 40
+			},
+			{
+				"command" : 6,
+				"file" : 12,
+				"line" : 61,
+				"parent" : 41
+			},
+			{
+				"command" : 5,
+				"file" : 14,
+				"line" : 172,
+				"parent" : 30
+			},
+			{
+				"command" : 8,
+				"file" : 4,
+				"line" : 178,
+				"parent" : 9
+			},
+			{
+				"file" : 16,
+				"parent" : 44
+			},
+			{
+				"command" : 7,
+				"file" : 16,
+				"line" : 57,
+				"parent" : 45
+			},
+			{
+				"file" : 15,
+				"parent" : 46
+			},
+			{
+				"command" : 6,
+				"file" : 15,
+				"line" : 61,
+				"parent" : 47
+			},
+			{
+				"command" : 11,
+				"file" : 1,
+				"line" : 23,
+				"parent" : 0
+			},
+			{
+				"command" : 12,
+				"file" : 1,
+				"line" : 90,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-DQT_QML_DEBUG -fexec-charset=UTF-8 -g -std=gnu++17 -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 49,
+					"fragment" : "-std=c++17"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 24,
+					"define" : "MINGW_HAS_SECURE_API=1"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "QT_AXCONTAINER_LIB"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "QT_CONCURRENT_LIB"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "QT_CORE_LIB"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "QT_GUI_LIB"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "QT_PRINTSUPPORT_LIB"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "QT_WIDGETS_LIB"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "UNICODE"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "WIN32"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "WIN64"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "_ENABLE_EXTENDED_ALIGNED_STORAGE"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "_UNICODE"
+				},
+				{
+					"backtrace" : 24,
+					"define" : "_WIN64"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2/build/Desktop_Qt_6_8_0_MinGW_64_bit-Debug"
+				},
+				{
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2"
+				},
+				{
+					"backtrace" : 0,
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2/build/Desktop_Qt_6_8_0_MinGW_64_bit-Debug/PriceTagMaster_autogen/include"
+				},
+				{
+					"backtrace" : 50,
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2/src"
+				},
+				{
+					"backtrace" : 50,
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2/include"
+				},
+				{
+					"backtrace" : 50,
+					"path" : "C:/Users/Psina/Desktop/AlexWork/AppProjects/PriceTagMasterProject_ver2/3rdparty/qxlsx/QXlsx/header"
+				},
+				{
+					"backtrace" : 24,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtCore"
+				},
+				{
+					"backtrace" : 24,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include"
+				},
+				{
+					"backtrace" : 24,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/mkspecs/win32-g++"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtGui"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtWidgets"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtAxContainer"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtConcurrent"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtPrintSupport"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtGui/6.8.0"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtGui/6.8.0/QtGui"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtCore/6.8.0"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "D:/Alex_Files/WorkDocs/Qt/6.8.0/mingw_64/include/QtCore/6.8.0/QtCore"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					24,
+					24,
+					7
+				],
+				"standard" : "17"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 7,
+			"id" : "QXlsx::@8fb095f86afe053f01ec"
+		},
+		{
+			"id" : "PriceTagMaster_autogen_timestamp_deps::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 0,
+			"id" : "PriceTagMaster_autogen::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "PriceTagMaster::@6890427a1f51a3e7e1df",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 5,
+				"path" : "bin"
+			},
+			{
+				"backtrace" : 6,
+				"path" : "bin"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "C:/Program Files (x86)/PriceTagMaster"
+		}
+	},
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-DQT_QML_DEBUG -fexec-charset=UTF-8 -g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6AxContainer.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Concurrent.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6PrintSupport.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "3rdparty\\qxlsx\\QXlsx\\libQXlsxQt6.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 14,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6AxBase.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-ladvapi32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-lgdi32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-lole32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-loleaut32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-luser32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 23,
+				"fragment" : "-luuid",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Widgets.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Gui.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 24,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Core.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 29,
+				"fragment" : "-lcomdlg32",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 29,
+				"fragment" : "-lwinspool",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 37,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Gui.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 42,
+				"fragment" : "-ld3d11",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 42,
+				"fragment" : "-ldxgi",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 42,
+				"fragment" : "-ldxguid",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 42,
+				"fragment" : "-ld3d12",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 43,
+				"fragment" : "D:\\Alex_Files\\WorkDocs\\Qt\\6.8.0\\mingw_64\\lib\\libQt6Core.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 48,
+				"fragment" : "-lmpr",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 48,
+				"fragment" : "-luserenv",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "PriceTagMaster",
+	"nameOnDisk" : "PriceTagMaster.exe",
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				1,
+				2,
+				3,
+				4,
+				5
+			]
+		},
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				12
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				13
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"compileGroupIndex" : 0,
+			"isGenerated" : true,
+			"path" : "build/Desktop_Qt_6_8_0_MinGW_64_bit-Debug/PriceTagMaster_autogen/mocs_compilation.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"path" : "include/excelgenerator.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 4,
+			"path" : "include/excelparser.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 4,
+			"path" : "include/mainwindow.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 4,
+			"path" : "include/pricetag.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 4,
+			"path" : "include/wordgenerator.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/excelgenerator.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/excelparser.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/main.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/mainwindow.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/pricetag.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 4,
+			"compileGroupIndex" : 0,
+			"path" : "src/wordgenerator.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/Desktop_Qt_6_8_0_MinGW_64_bit-Debug/PriceTagMaster_autogen/timestamp",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/Desktop_Qt_6_8_0_MinGW_64_bit-Debug/PriceTagMaster_autogen/timestamp.rule",
+			"sourceGroupIndex" : 3
+		}
+	],
+	"type" : "EXECUTABLE"
+}

@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>icons/logo.png</file>
+        <file>icons/open.png</file>
+        <file>icons/generate.png</file>
+    </qresource>
+</RCC> 
