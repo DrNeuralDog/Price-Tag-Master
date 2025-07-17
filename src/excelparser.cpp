@@ -347,6 +347,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
         if (cellValue.isValid ())
         {
             QString country = cellValue.toString ().trimmed ();
+
             if (! country.isEmpty ()) { priceTag.setBrandCountry (country); }
         }
     }
