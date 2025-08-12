@@ -1,27 +1,33 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QLabel>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QFileDialog>
+#include <QAction>
+#include <QComboBox>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-#include <QMimeData>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMainWindow>
 #include <QMessageBox>
-#include <QString>
+#include <QMimeData>
 #include <QProgressBar>
+#include <QPushButton>
+#include <QSettings>
+#include <QString>
+#include <QTabWidget>
 #include <QTableWidget>
 #include <QTextEdit>
-#include <QTabWidget>
-#include <QGroupBox>
-#include <QComboBox>
+#include <QToolBar>
+#include <QVBoxLayout>
 
-#include "excelparser.h"
-#include "wordgenerator.h"
-#include "pricetag.h"
 #include "excelgenerator.h"
+#include "excelparser.h"
+#include "pricetag.h"
+#include "templateeditor.h"
+#include "templateeditordialog.h"
+#include "thememanager.h"
+#include "wordgenerator.h"
 
 
 class MainWindow: public QMainWindow
@@ -29,8 +35,7 @@ class MainWindow: public QMainWindow
     Q_OBJECT //
 
 
-public:
-    explicit MainWindow (QWidget *parent = nullptr);
+            public: explicit MainWindow (QWidget *parent = nullptr);
     ~MainWindow ();
 
 
@@ -50,12 +55,17 @@ private slots:
 private:
     void setupUI ();
     void setupMainTab ();
-    void setupPreviewTab ();
+    void setupPreviewTab (); // no-op (legacy)
     void setupStatisticsTab ();
+    void setupToolbar ();
     void updateStatistics ();
+    void toggleTheme ();
+    void updateThemeStyles ();
 
     QWidget *centralWidget;
     QTabWidget *tabWidget;
+    QToolBar *mainToolbar;
+    QAction *toggleThemeAction;
 
     // Main tab
     QLabel *dropArea;
@@ -63,9 +73,8 @@ private:
     QPushButton *generateButton;
     QProgressBar *progressBar;
 
-    // Preview tab
-    QTableWidget *previewTable;
-    QPushButton *refreshPreviewButton;
+
+    TemplateEditorDialog *templateEditorDialog = nullptr; // dialog instance
 
     // Statistics tab
     QTextEdit *statisticsText;
@@ -77,5 +86,6 @@ private:
     ExcelGenerator *excelGenerator;
     QList<PriceTag> priceTags;
     QComboBox *outputFormatComboBox;
-};
 
+    QSettings settings;
+};

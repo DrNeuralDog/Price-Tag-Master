@@ -1,20 +1,9 @@
 #pragma once
 
-#include <QString>
 #include <QList>
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QDir>
-#include <QDebug>
-#include <QSize>
-#include <QSizeF>
-#include <QBuffer>
-#include <QPrinter>
-#include <QTextDocument>
-#include <QTextTable>
-#include <QTextFrame>
-#include <QTextCursor>
-#include <QTextCharFormat>
+#include <QObject>
+#include <QString>
+#include <xlsxzipwriter_p.h>
 
 #include "pricetag.h"
 
@@ -24,35 +13,51 @@ class WordGenerator: public QObject
     Q_OBJECT //
 
 
-public:
-    explicit WordGenerator (QObject *parent = nullptr);
+            public: explicit WordGenerator (QObject *parent = nullptr);
     ~WordGenerator ();
+
+    struct DocxLayoutConfig
+    {
+        // Geometry output document (A4 - 210 x 297)
+        double tagWidthMm	  = 38.0;
+        double tagHeightMm	  = 28.0;
+        double marginLeftMm	  = 8.0;
+        double marginTopMm	  = 8.0;
+        double marginRightMm  = 8.0;
+        double marginBottomMm = 8.0;
+        double spacingHMm	  = 0.0;
+        double spacingVMm	  = 0.0;
+    };
+
+    void setLayoutConfig (const DocxLayoutConfig &cfg) { layoutConfig = cfg; }
+    DocxLayoutConfig layout () const { return layoutConfig; }
+
 
     bool generateWordDocument (const QList<PriceTag> &priceTags, const QString &outputPath);
 
 
 private:
-    const int pageWidth  = 11906;  // 210mm
-    const int pageHeight = 16838; // 297mm
-
-    const int tagWidth  = 3969;   // 70mm
-    const int tagHeight = 2551;  // 45mm
-
-    const int tagsPerRow = 2;    // Assuming 2 tags per row for A4 page
+    DocxLayoutConfig layoutConfig{};
 
 
-    void createPriceTagCell (QTextTable *table, int row, int col, const PriceTag &priceTag);
-    QString formatPrice (double price);
+    static inline int mmToTwips (double mm) { return static_cast<int> (mm * 1440.0 / 25.4 + 0.5); }
 
-    // Новые методы для форматирования ценников
-    void addBrandInfo (QTextCursor &cursor, const PriceTag &priceTag);
-    void addCategoryInfo (QTextCursor &cursor, const PriceTag &priceTag);
-    void addPriceInfo (QTextCursor &cursor, const PriceTag &priceTag);
-    void addProductInfo (QTextCursor &cursor, const PriceTag &priceTag);
-    void addSupplierInfo (QTextCursor &cursor, const PriceTag &priceTag);
 
-    // Утилитарные методы
-    void addTextWithFormat (QTextCursor &cursor, const QString &text, const QTextCharFormat &format, bool newLine = true);
-    QTextCharFormat createFormat (int fontSize, bool bold = false, const QColor &color = Qt::black);
+    static void computeGrid (const DocxLayoutConfig &cfg, int &nCols, int &nRows);
+
+
+    void writeContentTypes (QXlsx::ZipWriter &zip);
+    void writeRelsRoot (QXlsx::ZipWriter &zip);
+    void writeDocProps (QXlsx::ZipWriter &zip);
+    void writeStyles (QXlsx::ZipWriter &zip);
+    void writeSettings (QXlsx::ZipWriter &zip);
+    void writeDocumentXml (QXlsx::ZipWriter &zip, const QList<PriceTag> &expandedTags);
+
+
+    QString buildDocumentXml (const QList<PriceTag> &expandedTags);
+
+
+    // Utilities:
+    static QString xmlEscape (const QString &s);
+    static QString formatPrice (double price);
 };
-

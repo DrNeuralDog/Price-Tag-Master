@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <QMap>
+#include <QString>
 
 
 class PriceTag
@@ -10,7 +10,7 @@ public:
     PriceTag ();
     PriceTag (const QString &name, const QString &description, double price, int quantity);
 
-    // Основные поля
+    // Main fields:
     QString getName () const;
     void setName (const QString &name);
 
@@ -23,7 +23,6 @@ public:
     int getQuantity () const;
     void setQuantity (int quantity);
 
-    // Новые поля согласно API
     QString getSupplier () const;
     void setSupplier (const QString &supplier);
 
@@ -63,20 +62,18 @@ public:
     QString getAdditionalData2 () const;
     void setAdditionalData2 (const QString &data);
 
-    // Утилитарные методы
-    QString getFormattedCategory () const; // Категория с учетом пола
-    bool hasDiscount () const; // Есть ли скидка (Цена 2)
-    double getDiscountPrice () const; // Цена со скидкой
-    double getOriginalPrice () const; // Оригинальная цена
+    // Service methods:
+    QString getFormattedCategory () const;
+    bool hasDiscount () const;
+    double getDiscountPrice () const;
+    double getOriginalPrice () const;
+
 
 private:
-    // Основные поля
     QString name;
     QString description;
     double price;
     int quantity;
-
-    // Новые поля согласно API
     QString supplier;
     QString address;
     QString brand;

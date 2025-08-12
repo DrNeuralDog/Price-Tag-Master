@@ -90,6 +90,15 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxlsx/QXlsx/header
 )
 
+# Ensure new editor sources are linked even if CMake hasn't regenerated globs
+target_sources(
+        ${PROJECT_NAME}
+        PRIVATE
+        src/templateeditor.cpp
+        include/templateeditor.h
+        include/templateeditordialog.h
+)
+
 target_link_libraries(
         ${PROJECT_NAME}
         PUBLIC

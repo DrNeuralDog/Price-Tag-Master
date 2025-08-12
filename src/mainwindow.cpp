@@ -6,13 +6,15 @@
 
 MainWindow::MainWindow (QWidget *parent) : QMainWindow (parent)
 {
-    excelParser    = new ExcelParser (this);
+    excelParser	   = new ExcelParser (this);
     wordGenerator  = new WordGenerator (this);
     excelGenerator = new ExcelGenerator (this);
 
     setupUI ();
+    setupToolbar ();
 
     setAcceptDrops (true);
+    updateThemeStyles ();
 }
 
 MainWindow::~MainWindow () {}
@@ -32,32 +34,58 @@ void MainWindow::setupUI ()
 
     setupMainTab ();
 
-    setupPreviewTab ();
+    // Preview tab deprecated; Template Editor available from toolbar
 
     setupStatisticsTab ();
 }
 
+void MainWindow::setupToolbar ()
+{
+    mainToolbar = addToolBar (tr ("Toolbar"));
+    mainToolbar->setMovable (false);
+    toggleThemeAction = new QAction (tr ("Light/Dark"), this);
+    toggleThemeAction->setToolTip (tr ("Toggle theme"));
+    toggleThemeAction->setCheckable (false);
+    connect (toggleThemeAction, &QAction::triggered, this, &MainWindow::toggleTheme);
+    mainToolbar->addAction (toggleThemeAction);
+
+    QWidget *spacer = new QWidget (this);
+    spacer->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
+    mainToolbar->addWidget (spacer);
+
+    QAction *openEditorAction = new QAction (tr ("Template Editor"), this);
+    connect (openEditorAction, &QAction::triggered, this,
+             [this] ()
+             {
+                 if (! templateEditorDialog)
+                 {
+                     templateEditorDialog = new TemplateEditorDialog (this);
+                 }
+                 templateEditorDialog->show ();
+                 templateEditorDialog->raise ();
+                 templateEditorDialog->activateWindow ();
+             });
+    mainToolbar->addAction (openEditorAction);
+}
+
 void MainWindow::setupMainTab ()
 {
-    QWidget *mainTab           = new QWidget ();
+    QWidget *mainTab		   = new QWidget ();
     QVBoxLayout *mainTabLayout = new QVBoxLayout (mainTab);
 
-    // Create drop area label
     dropArea = new QLabel (tr ("Drag and drop Excel file here or use the Open button below"));
     dropArea->setAlignment (Qt::AlignCenter);
     dropArea->setMinimumHeight (200);
-    dropArea->setStyleSheet ("QLabel { border: 2px dashed #aaa; border-radius: 5px; }");
+    dropArea->setStyleSheet ("QLabel { border: 2px dashed #CBD5E1; border-radius: 4px; background: rgba(59,130,246,0.08); }");
 
-    // Create buttons
-    openButton     = new QPushButton (tr ("Open Excel File"));
+    openButton	   = new QPushButton (tr ("Open Excel File"));
     generateButton = new QPushButton (tr ("Generate Price Tags"));
+    generateButton->setObjectName ("primary"); // map to primary style
     generateButton->setEnabled (false);
 
-    // Create progress bar
     progressBar = new QProgressBar ();
     progressBar->setVisible (false);
 
-    // Add widgets to layout
     mainTabLayout->addWidget (dropArea, 1);
 
     QHBoxLayout *buttonLayout = new QHBoxLayout ();
@@ -66,66 +94,30 @@ void MainWindow::setupMainTab ()
 
     mainTabLayout->addLayout (buttonLayout);
 
-    // Формат вывода
     outputFormatComboBox = new QComboBox ();
-    outputFormatComboBox->addItem (tr ("Word/ODT"));
+    outputFormatComboBox->addItem (tr ("Word/DOCX"));
     outputFormatComboBox->addItem (tr ("Excel/XLSX"));
     mainTabLayout->addWidget (outputFormatComboBox);
 
     mainTabLayout->addWidget (progressBar);
 
-    // Connect signals
     connect (openButton, &QPushButton::clicked, this, &MainWindow::openFile);
     connect (generateButton, &QPushButton::clicked, this, &MainWindow::generateDocument);
 
     tabWidget->addTab (mainTab, tr ("Main"));
 }
 
-void MainWindow::setupPreviewTab ()
-{
-    QWidget *previewTab        = new QWidget ();
-    QVBoxLayout *previewLayout = new QVBoxLayout (previewTab);
 
-    // Create preview table
-    previewTable = new QTableWidget ();
-    previewTable->setColumnCount (8);
-    previewTable->setHorizontalHeaderLabels ({
-                                                 tr ("Brand"),
-                                                 tr ("Category"),
-                                                 tr ("Price"),
-                                                 tr ("Price 2"),
-                                                 tr ("Article"),
-                                                 tr ("Size"),
-                                                 tr ("Material"),
-                                                 tr ("Supplier")});
-
-    // Set table properties
-    previewTable->setAlternatingRowColors (true);
-    previewTable->horizontalHeader ()->setStretchLastSection (true);
-    previewTable->setSelectionBehavior (QAbstractItemView::SelectRows);
-
-    // Create refresh button
-    refreshPreviewButton = new QPushButton (tr ("Refresh Preview"));
-    refreshPreviewButton->setEnabled (false);
-
-    previewLayout->addWidget (previewTable, 1);
-    previewLayout->addWidget (refreshPreviewButton);
-
-    connect (refreshPreviewButton, &QPushButton::clicked, this, &MainWindow::updatePreview);
-
-    tabWidget->addTab (previewTab, tr ("Preview"));
-}
+void MainWindow::setupPreviewTab () { /* deprecated */ }
 
 void MainWindow::setupStatisticsTab ()
 {
-    QWidget *statsTab        = new QWidget ();
+    QWidget *statsTab		 = new QWidget ();
     QVBoxLayout *statsLayout = new QVBoxLayout (statsTab);
 
-    // Create statistics text area
     statisticsText = new QTextEdit ();
     statisticsText->setReadOnly (true);
 
-    // Create refresh button
     refreshStatsButton = new QPushButton (tr ("Refresh Statistics"));
     refreshStatsButton->setEnabled (false);
 
@@ -135,6 +127,27 @@ void MainWindow::setupStatisticsTab ()
     connect (refreshStatsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 
     tabWidget->addTab (statsTab, tr ("Statistics"));
+}
+
+void MainWindow::toggleTheme ()
+{
+    const AppTheme current = ThemeManager::currentTheme ();
+    const AppTheme next	   = (current == AppTheme::Light) ? AppTheme::Dark : AppTheme::Light;
+    ThemeManager::applyThemeToApplication (next);
+    ThemeManager::saveThemeToSettings (settings, next);
+    updateThemeStyles ();
+}
+
+void MainWindow::updateThemeStyles ()
+{
+    const bool isDark		  = (ThemeManager::currentTheme () == AppTheme::Dark);
+    const QString borderColor = isDark ? "#475569" : "#E2E8F0"; // border tokens
+    const QString subtleBg	  = isDark ? "#1F2937" : "#F1F5F9";
+    dropArea->setStyleSheet (QString ("QLabel { border: 2px dashed %1; border-radius: 4px; background: %2; }").arg (borderColor, subtleBg));
+    if (mainToolbar)
+    {
+        mainToolbar->setStyleSheet (QString ("QToolBar { border-bottom: 1px solid %1; } ").arg (borderColor));
+    }
 }
 
 
@@ -149,7 +162,11 @@ void MainWindow::dragEnterEvent (QDragEnterEvent *event)
             if (filePath.endsWith (".xlsx", Qt::CaseInsensitive))
             {
                 event->acceptProposedAction ();
-                dropArea->setStyleSheet ("QLabel { border: 2px dashed #4CAF50; border-radius: 5px; }");
+                const bool isDark	 = (ThemeManager::currentTheme () == AppTheme::Dark);
+                const QString border = "#3B82F6";									 // brand/primary
+                const QString bg	 = isDark ? "rgba(96,165,250,0.20)" : "#DBEAFE"; // highlight/bg
+                dropArea->setStyleSheet (
+                        QString ("QLabel { border: 2px dashed %1; border-radius: 4px; background: %2; }").arg (border, bg));
                 return;
             }
         }
@@ -163,7 +180,7 @@ void MainWindow::dropEvent (QDropEvent *event)
     QList<QUrl> urls = event->mimeData ()->urls ();
     QString filePath = urls[0].toLocalFile ();
 
-    dropArea->setStyleSheet ("QLabel { border: 2px dashed #aaa; border-radius: 5px; }");
+    updateThemeStyles ();
 
     processFile (filePath);
 
@@ -175,7 +192,10 @@ void MainWindow::openFile ()
 {
     QString filePath = QFileDialog::getOpenFileName (this, tr ("Open Excel File"), QString (), tr ("Excel Files (*.xlsx)"));
 
-    if (! filePath.isEmpty ()) { processFile (filePath); }
+    if (! filePath.isEmpty ())
+    {
+        processFile (filePath);
+    }
 }
 
 
@@ -184,21 +204,23 @@ void MainWindow::processFile (const QString &filePath)
     currentFilePath = filePath;
     dropArea->setText (tr ("File: %1").arg (QFileInfo (filePath).fileName ()));
 
-    // Parse the Excel file and extract price tags
+
     priceTags.clear ();
     bool success = excelParser->parseExcelFile (filePath, priceTags);
 
     if (success && ! priceTags.isEmpty ())
     {
         int totalTags = 0;
-        for (const PriceTag &tag : priceTags) { totalTags += tag.getQuantity (); }
+        for (const PriceTag &tag : priceTags)
+        {
+            totalTags += tag.getQuantity ();
+        }
 
         dropArea->setText (tr ("Loaded %1 products with a total of %2 price tags.").arg (priceTags.size ()).arg (totalTags));
         generateButton->setEnabled (true);
-        refreshPreviewButton->setEnabled (true);
         refreshStatsButton->setEnabled (true);
 
-        // Update preview and statistics
+
         updatePreview ();
         updateStatistics ();
     }
@@ -207,7 +229,6 @@ void MainWindow::processFile (const QString &filePath)
         QMessageBox::warning (this, tr ("Error"), tr ("Failed to parse the Excel file or no products found."));
         dropArea->setText (tr ("Drag and drop Excel file here or use the Open button below"));
         generateButton->setEnabled (false);
-        refreshPreviewButton->setEnabled (false);
         refreshStatsButton->setEnabled (false);
     }
 }
@@ -223,10 +244,11 @@ void MainWindow::generateDocument ()
     bool success = false;
     if (outputFormatComboBox->currentIndex () == 0)
     {
-        // Word/ODT
-        filePath = QFileDialog::getSaveFileName (this, tr ("Save Document"), QString (), tr ("OpenDocument Files (*.odt)"));
+        filePath = QFileDialog::getSaveFileName (this, tr ("Save Document"), QString (), tr ("Word DOCX Files (*.docx)"));
+
         if (filePath.isEmpty ())
             return;
+
         progressBar->setVisible (true);
         progressBar->setValue (0);
         success = wordGenerator->generateWordDocument (priceTags, filePath);
@@ -234,46 +256,30 @@ void MainWindow::generateDocument ()
     }
     else
     {
-        // Excel/XLSX
         filePath = QFileDialog::getSaveFileName (this, tr ("Save Excel Document"), QString (), tr ("Excel Files (*.xlsx)"));
         if (filePath.isEmpty ())
             return;
+
         progressBar->setVisible (true);
         progressBar->setValue (0);
         success = excelGenerator->generateExcelDocument (priceTags, filePath);
         progressBar->setValue (100);
     }
-    if (success) { QMessageBox::information (this, tr ("Success"), tr ("Document has been generated successfully.")); }
-    else { QMessageBox::warning (this, tr ("Error"), tr ("Failed to generate the document.")); }
+    if (success)
+    {
+        QMessageBox::information (this, tr ("Success"), tr ("Document has been generated successfully."));
+    }
+    else
+    {
+        QMessageBox::warning (this, tr ("Error"), tr ("Failed to generate the document."));
+    }
     progressBar->setVisible (false);
 }
 
 
 void MainWindow::updatePreview ()
 {
-    if (priceTags.isEmpty ())
-    {
-        previewTable->setRowCount (0);
-        return;
-    }
-
-    previewTable->setRowCount (priceTags.size ());
-
-    for (int i = 0; i < priceTags.size (); ++i)
-    {
-        const PriceTag &tag = priceTags[i];
-
-        previewTable->setItem (i, 0, new QTableWidgetItem (tag.getBrand ()));
-        previewTable->setItem (i, 1, new QTableWidgetItem (tag.getFormattedCategory ()));
-        previewTable->setItem (i, 2, new QTableWidgetItem (QString::number (tag.getPrice (), 'f', 0) + " ₽"));
-        previewTable->setItem (i, 3, new QTableWidgetItem (tag.hasDiscount () ? QString::number (tag.getPrice2 (), 'f', 0) + " ₽" : ""));
-        previewTable->setItem (i, 4, new QTableWidgetItem (tag.getArticle ()));
-        previewTable->setItem (i, 5, new QTableWidgetItem (tag.getSize ()));
-        previewTable->setItem (i, 6, new QTableWidgetItem (tag.getMaterial ()));
-        previewTable->setItem (i, 7, new QTableWidgetItem (tag.getSupplier ()));
-    }
-
-    previewTable->resizeColumnsToContents ();
+    // Placeholder: later bind template parameters to layout engine and data preview
 }
 
 void MainWindow::showStatistics () { updateStatistics (); }
@@ -291,9 +297,9 @@ void MainWindow::updateStatistics ()
     stats += tr ("=== PRICE TAG STATISTICS ===\n\n");
 
     // Basic statistics
-    int totalProducts         = priceTags.size ();
-    int totalTags             = 0;
-    double totalValue         = 0.0;
+    int totalProducts		  = priceTags.size ();
+    int totalTags			  = 0;
+    double totalValue		  = 0.0;
     double totalDiscountValue = 0.0;
     int productsWithDiscount  = 0;
 
@@ -329,6 +335,7 @@ void MainWindow::updateStatistics ()
     stats += tr ("Unique Categories: %1\n").arg (categories.size ());
     stats += tr ("Unique Suppliers: %1\n\n").arg (suppliers.size ());
 
+
     // Brand breakdown
     if (! brands.isEmpty ())
     {
@@ -342,9 +349,13 @@ void MainWindow::updateStatistics ()
     if (! categories.isEmpty ())
     {
         stats += tr ("=== CATEGORIES ===\n");
-        for (const QString &category : categories) { stats += tr ("• %1\n").arg (category); }
+        for (const QString &category : categories)
+        {
+            stats += tr ("• %1\n").arg (category);
+        }
         stats += "\n";
     }
+
 
     statisticsText->setPlainText (stats);
 }

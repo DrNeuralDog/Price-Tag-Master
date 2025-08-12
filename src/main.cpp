@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <QDebug>
 #include "mainwindow.h"
+ #include <QSettings>
+ #include "thememanager.h"
 
 
 int main (int argc, char *argv[])
@@ -11,6 +13,10 @@ int main (int argc, char *argv[])
     app.setOrganizationName ("Price Tag Inc.");
     app.setOrganizationDomain ("pricetagmaster.com");
 
+    QSettings settings;
+    const AppTheme theme = ThemeManager::loadThemeFromSettings (settings);
+    ThemeManager::applyThemeToApplication (theme);
+
 
     MainWindow mainWindow;
 
@@ -20,4 +26,4 @@ int main (int argc, char *argv[])
 
 
     return app.exec ();
-} 
+}
