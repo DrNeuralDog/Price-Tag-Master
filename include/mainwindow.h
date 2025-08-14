@@ -76,7 +76,6 @@ private:
 
     TemplateEditorDialog *templateEditorDialog = nullptr; // dialog instance
 
-    // Statistics tab
     QTextEdit *statisticsText;
     QPushButton *refreshStatsButton;
 

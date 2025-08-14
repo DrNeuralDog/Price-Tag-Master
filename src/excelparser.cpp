@@ -171,6 +171,7 @@ bool ExcelParser::findHeaders (QXlsx::Document *xlsx, const QXlsx::CellRange &ra
                     {
                         *(it.value ()) = col;
                         qDebug () << "Found header '" << expectedHeader << "' at row" << row << "column" << col;
+
                         break;
                     }
                 }
@@ -183,10 +184,14 @@ bool ExcelParser::findHeaders (QXlsx::Document *xlsx, const QXlsx::CellRange &ra
     {
         qDebug () << "Missing required columns: Фирма or Цена";
         qDebug () << "Фирма column:" << mapping.nameColumn << "Цена column:" << mapping.priceColumn;
+
+
         return false;
     }
 
     qDebug () << "Header search completed successfully";
+
+
     return true;
 }
 
@@ -272,22 +277,19 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
 
 
     if (! hasData)
-    {
         return false;
-    }
 
     if (mapping.quantityColumn > 0)
     {
         QVariant cellValue = xlsx->read (row, mapping.quantityColumn);
+
         if (cellValue.isValid ())
         {
             bool ok;
             int quantity = cellValue.toInt (&ok);
 
             if (ok && quantity > 0)
-            {
                 priceTag.setQuantity (quantity);
-            }
             else
                 priceTag.setQuantity (1);
         }
@@ -306,9 +308,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString supplier = cellValue.toString ().trimmed ();
 
             if (! supplier.isEmpty ())
-            {
                 currentSupplier = supplier;
-            }
         }
     }
     priceTag.setSupplier (currentSupplier);
@@ -322,9 +322,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString address = cellValue.toString ().trimmed ();
 
             if (! address.isEmpty ())
-            {
                 currentAddress = address;
-            }
         }
     }
     priceTag.setAddress (currentAddress);
@@ -338,9 +336,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString category = cellValue.toString ().trimmed ();
 
             if (! category.isEmpty ())
-            {
                 priceTag.setCategory (category);
-            }
         }
     }
 
@@ -353,9 +349,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString data = cellValue.toString ().trimmed ();
 
             if (! data.isEmpty ())
-            {
                 priceTag.setAdditionalData (data);
-            }
         }
     }
 
@@ -368,9 +362,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString gender = cellValue.toString ().trimmed ();
 
             if (! gender.isEmpty ())
-            {
                 priceTag.setGender (gender);
-            }
         }
     }
 
@@ -384,9 +376,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString country = cellValue.toString ().trimmed ();
 
             if (! country.isEmpty ())
-            {
                 priceTag.setBrandCountry (country);
-            }
         }
     }
 
@@ -400,9 +390,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString place = cellValue.toString ().trimmed ();
 
             if (! place.isEmpty ())
-            {
                 priceTag.setManufacturingPlace (place);
-            }
         }
     }
 
@@ -416,9 +404,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString material = cellValue.toString ().trimmed ();
 
             if (! material.isEmpty ())
-            {
                 priceTag.setMaterial (material);
-            }
         }
     }
 
@@ -432,9 +418,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString size = cellValue.toString ().trimmed ();
 
             if (! size.isEmpty ())
-            {
                 priceTag.setSize (size);
-            }
         }
     }
 
@@ -448,9 +432,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             QString article = cellValue.toString ().trimmed ();
 
             if (! article.isEmpty ())
-            {
                 priceTag.setArticle (article);
-            }
         }
     }
 
@@ -468,9 +450,7 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
                 double price2 = priceStr.toDouble ();
 
                 if (price2 > 0)
-                {
                     priceTag.setPrice2 (price2);
-                }
             }
         }
     }

@@ -16,9 +16,9 @@ class WordGenerator: public QObject
             public: explicit WordGenerator (QObject *parent = nullptr);
     ~WordGenerator ();
 
+
     struct DocxLayoutConfig
     {
-        // Geometry output document (A4 - 210 x 297)
         double tagWidthMm	  = 38.0;
         double tagHeightMm	  = 28.0;
         double marginLeftMm	  = 8.0;
