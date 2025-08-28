@@ -22,3 +22,8 @@
 [2025-08-14 14:00:00] Updated XLSX tag cell dimensions in `src/excelgenerator.cpp`: column widths set to [7, 3.57, 3.57, 3.43]; row heights set to [16.5, 16.5, 16.5, 12.75, 12.75, 12.75, 15.75, 16.5, 10.5, 13.5, 9.75, 9.75] - Success
 [2025-08-14 14:20:00] Tweaked widths calibration to reach ~7.71 cm for col1 and ~2.71 cm for col4; split Supplier row into label+value cells; implemented two-price logic: left cell shows only old price number with strikethrough and diagonal slash, right cell shows new price - Success
 [2025-08-14 14:40:00] Mirrored Excel changes in DOCX export (`src/wordgenerator.cpp`): updated row heights; introduced 4-column inner grid with widths [77.1, 35.7, 35.7, 27.1] mm; split Supplier row; two-price logic with strike and diagonal TL→BR on old price; kept single-cell rows merged otherwise - Success
+[2025-08-26 00:00:00] DOCX export polish: prevented row splitting across pages (whole tag row moves), set outer borders to medium (w:sz=8), and aligned tag dimensions to 175.6×57.6 mm; updated `src/wordgenerator.cpp` and `include/wordgenerator.h` - Success
+[2025-08-28 00:10:00] Added TagTemplate model (geometry + per-field text styles) in `include/tagtemplate.h`; extended TemplateEditor with style panel and `templateChanged` signal - Success
+[2025-08-28 00:20:00] Wired Template Editor to MainWindow; propagated template to Word/Excel generators; mapped geometry to layout configs - Success
+[2025-08-28 00:30:00] Applied per-field fonts/sizes/alignment to DOCX export (paragraphWithStyle, inner table rendering) - Success
+[2025-08-28 00:40:00] Applied per-field fonts/sizes/alignment to XLSX export formats; strikeout and diagonal slash for old price retained - Success

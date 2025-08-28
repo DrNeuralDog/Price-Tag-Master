@@ -6,6 +6,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexec-charset=UTF-8")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -14,15 +16,18 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-add_subdirectory(3rdparty/qxlsx/QXlsx)
+# Явно добавляем флаг -std=c++17 в CMAKE_CXX_FLAGS
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-#set(WHETHER_QTWINDEPLOY_NECESSARY ON)
-
+# Добавляем опции компиляции для поддержки C++17 (Windows)
 add_compile_options(
-        $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
+     $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
 )
 
 cmake_policy(SET CMP0091 NEW)
+
+add_subdirectory(3rdparty/qxlsx/QXlsx)
+
 
 # Отключение поиска Vulkan, если он не нужен
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)

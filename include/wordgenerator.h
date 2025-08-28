@@ -6,6 +6,7 @@
 #include <xlsxzipwriter_p.h>
 
 #include "pricetag.h"
+#include "tagtemplate.h"
 
 
 class WordGenerator: public QObject
@@ -19,6 +20,7 @@ class WordGenerator: public QObject
 
     struct DocxLayoutConfig
     {
+        // Small tag size to fit multiple per row on A4
         double tagWidthMm	  = 38.0;
         double tagHeightMm	  = 28.0;
         double marginLeftMm	  = 8.0;
@@ -32,12 +34,16 @@ class WordGenerator: public QObject
     void setLayoutConfig (const DocxLayoutConfig &cfg) { layoutConfig = cfg; }
     DocxLayoutConfig layout () const { return layoutConfig; }
 
+    void setTagTemplate (const TagTemplate &tpl) { tagTemplate = tpl; }
+    TagTemplate tagTpl () const { return tagTemplate; }
+
 
     bool generateWordDocument (const QList<PriceTag> &priceTags, const QString &outputPath);
 
 
 private:
     DocxLayoutConfig layoutConfig{};
+    TagTemplate tagTemplate{};
 
 
     static inline int mmToTwips (double mm) { return static_cast<int> (mm * 1440.0 / 25.4 + 0.5); }

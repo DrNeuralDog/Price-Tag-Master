@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include "pricetag.h"
+#include "tagtemplate.h"
 
 
 class ExcelGenerator: public QObject
@@ -32,7 +33,11 @@ class ExcelGenerator: public QObject
     void setLayoutConfig (const ExcelLayoutConfig &cfg) { layoutConfig = cfg; }
     ExcelLayoutConfig layout () const { return layoutConfig; }
 
+    void setTagTemplate (const TagTemplate &tpl) { tagTemplate = tpl; }
+    TagTemplate tagTpl () const { return tagTemplate; }
+
 
 private:
     ExcelLayoutConfig layoutConfig{};
+    TagTemplate tagTemplate{};
 };

@@ -1,6 +1,7 @@
 #include "excelgenerator.h"
 #include <QBrush>
 #include <QDebug>
+#include <cmath>
 #include <xlsxcellrange.h>
 #include <xlsxdocument.h>
 #include <xlsxformat.h>
@@ -61,100 +62,85 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
     const double spacerHrow = mmToRowHeightPt (layoutConfig.spacingVMm);
 
 
+    const TagTextStyle stCompany   = tagTemplate.styleOrDefault (TagField::CompanyHeader);
+    const TagTextStyle stBrand     = tagTemplate.styleOrDefault (TagField::Brand);
+    const TagTextStyle stCategory  = tagTemplate.styleOrDefault (TagField::CategoryGender);
+    const TagTextStyle stBrandC    = tagTemplate.styleOrDefault (TagField::BrandCountry);
+    const TagTextStyle stManuf     = tagTemplate.styleOrDefault (TagField::ManufacturingPlace);
+    const TagTextStyle stMatLab    = tagTemplate.styleOrDefault (TagField::MaterialLabel);
+    const TagTextStyle stMatVal    = tagTemplate.styleOrDefault (TagField::MaterialValue);
+    const TagTextStyle stArtLab    = tagTemplate.styleOrDefault (TagField::ArticleLabel);
+    const TagTextStyle stArtVal    = tagTemplate.styleOrDefault (TagField::ArticleValue);
+    const TagTextStyle stPriceL    = tagTemplate.styleOrDefault (TagField::PriceLeft);
+    const TagTextStyle stPriceR    = tagTemplate.styleOrDefault (TagField::PriceRight);
+    const TagTextStyle stSign      = tagTemplate.styleOrDefault (TagField::Signature);
+    const TagTextStyle stSupplierL = tagTemplate.styleOrDefault (TagField::SupplierLabel);
+    const TagTextStyle stSupplierV = tagTemplate.styleOrDefault (TagField::SupplierValue);
+    const TagTextStyle stAddress   = tagTemplate.styleOrDefault (TagField::Address);
+
+    auto applyStyle = [] (QXlsx::Format &fmt, const TagTextStyle &st, QXlsx::Format::HorizontalAlignment halign)
+    {
+        fmt.setFontName (st.fontFamily);
+        fmt.setFontSize (st.fontSizePt);
+        fmt.setFontBold (st.bold);
+        fmt.setFontItalic (st.italic);
+        if (st.strike)
+            fmt.setFontStrikeOut (true);
+        fmt.setHorizontalAlignment (halign);
+        fmt.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+        fmt.setTextWrap (true);
+    };
+
+    auto halignFrom = [] (TagTextAlign a)
+    {
+        switch (a)
+        {
+        case TagTextAlign::Left: return QXlsx::Format::AlignLeft;
+        case TagTextAlign::Center: return QXlsx::Format::AlignHCenter;
+        case TagTextAlign::Right: return QXlsx::Format::AlignRight;
+        }
+        return QXlsx::Format::AlignLeft;
+    };
+
     QXlsx::Format headerFormat;
     headerFormat.setFontBold (false);
-    headerFormat.setFontName ("Times New Roman");
-    headerFormat.setFontSize (11);
-    headerFormat.setHorizontalAlignment (QXlsx::Format::AlignHCenter);
-    headerFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (headerFormat, stCompany, halignFrom (stCompany.align));
     headerFormat.setBorderStyle (QXlsx::Format::BorderThin);
-    headerFormat.setTextWrap (true);
 
     QXlsx::Format brandFormat;
-    brandFormat.setFontBold (true);
-    brandFormat.setFontName ("Arial");
-    brandFormat.setFontSize (12);
-    brandFormat.setHorizontalAlignment (QXlsx::Format::AlignHCenter);
-    brandFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (brandFormat, stBrand, halignFrom (stBrand.align));
     brandFormat.setBorderStyle (QXlsx::Format::BorderThin);
-    brandFormat.setTextWrap (true);
 
     QXlsx::Format categoryFormat;
-    categoryFormat.setFontName ("Times New Roman");
-    categoryFormat.setFontSize (12);
-    categoryFormat.setHorizontalAlignment (QXlsx::Format::AlignHCenter);
-    categoryFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (categoryFormat, stCategory, halignFrom (stCategory.align));
     categoryFormat.setBorderStyle (QXlsx::Format::BorderThin);
-    categoryFormat.setTextWrap (true);
 
     QXlsx::Format brendCountryFormat;
-    brendCountryFormat.setFontSize (9);
-    brendCountryFormat.setFontName ("Times New Roman");
-    brendCountryFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    brendCountryFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    brendCountryFormat.setFontBold (true);
-    brendCountryFormat.setFontItalic (true);
+    applyStyle (brendCountryFormat, stBrandC, halignFrom (stBrandC.align));
     brendCountryFormat.setBorderStyle (QXlsx::Format::BorderThin);
-    brendCountryFormat.setTextWrap (true);
 
     QXlsx::Format developCountryFormat;
-    developCountryFormat.setFontSize (9);
-    developCountryFormat.setFontName ("Times New Roman");
-    developCountryFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    developCountryFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    developCountryFormat.setFontBold (true);
-    developCountryFormat.setFontItalic (true);
+    applyStyle (developCountryFormat, stManuf, halignFrom (stManuf.align));
     developCountryFormat.setBorderStyle (QXlsx::Format::BorderThin);
-    developCountryFormat.setTextWrap (true);
 
     QXlsx::Format materialHeaderFormat;
-    materialHeaderFormat.setFontSize (8);
-    materialHeaderFormat.setFontName ("Times New Roman");
-    materialHeaderFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    materialHeaderFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    materialHeaderFormat.setFontBold (true);
-    materialHeaderFormat.setFontItalic (true);
-    materialHeaderFormat.setTextWrap (true);
+    applyStyle (materialHeaderFormat, stMatLab, halignFrom (stMatLab.align));
 
     QXlsx::Format materialValueFormat;
-    materialValueFormat.setFontSize (10);
-    materialValueFormat.setFontName ("Times New Roman");
-    materialValueFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    materialValueFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    materialValueFormat.setTextWrap (true);
+    applyStyle (materialValueFormat, stMatVal, halignFrom (stMatVal.align));
 
     QXlsx::Format articulHeaderFormat;
-    articulHeaderFormat.setFontSize (8);
-    articulHeaderFormat.setFontName ("Times New Roman");
-    articulHeaderFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    articulHeaderFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    articulHeaderFormat.setFontBold (true);
-    articulHeaderFormat.setFontItalic (true);
-    articulHeaderFormat.setTextWrap (true);
+    applyStyle (articulHeaderFormat, stArtLab, halignFrom (stArtLab.align));
 
     QXlsx::Format articulValueFormat;
-    articulValueFormat.setFontSize (11);
-    articulValueFormat.setFontName ("Times New Roman");
-    articulValueFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    articulValueFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    articulValueFormat.setFontBold (true);
-    articulValueFormat.setFontItalic (false);
-    articulValueFormat.setTextWrap (true);
+    applyStyle (articulValueFormat, stArtVal, halignFrom (stArtVal.align));
 
     QXlsx::Format priceFormatCell1;
-    priceFormatCell1.setFontBold (true);
-    priceFormatCell1.setFontSize (10);
-    priceFormatCell1.setFontName ("Times New Roman");
-    priceFormatCell1.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    priceFormatCell1.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (priceFormatCell1, stPriceL, halignFrom (stPriceL.align));
 
 
     QXlsx::Format priceFormatCell2;
-    priceFormatCell2.setFontBold (true);
-    priceFormatCell2.setFontSize (12);
-    priceFormatCell2.setFontName ("Times New Roman");
-    priceFormatCell2.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    priceFormatCell2.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (priceFormatCell2, stPriceR, halignFrom (stPriceR.align));
     priceFormatCell2.setBorderStyle (QXlsx::Format::BorderMedium);
     priceFormatCell2.setLeftBorderStyle (QXlsx::Format::BorderMedium);
     priceFormatCell2.setRightBorderStyle (QXlsx::Format::BorderMedium);
@@ -162,38 +148,22 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
     priceFormatCell2.setBottomBorderStyle (QXlsx::Format::BorderMedium);
 
     QXlsx::Format strikePriceFormat;
-    strikePriceFormat.setFontBold (true);
-    strikePriceFormat.setFontSize (12);
-    strikePriceFormat.setFontName ("Times New Roman");
+    applyStyle (strikePriceFormat, stPriceL, halignFrom (stPriceL.align));
     strikePriceFormat.setFontStrikeOut (true);
-    strikePriceFormat.setHorizontalAlignment (QXlsx::Format::AlignHCenter);
-    strikePriceFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
     // Draw a diagonal slash across the cell to visually cross the old price when two prices are present
     strikePriceFormat.setDiagonalBorderStyle (QXlsx::Format::BorderThin);
     strikePriceFormat.setDiagonalBorderType (QXlsx::Format::DiagonalBorderUp);
 
     QXlsx::Format signatureFormat;
-    signatureFormat.setFontSize (8);
-    signatureFormat.setFontName ("Times New Roman");
-    signatureFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    signatureFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    signatureFormat.setTextWrap (true);
+    applyStyle (signatureFormat, stSign, halignFrom (stSign.align));
 
     QXlsx::Format supplierFormat;
-    supplierFormat.setFontSize (7);
-    supplierFormat.setFontName ("Times New Roman");
-    supplierFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    supplierFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
+    applyStyle (supplierFormat, stSupplierL, halignFrom (stSupplierL.align));
     supplierFormat.setTopBorderStyle (QXlsx::Format::BorderThin);
     supplierFormat.setTextWrap (true);
 
     QXlsx::Format addressFormat;
-    addressFormat.setFontSize (7);
-    addressFormat.setFontName ("Times New Roman");
-    addressFormat.setHorizontalAlignment (QXlsx::Format::AlignLeft);
-    addressFormat.setVerticalAlignment (QXlsx::Format::AlignVCenter);
-    addressFormat.setFontBold (true);
-    addressFormat.setFontItalic (true);
+    applyStyle (addressFormat, stAddress, halignFrom (stAddress.align));
     addressFormat.setTextWrap (true);
 
 

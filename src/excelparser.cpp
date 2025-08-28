@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 
+
 ExcelParser::ExcelParser (QObject *parent) : QObject (parent) {}
 
 ExcelParser::~ExcelParser () {}

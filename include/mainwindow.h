@@ -61,6 +61,7 @@ private:
     void updateStatistics ();
     void toggleTheme ();
     void updateThemeStyles ();
+    void applyTemplateToGenerators (const TagTemplate &tpl);
 
     QWidget *centralWidget;
     QTabWidget *tabWidget;
@@ -87,4 +88,6 @@ private:
     QComboBox *outputFormatComboBox;
 
     QSettings settings;
+
+    TagTemplate currentTemplate; // last template from editor
 };

@@ -5,8 +5,14 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGroupBox>
+#include <QFontComboBox>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
 #include <QSplitter>
 #include <QWidget>
+
+#include "tagtemplate.h"
 
 
 class TemplateEditorWidget: public QWidget
@@ -20,6 +26,13 @@ public:
     void setTagSizeMm (double widthMm, double heightMm);
     void setMarginsMm (double leftMm, double topMm, double rightMm, double bottomMm);
     void setSpacingMm (double hSpacingMm, double vSpacingMm);
+
+    // Template binding
+    void setTagTemplate (const TagTemplate &tpl);
+    TagTemplate currentTemplate () const { return templateModel; }
+
+signals:
+    void templateChanged (const TagTemplate &tpl);
 
 
 private slots:
@@ -49,6 +62,17 @@ private:
     QDoubleSpinBox *spinMarginB;
     QDoubleSpinBox *spinSpacingH;
     QDoubleSpinBox *spinSpacingV;
+
+    // Style controls
+    QComboBox *comboField;
+    QFontComboBox *fontFamilyBox;
+    QSpinBox *fontSizeSpin;
+    QCheckBox *boldCheck;
+    QCheckBox *italicCheck;
+    QCheckBox *strikeCheck;
+    QComboBox *alignBox;
+
+    TagTemplate templateModel; // current template state
 
     // Constants (A4 Portrait)
     const double pageWidthMm  = 210.0;

@@ -60,6 +60,14 @@ void MainWindow::setupToolbar ()
                  if (! templateEditorDialog)
                  {
                      templateEditorDialog = new TemplateEditorDialog (this);
+                     // initialize template defaults to editor
+                     templateEditorDialog->templateEditor ()->setTagTemplate (currentTemplate);
+                     connect (templateEditorDialog->templateEditor (), &TemplateEditorWidget::templateChanged, this,
+                              [this] (const TagTemplate &tpl)
+                              {
+                                  currentTemplate = tpl;
+                                  applyTemplateToGenerators (tpl);
+                              });
                  }
                  templateEditorDialog->show ();
                  templateEditorDialog->raise ();
@@ -148,6 +156,34 @@ void MainWindow::updateThemeStyles ()
     {
         mainToolbar->setStyleSheet (QString ("QToolBar { border-bottom: 1px solid %1; } ").arg (borderColor));
     }
+}
+
+void MainWindow::applyTemplateToGenerators (const TagTemplate &tpl)
+{
+    // Layout to generators from template geometry
+    WordGenerator::DocxLayoutConfig wcfg = wordGenerator->layout ();
+    wcfg.tagWidthMm		= tpl.tagWidthMm;
+    wcfg.tagHeightMm		= tpl.tagHeightMm;
+    wcfg.marginLeftMm		= tpl.marginLeftMm;
+    wcfg.marginTopMm		= tpl.marginTopMm;
+    wcfg.marginRightMm	= tpl.marginRightMm;
+    wcfg.marginBottomMm	= tpl.marginBottomMm;
+    wcfg.spacingHMm		= tpl.spacingHMm;
+    wcfg.spacingVMm		= tpl.spacingVMm;
+    wordGenerator->setLayoutConfig (wcfg);
+    wordGenerator->setTagTemplate (tpl);
+
+    ExcelGenerator::ExcelLayoutConfig ecfg = excelGenerator->layout ();
+    ecfg.tagWidthMm		= tpl.tagWidthMm;
+    ecfg.tagHeightMm		= tpl.tagHeightMm;
+    ecfg.marginLeftMm		= tpl.marginLeftMm;
+    ecfg.marginTopMm		= tpl.marginTopMm;
+    ecfg.marginRightMm	= tpl.marginRightMm;
+    ecfg.marginBottomMm	= tpl.marginBottomMm;
+    ecfg.spacingHMm		= tpl.spacingHMm;
+    ecfg.spacingVMm		= tpl.spacingVMm;
+    excelGenerator->setLayoutConfig (ecfg);
+    excelGenerator->setTagTemplate (tpl);
 }
 
 

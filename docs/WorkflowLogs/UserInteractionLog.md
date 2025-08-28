@@ -16,3 +16,6 @@
 [2025-08-14 14:00:00] User requested precise XLSX cell dimensions (cols: 7, 3.57, 3.57, 3.43; rows: 16.5, 16.5, 16.5, 12.75, 12.75, 12.75, 15.75, 16.5, 10.5, 13.5, 9.75, 9.75) - Updated implementation in src/excelgenerator.cpp - Done
 [2025-08-14 14:20:00] User requested fine-tune: col1 ≈ 7.71 cm, col4 ≈ 2.71 cm; split Supplier row into two cells; for two prices remove label and strike old price with diagonal slash - Implemented in src/excelgenerator.cpp - Done
 [2025-08-14 14:40:00] User requested same behavior for DOCX: mirror Excel layout and two-price formatting - Implemented in src/wordgenerator.cpp - Done
+[2025-08-26 00:00:00] User requested DOCX updates: keep whole price tag on one page; make outer borders medium - Implemented non-splitting rows and medium borders in src/wordgenerator.cpp; adjusted tag size in include/wordgenerator.h - Success
+[2025-08-26 00:35:00] User requested rollback of scaling and only move last non-fitting row to next page - Reverted sizes to 175.6×57.6 mm, removed scaling, kept single outer table with w:cantSplit rows - Applied
+[2025-08-28 00:00:00] User requested: finish Template Editor to control per-field fonts/sizes and apply to DOCX/XLSX - Work started, template model and editor UI extended; wiring to generators implemented
