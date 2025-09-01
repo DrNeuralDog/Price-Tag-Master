@@ -27,3 +27,7 @@
 [2025-08-28 00:20:00] Wired Template Editor to MainWindow; propagated template to Word/Excel generators; mapped geometry to layout configs - Success
 [2025-08-28 00:30:00] Applied per-field fonts/sizes/alignment to DOCX export (paragraphWithStyle, inner table rendering) - Success
 [2025-08-28 00:40:00] Applied per-field fonts/sizes/alignment to XLSX export formats; strikeout and diagonal slash for old price retained - Success
+[2025-08-28 01:00:00] Enhanced Template Editor preview: WYSIWYG 4×12 grid with inner lines, all fields drawn per TagTemplate; added zoom controls (±, slider, Fit Page) - Success
+[2025-08-30 00:00:00] Integrated application icon: added `resources/icons/PriceTagMangerIcon.jpg` to `resources/resources.qrc` and set app/main window icon via QIcon in `src/main.cpp` - Success
+[2025-08-30 00:15:00] Switched app/window icons to .ico; added Windows resource `resources/windows/app_icon.rc`; wired into `CMakeLists.txt` to embed icon in EXE - Success
+[2025-09-01 00:00:00] Category+Gender+Size row: appended Size from new column; default centered CompanyHeader; improved address wrapping to 2 lines without word loss; removed signature text in Excel/DOCX/Preview - Success

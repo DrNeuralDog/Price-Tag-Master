@@ -238,6 +238,8 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
                 if (! tag.getGender ().isEmpty () && categoryText.length () <= 12)
                     categoryText += " " + tag.getGender ();
+                if (! tag.getSize ().isEmpty ())
+                    categoryText += " " + tag.getSize ();
                 xlsx.write (row + 2, col, categoryText, fmt);
             }
 
@@ -300,7 +302,7 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             {
                 const QXlsx::Format fmt = withOuterEdges (signatureFormat, true, true, false, false);
                 xlsx.mergeCells (QXlsx::CellRange (row + 8, col, row + 8, col + tagCols - 1), fmt);
-                xlsx.write (row + 8, col, "Подпись", fmt);
+                xlsx.write (row + 8, col, "", fmt);
             }
 
 
@@ -329,7 +331,15 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 					++iWord;
 				}
                 else
+                {
+                    if (line1.isEmpty ())
+                    {
+                        // If a single word exceeds the budget, place it on the line anyway
+                        line1 = w;
+                        ++iWord;
+                    }
                     break;
+                }
 			}
 			while (iWord < words.size ())
 			{
@@ -341,7 +351,15 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 					++iWord;
 				}
                 else
+                {
+                    if (line2.isEmpty ())
+                    {
+                        // If a single word exceeds the budget, place it on the second line anyway
+                        line2 = w;
+                        ++iWord;
+                    }
                     break;
+                }
 			}
 
 

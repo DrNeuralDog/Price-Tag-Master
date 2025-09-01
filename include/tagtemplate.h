@@ -70,6 +70,10 @@ public:
     static const TagTextStyle &defaultStyle (TagField field)
     {
         static TagTextStyle def; // Times 11 left
+        static TagTextStyle center11;
+        center11.fontFamily = "Times New Roman";
+        center11.fontSizePt = 11;
+        center11.align      = TagTextAlign::Center;
         static TagTextStyle centerBold12;
         centerBold12.fontFamily = "Times New Roman";
         centerBold12.fontSizePt = 12;
@@ -103,7 +107,7 @@ public:
 
         switch (field)
         {
-        case TagField::CompanyHeader: return def;
+        case TagField::CompanyHeader: return center11;
         case TagField::Brand: return centerBold12;
         case TagField::CategoryGender: return center12;
         case TagField::BrandCountry: return small7BoldIt;

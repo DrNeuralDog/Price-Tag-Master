@@ -1,8 +1,9 @@
 #include <QApplication>
 #include <QDebug>
+#include <QIcon>
+#include <QSettings>
 #include "mainwindow.h"
- #include <QSettings>
- #include "thememanager.h"
+#include "thememanager.h"
 
 
 int main (int argc, char *argv[])
@@ -18,9 +19,13 @@ int main (int argc, char *argv[])
     ThemeManager::applyThemeToApplication (theme);
 
 
+    // Set application icon from resources (.ico is preferred for Windows taskbar)
+    app.setWindowIcon (QIcon (":/icons/PriceTagMangerIcon.ico"));
+
     MainWindow mainWindow;
 
     mainWindow.setWindowTitle ("Price Tag Master");
+    mainWindow.setWindowIcon (QIcon (":/icons/PriceTagMangerIcon.ico"));
     mainWindow.resize (800, 600);
     mainWindow.show ();
 

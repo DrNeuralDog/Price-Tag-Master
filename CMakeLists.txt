@@ -116,6 +116,12 @@ target_link_libraries(
         QXlsx
 )
 
+# Embed Windows application icon into the executable
+if (WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE resources/windows/app_icon.rc)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif ()
+
 # Install
 install(TARGETS
         ${PROJECT_NAME}

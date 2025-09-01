@@ -4,5 +4,7 @@
         <file>icons/logo.png</file>
         <file>icons/open.png</file>
         <file>icons/generate.png</file>
+        <file>icons/PriceTagMangerIcon.jpg</file>
+        <file>icons/PriceTagMangerIcon.ico</file>
     </qresource>
 </RCC> 

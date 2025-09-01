@@ -328,6 +328,8 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
     QString category = t.getCategory ();
     if (! t.getGender ().isEmpty () && category.length () <= 12)
         category += " " + t.getGender ();
+    if (! t.getSize ().isEmpty ())
+        category += " " + t.getSize ();
 
     xml += trMerged (ptToTwipsLocal (pt[2]), paragraphWithStyle (category, tpl.styleOrDefault (TagField::CategoryGender)), 4);
     xml += trMerged (ptToTwipsLocal (pt[3]), paragraphWithStyle ("Страна: " + t.getBrandCountry (), tpl.styleOrDefault (TagField::BrandCountry)), 4);
@@ -363,7 +365,7 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
         xml += trTwoCells (ptToTwipsLocal (pt[7]), leftContent, rightContent, false, true, 0);
     }
 
-    xml += trMerged (ptToTwipsLocal (pt[8]), paragraphWithStyle ("Подпись", tpl.styleOrDefault (TagField::Signature)), 2);
+    xml += trMerged (ptToTwipsLocal (pt[8]), paragraphWithStyle ("", tpl.styleOrDefault (TagField::Signature)), 2);
     // Supplier row split into label and value
     {
         QString left  = paragraphWithStyle ("Поставщик:", tpl.styleOrDefault (TagField::SupplierLabel));
@@ -372,35 +374,51 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
     }
 
 
-    QString address	  = t.getAddress ().simplified ();
+    QString address      = t.getAddress ().simplified ();
     QStringList words = address.split (' ', Qt::SkipEmptyParts);
     QString line1, line2;
     const int charBudget = 40;
-    int iWord			 = 0;
+    int iWord            = 0;
 
     while (iWord < words.size ())
     {
         const QString &w = words[iWord];
-        int nextLen		 = (line1.isEmpty () ? 0 : line1.size () + 1) + w.size ();
+        int nextLen      = (line1.isEmpty () ? 0 : line1.size () + 1) + w.size ();
         if (nextLen <= charBudget)
         {
             line1 = line1.isEmpty () ? w : line1 + " " + w;
             ++iWord;
         }
         else
+        {
+            if (line1.isEmpty ())
+            {
+                // если слово длиннее бюджета, всё равно помещаем его в первую строку
+                line1 = w;
+                ++iWord;
+            }
             break;
+        }
     }
     while (iWord < words.size ())
     {
         const QString &w = words[iWord];
-        int nextLen		 = (line2.isEmpty () ? 0 : line2.size () + 1) + w.size ();
+        int nextLen      = (line2.isEmpty () ? 0 : line2.size () + 1) + w.size ();
         if (nextLen <= charBudget)
         {
             line2 = line2.isEmpty () ? w : line2 + " " + w;
             ++iWord;
         }
         else
+        {
+            if (line2.isEmpty ())
+            {
+                // если слово длиннее бюджета, помещаем его во вторую строку
+                line2 = w;
+                ++iWord;
+            }
             break;
+        }
     }
 
     xml += trMerged (ptToTwipsLocal (pt[10]), paragraphWithStyle (line1, tpl.styleOrDefault (TagField::Address)), 2);

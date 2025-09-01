@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include <QFrame>
 #include <QtMath>
 
 namespace
@@ -96,7 +97,29 @@ void TemplateEditorWidget::initializeUi ()
     view->setBackgroundBrush (QColor (0xF1, 0xF5, 0xF9));
     view->setDragMode (QGraphicsView::ScrollHandDrag);
 
-    splitter->addWidget (view);
+    // Left panel with view + zoom controls
+    QWidget *leftPanel = new QWidget (splitter);
+    QVBoxLayout *leftLayout = new QVBoxLayout (leftPanel);
+    leftLayout->setContentsMargins (0, 0, 0, 0);
+    leftLayout->addWidget (view, 1);
+
+    // Zoom bar
+    QWidget *zoomBar = new QWidget (leftPanel);
+    QHBoxLayout *zoomLayout = new QHBoxLayout (zoomBar);
+    zoomLayout->setContentsMargins (8, 4, 8, 8);
+    btnZoomOut = new QPushButton ("-", zoomBar);
+    btnZoomIn = new QPushButton ("+", zoomBar);
+    btnFitPage = new QPushButton (tr ("Fit"), zoomBar);
+    zoomSlider = new QSlider (Qt::Horizontal, zoomBar);
+    zoomSlider->setRange (10, 400);
+    zoomSlider->setValue (100);
+    zoomLayout->addWidget (btnZoomOut);
+    zoomLayout->addWidget (zoomSlider, 1);
+    zoomLayout->addWidget (btnZoomIn);
+    zoomLayout->addWidget (btnFitPage);
+    leftLayout->addWidget (zoomBar, 0);
+
+    splitter->addWidget (leftPanel);
     splitter->addWidget (rightPanel);
     splitter->setStretchFactor (0, 1);
     splitter->setStretchFactor (1, 0);
@@ -144,6 +167,12 @@ void TemplateEditorWidget::initializeUi ()
     connect (italicCheck, &QCheckBox::toggled, this, [applyStyle] (bool) { applyStyle (); });
     connect (strikeCheck, &QCheckBox::toggled, this, [applyStyle] (bool) { applyStyle (); });
     connect (alignBox, QOverload<int>::of (&QComboBox::currentIndexChanged), this, [applyStyle] (int) { applyStyle (); });
+
+    // Zoom behavior
+    connect (zoomSlider, &QSlider::valueChanged, this, [this] (int v) { setZoomPercent (v); });
+    connect (btnZoomOut, &QPushButton::clicked, this, [this] () { zoomSlider->setValue (qMax (10, zoomSlider->value () - 10)); });
+    connect (btnZoomIn, &QPushButton::clicked, this, [this] () { zoomSlider->setValue (qMin (400, zoomSlider->value () + 10)); });
+    connect (btnFitPage, &QPushButton::clicked, this, [this] () { fitPageInView (); });
 }
 
 void TemplateEditorWidget::onParametersChanged () { rebuildScene (); }
@@ -214,44 +243,7 @@ void TemplateEditorWidget::drawGrid ()
         double x = ml;
         for (int c = 0; c < nCols; ++c)
         {
-            QRectF mmRect (x, y, tagW, tagH);
-            QRectF pxRect (mmRect.left () * pxPerMm, mmRect.top () * pxPerMm, mmRect.width () * pxPerMm, mmRect.height () * pxPerMm);
-            scene->addRect (pxRect, QPen (QColor (0x94, 0xA3, 0xB8), 1, Qt::DashLine), QBrush (QColor (59, 130, 246, 20)));
-
-
-            const double padMm	   = 2.5;
-            const QRectF contentPx = pxRect.adjusted (padMm * pxPerMm, padMm * pxPerMm, -padMm * pxPerMm, -padMm * pxPerMm);
-
-            auto addText =
-                    [&] (const QString &text, double topOffsetMm, const TagTextStyle &style)
-            {
-                auto *t = scene->addText (text);
-                QFont f = t->font ();
-                f.setFamily (style.fontFamily);
-                f.setPointSize (style.fontSizePt);
-                f.setBold (style.bold);
-                f.setItalic (style.italic);
-                t->setFont (f);
-                t->setDefaultTextColor (QColor (0x11, 0x18, 0x27));
-                const double ty = contentPx.top () + topOffsetMm * pxPerMm;
-                double tx		= contentPx.left ();
-                if (style.align == TagTextAlign::Right)
-                {
-                    tx = contentPx.right () - t->boundingRect ().width ();
-                }
-                else if (style.align == TagTextAlign::Center)
-                {
-                    tx = contentPx.left () + (contentPx.width () - t->boundingRect ().width ()) / 2.0;
-                }
-                t->setPos (tx, ty);
-                t->setVisible (true);
-                return t;
-            };
-
-            addText (tr ("BRAND"), 0.0, templateModel.styleOrDefault (TagField::Brand));
-            addText (tr ("Category + Gender"), 6.0, templateModel.styleOrDefault (TagField::CategoryGender));
-            addText (tr ("9 990 ₽"), 12.0, templateModel.styleOrDefault (TagField::PriceRight));
-            addText (tr ("SKU: VFG0005-5"), tagH - 8.0, templateModel.styleOrDefault (TagField::ArticleValue));
+            drawTagAtMm (x, y, tagW, tagH);
             x += tagW + hsp;
         }
         y += tagH + vsp;
@@ -276,6 +268,115 @@ void TemplateEditorWidget::fitPageInView ()
             break;
         }
     }
+}
+
+void TemplateEditorWidget::setZoomPercent (int percent)
+{
+    if (percent <= 0)
+        return;
+    view->resetTransform ();
+    const double scale = static_cast<double> (percent) / 100.0;
+    view->scale (scale, scale);
+}
+
+void TemplateEditorWidget::drawTagAtMm (double xMm, double yMm, double tagWMm, double tagHMm)
+{
+    const double pxPerMm = mmToPx (1.0);
+    QRectF pxRect (xMm * pxPerMm, yMm * pxPerMm, tagWMm * pxPerMm, tagHMm * pxPerMm);
+
+    // Outer border rectangle
+    auto *outer = scene->addRect (pxRect, QPen (QColor (0x2b, 0x2b, 0x2b), 1), QBrush (Qt::white));
+    outer->setZValue (0);
+
+    // Build inner 4x12 grid, matching Word/Excel
+    const double colMm[4] = {77.1, 35.7, 35.7, 27.1};
+    const double rowPt[12] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 10.50, 13.50, 9.75, 9.75};
+
+    // Convert rows pt -> mm
+    double rowMm[12];
+    for (int i = 0; i < 12; ++i)
+        rowMm[i] = ptToMm (rowPt[i]);
+
+    // Compute column x positions within pxRect
+    double gridX[5];
+    gridX[0] = pxRect.left ();
+    for (int i = 0; i < 4; ++i)
+        gridX[i + 1] = gridX[i] + (colMm[i] / (77.1 + 35.7 + 35.7 + 27.1)) * pxRect.width (); // proportional fit to outer width
+
+    // Compute row y positions within pxRect
+    double totalMm = 0.0;
+    for (double m : rowMm) totalMm += m;
+    double gridY[13];
+    gridY[0] = pxRect.top ();
+    for (int i = 0; i < 12; ++i)
+        gridY[i + 1] = gridY[i] + (rowMm[i] / totalMm) * pxRect.height ();
+
+    // Draw inner lines respecting merged cells
+    QPen thinPen (QColor (0x70, 0x78, 0x87));
+    thinPen.setWidth (1);
+    // Horizontal separators between rows (always)
+    for (int i = 1; i < 12; ++i)
+        scene->addLine (pxRect.left (), gridY[i], pxRect.right (), gridY[i], thinPen);
+    // Vertical split only where row is 1+3 (rows 5,6,7,9 in 0-based indexing)
+    auto drawSplitCol = [this, &thinPen, &gridX, &gridY] (int rowIndex)
+    {
+        scene->addLine (gridX[1], gridY[rowIndex], gridX[1], gridY[rowIndex + 1], thinPen);
+    };
+    drawSplitCol (5);
+    drawSplitCol (6);
+    drawSplitCol (7);
+    drawSplitCol (9);
+
+    // Helper to add text in a merged cell area
+    auto drawTextInRect = [this] (const QRectF &r, const TagTextStyle &style, const QString &text)
+    {
+        auto *t = scene->addText (text);
+        QFont f = t->font ();
+        f.setFamily (style.fontFamily);
+        f.setPointSize (style.fontSizePt);
+        f.setBold (style.bold);
+        f.setItalic (style.italic);
+        t->setFont (f);
+        t->setDefaultTextColor (QColor (0x11, 0x18, 0x27));
+        QRectF br = t->boundingRect ();
+        double tx = r.left ();
+        if (style.align == TagTextAlign::Center)
+            tx = r.left () + (r.width () - br.width ()) / 2.0;
+        else if (style.align == TagTextAlign::Right)
+            tx = r.right () - br.width ();
+        double ty = r.top () + (r.height () - br.height ()) / 2.0;
+        t->setPos (tx, ty);
+    };
+
+    // Row 0: Company (merge 4 cols)
+    drawTextInRect (QRectF (gridX[0], gridY[0], pxRect.width (), gridY[1] - gridY[0]), templateModel.styleOrDefault (TagField::CompanyHeader), tr ("ИП Новиков А.В."));
+    // Row 1: Brand (merge 4)
+    drawTextInRect (QRectF (gridX[0], gridY[1], pxRect.width (), gridY[2] - gridY[1]), templateModel.styleOrDefault (TagField::Brand), tr ("BRAND"));
+    // Row 2: Category+Gender (merge 4)
+    drawTextInRect (QRectF (gridX[0], gridY[2], pxRect.width (), gridY[3] - gridY[2]), templateModel.styleOrDefault (TagField::CategoryGender), tr ("Category + Gender + Size"));
+    // Row 3: Brand country (merge 4)
+    drawTextInRect (QRectF (gridX[0], gridY[3], pxRect.width (), gridY[4] - gridY[3]), templateModel.styleOrDefault (TagField::BrandCountry), tr ("Страна: ..."));
+    // Row 4: Manufacturing place (merge 4)
+    drawTextInRect (QRectF (gridX[0], gridY[4], pxRect.width (), gridY[5] - gridY[4]), templateModel.styleOrDefault (TagField::ManufacturingPlace), tr ("Место: ..."));
+    // Row 5: Material split: label col1, value cols2-4 merged
+    drawTextInRect (QRectF (gridX[0], gridY[5], gridX[1] - gridX[0], gridY[6] - gridY[5]), templateModel.styleOrDefault (TagField::MaterialLabel), tr ("Матер-л:"));
+    drawTextInRect (QRectF (gridX[1], gridY[5], pxRect.right () - gridX[1], gridY[6] - gridY[5]), templateModel.styleOrDefault (TagField::MaterialValue), tr ("Материал"));
+    // Row 6: Article split
+    drawTextInRect (QRectF (gridX[0], gridY[6], gridX[1] - gridX[0], gridY[7] - gridY[6]), templateModel.styleOrDefault (TagField::ArticleLabel), tr ("Артикул:"));
+    drawTextInRect (QRectF (gridX[1], gridY[6], pxRect.right () - gridX[1], gridY[7] - gridY[6]), templateModel.styleOrDefault (TagField::ArticleValue), tr ("VFG0005-5"));
+    // Row 7: Price split; show sample with strike in left
+    drawTextInRect (QRectF (gridX[0], gridY[7], gridX[1] - gridX[0], gridY[8] - gridY[7]), templateModel.styleOrDefault (TagField::PriceLeft), tr ("9 990"));
+    // emulate diagonal slash visually
+    scene->addLine (gridX[0], gridY[8], gridX[1], gridY[7], thinPen);
+    drawTextInRect (QRectF (gridX[1], gridY[7], pxRect.right () - gridX[1], gridY[8] - gridY[7]), templateModel.styleOrDefault (TagField::PriceRight), tr ("8 490 ="));
+    // Row 8: Signature (merge 4)
+    drawTextInRect (QRectF (gridX[0], gridY[8], pxRect.width (), gridY[9] - gridY[8]), templateModel.styleOrDefault (TagField::Signature), tr (""));
+    // Row 9: Supplier split
+    drawTextInRect (QRectF (gridX[0], gridY[9], gridX[1] - gridX[0], gridY[10] - gridY[9]), templateModel.styleOrDefault (TagField::SupplierLabel), tr ("Поставщик:"));
+    drawTextInRect (QRectF (gridX[1], gridY[9], pxRect.right () - gridX[1], gridY[10] - gridY[9]), templateModel.styleOrDefault (TagField::SupplierValue), tr ("ООО Рога и Копыта"));
+    // Rows 10-11: Address lines merged
+    drawTextInRect (QRectF (gridX[0], gridY[10], pxRect.width (), gridY[11] - gridY[10]), templateModel.styleOrDefault (TagField::Address), tr ("г. Москва, ул. Пушкина 1"));
+    drawTextInRect (QRectF (gridX[0], gridY[11], pxRect.width (), gridY[12] - gridY[11]), templateModel.styleOrDefault (TagField::Address), tr ("ТЦ Пример, бутик 5"));
 }
 
 void TemplateEditorWidget::resizeEvent (QResizeEvent *event)

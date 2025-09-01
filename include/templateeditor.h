@@ -9,6 +9,8 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QCheckBox>
+#include <QSlider>
+#include <QPushButton>
 #include <QSplitter>
 #include <QWidget>
 
@@ -43,9 +45,12 @@ private:
     void initializeUi ();
     void rebuildScene ();
     void drawGrid ();
+    void drawTagAtMm (double xMm, double yMm, double tagWMm, double tagHMm);
     void fitPageInView ();
+    void setZoomPercent (int percent);
 
     static double mmToPx (double mm);
+    static double ptToMm (double pt) { return pt * 25.4 / 72.0; }
 
 
 private:
@@ -71,6 +76,12 @@ private:
     QCheckBox *italicCheck;
     QCheckBox *strikeCheck;
     QComboBox *alignBox;
+
+    // Zoom controls
+    QSlider *zoomSlider;
+    QPushButton *btnZoomOut;
+    QPushButton *btnZoomIn;
+    QPushButton *btnFitPage;
 
     TagTemplate templateModel; // current template state
 
