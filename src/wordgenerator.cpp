@@ -326,9 +326,13 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
     xml += trMerged (ptToTwipsLocal (pt[1]), paragraphWithStyle (t.getBrand (), tpl.styleOrDefault (TagField::Brand)), 4);
 
     QString category = t.getCategory ();
+    bool appendedGender = false;
     if (! t.getGender ().isEmpty () && category.length () <= 12)
+    {
         category += " " + t.getGender ();
-    if (! t.getSize ().isEmpty ())
+        appendedGender = true;
+    }
+    if (appendedGender && ! t.getSize ().isEmpty ())
         category += " " + t.getSize ();
 
     xml += trMerged (ptToTwipsLocal (pt[2]), paragraphWithStyle (category, tpl.styleOrDefault (TagField::CategoryGender)), 4);

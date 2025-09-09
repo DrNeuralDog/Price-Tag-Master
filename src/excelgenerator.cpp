@@ -236,9 +236,13 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
                 xlsx.mergeCells (QXlsx::CellRange (row + 2, col, row + 2, col + tagCols - 1), fmt);
                 QString categoryText = tag.getCategory ();
 
+                bool appendedGender = false;
                 if (! tag.getGender ().isEmpty () && categoryText.length () <= 12)
+                {
                     categoryText += " " + tag.getGender ();
-                if (! tag.getSize ().isEmpty ())
+                    appendedGender = true;
+                }
+                if (appendedGender && ! tag.getSize ().isEmpty ())
                     categoryText += " " + tag.getSize ();
                 xlsx.write (row + 2, col, categoryText, fmt);
             }

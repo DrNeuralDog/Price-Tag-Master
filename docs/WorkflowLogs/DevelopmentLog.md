@@ -1,3 +1,4 @@
+[2025-09-09 00:00:00] Adjusted output: Size is appended only after Gender in Category line; ensured reading from column "Размер" remains active - Success
 [2025-08-08 00:00:00] Created AI-friendly PRD in `docs/PRD.md`; added logs; prepared for git commit - Success
 [2025-08-08 00:10:00] Authored structured CR aligned with PRD; saved to `docs/CR.md`; updated interaction logs - Success
 [2025-08-08 00:20:00] Created base docs: `docs/Implementation.md`, `docs/project_structure.md`, `docs/UI_UX_doc.md`; updated task checklist - Success
