@@ -47,3 +47,5 @@
 [
 2025-09-18 17:28:00] User requested Ctrl+mouse wheel zoom and proper cursors (arrow over fields, resize on edges) - Implemented Ctrl+wheel zoom, arrow cursor, edge/BR resize cursors; fixed segfault on field click - Success
 [2025-09-19 12:00:00] User requested language switching mechanism, square rounded lang button with spacing, and default export to Excel - Implemented via code edits; language dynamic switch suggests restart - Success
+[2025-09-19 13:00:00] User reported compile error: No member 'setUiLanguage' in MainWindow - Added declaration in header and implementation in cpp - Fixed
+[2025-09-19 14:00:00] User requested full Russian translations for all UI texts - Generated .ts/.qm, added to resources, wrapped remaining strings in tr() - Success

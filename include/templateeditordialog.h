@@ -18,6 +18,7 @@ public:
     explicit TemplateEditorDialog (QWidget *parent = nullptr);
 
     TemplateEditorWidget *templateEditor () const { return editor; }
+    void applyLanguage (const QString &lang);
 
 
 private:

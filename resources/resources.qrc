@@ -9,4 +9,5 @@
         <file>icons/PriceTagMangerIcon.jpg</file>
         <file>icons/PriceTagMangerIcon.ico</file>
     </qresource>
+    <!-- Translations are embedded via CMake's qt_add_resources(translations_qm) -->
 </RCC> 

@@ -1,6 +1,7 @@
 #include "templateeditordialog.h"
 #include "templateeditor.h"
 #include "configmanager.h"
+#include "mainwindow.h"
 
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -12,7 +13,9 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
     buttons (new QDialogButtonBox (QDialogButtonBox::Save | QDialogButtonBox::Close, this)), saveButton (nullptr), dirty (false),
     suppressNextDirty (true)
 {
-    setWindowTitle (tr ("Template Editor"));
+    setWindowTitle (parent && parent->inherits("MainWindow")
+                        ? static_cast<MainWindow*>(parent)->localized("Template Editor", "Редактор шаблона")
+                        : tr ("Template Editor"));
     setModal (true);
     auto *layout = new QVBoxLayout (this);
     layout->addWidget (editor, 1);
@@ -23,7 +26,15 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
     saveButton = buttons->button (QDialogButtonBox::Save);
     if (saveButton)
     {
-        saveButton->setText (tr ("Save"));
+        if (parent && parent->inherits("MainWindow"))
+        {
+            auto *mw = static_cast<MainWindow*>(parent);
+            saveButton->setText (mw->localized("Save", "Сохранить"));
+        }
+        else
+        {
+            saveButton->setText (tr ("Save"));
+        }
         saveButton->setEnabled (false); // disabled until changes occur
         connect (saveButton, &QPushButton::clicked, this, [this] () {
             const TagTemplate tpl = editor->currentTemplate ();
@@ -31,6 +42,15 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
             dirty = false;
             saveButton->setEnabled (false);
         });
+    }
+    // Localize Close button text if present
+    if (QPushButton *closeBtn = buttons->button(QDialogButtonBox::Close))
+    {
+        if (parent && parent->inherits("MainWindow"))
+        {
+            auto *mw = static_cast<MainWindow*>(parent);
+            closeBtn->setText(mw->localized("Close", "Закрыть"));
+        }
     }
 
     // Enable save only when there are changes
@@ -48,4 +68,16 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
     resize (900, 700);
 }
 
+
+void TemplateEditorDialog::applyLanguage (const QString &lang)
+{
+    MainWindow *mw = qobject_cast<MainWindow*>(parent());
+    auto loc = [lang, mw](const QString &en, const QString &ru){
+        return (mw ? mw->localized(en, ru) : (lang == "RU" ? ru : en));
+    };
+    setWindowTitle(loc("Template Editor", "Редактор шаблона"));
+    if (saveButton) saveButton->setText(loc("Save", "Сохранить"));
+    if (QPushButton *closeBtn = buttons->button(QDialogButtonBox::Close)) closeBtn->setText(loc("Close", "Закрыть"));
+    if (editor) editor->applyLanguage(lang);
+}
 

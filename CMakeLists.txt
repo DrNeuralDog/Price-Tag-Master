@@ -33,11 +33,11 @@ add_subdirectory(3rdparty/qxlsx/QXlsx)
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)
 
 # Find required packages
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts LinguistTools)
 if (Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
 else ()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts LinguistTools)
     set(QT_VERSION_MAJOR 5)
 endif ()
 
@@ -147,4 +147,7 @@ install(TARGETS ${PROJECT_NAME}
 
 if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
+else ()
+    # For Qt5, leave resources/resources.qrc as-is
+    target_sources(${PROJECT_NAME} PRIVATE resources/resources.qrc)
 endif ()

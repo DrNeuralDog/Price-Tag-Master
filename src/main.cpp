@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
     }
 
     MainWindow mainWindow;
-    // mainWindow.setUiLanguage(lang); // Add setter in MainWindow
+    mainWindow.setUiLanguage (lang); // Add setter in MainWindow
 
     mainWindow.setWindowTitle ("Price Tag Master");
     mainWindow.setWindowIcon (appIcon);

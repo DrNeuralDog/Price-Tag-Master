@@ -62,14 +62,14 @@ void TemplateEditorWidget::initializeUi ()
     spinSpacingV->setValue (5.0);
 
     // Field selector on top
-    QGroupBox *fieldBox = new QGroupBox (tr ("Field"), rightPanel);
+    fieldBox = new QGroupBox (tr ("Field"), rightPanel);
     QVBoxLayout *fieldLay = new QVBoxLayout (fieldBox);
     fieldLay->addWidget (comboField);
     rightLayout->addWidget (fieldBox);
 
     // Block 1: Geometry/Margins/Spacing
-    QGroupBox *geomBox = new QGroupBox (tr ("Layout"), rightPanel);
-    QFormLayout *geomForm = new QFormLayout (geomBox);
+    geomBox = new QGroupBox (tr ("Layout"), rightPanel);
+    geomForm = new QFormLayout (geomBox);
     geomForm->addRow (tr ("Tag width (mm)"), spinTagW);
     geomForm->addRow (tr ("Tag height (mm)"), spinTagH);
     geomForm->addRow (tr ("Margin left (mm)"), spinMarginL);
@@ -104,8 +104,8 @@ void TemplateEditorWidget::initializeUi ()
     alignBox->addItem (tr("Right"), static_cast<int> (TagTextAlign::Right));
 
     // Block 2: Typography
-    QGroupBox *typoBox = new QGroupBox (tr ("Typography"), rightPanel);
-    QFormLayout *typoForm = new QFormLayout (typoBox);
+    typoBox = new QGroupBox (tr ("Typography"), rightPanel);
+    typoForm = new QFormLayout (typoBox);
     typoForm->addRow (tr("Font family"), fontFamilyBox);
     typoForm->addRow (tr("Font size"), fontSizeSpin);
     typoForm->addRow (tr("Bold"), boldCheck);
@@ -268,6 +268,95 @@ void TemplateEditorWidget::setTagTemplate (const TagTemplate &tpl)
     setMarginsMm (tpl.marginLeftMm, tpl.marginTopMm, tpl.marginRightMm, tpl.marginBottomMm);
     setSpacingMm (tpl.spacingHMm, tpl.spacingVMm);
     emit templateChanged (templateModel);
+}
+
+static QString locText(const QString &lang, const QString &en, const QString &ru)
+{
+    return (lang == "RU") ? ru : en;
+}
+
+void TemplateEditorWidget::applyLanguage (const QString &lang)
+{
+    currentLanguage = lang;
+    // Group titles
+    if (fieldBox) fieldBox->setTitle(locText(lang, "Field", "Поле"));
+    if (geomBox) geomBox->setTitle(locText(lang, "Layout", "Макет"));
+    if (typoBox) typoBox->setTitle(locText(lang, "Typography", "Типографика"));
+
+    // Geometry form labels
+    if (geomForm)
+    {
+        auto setLabel = [this, &lang](QFormLayout *form, QWidget *field, const QString &en, const QString &ru)
+        {
+            if (!form || !field) return;
+            QWidget *w = form->labelForField(field);
+            if (QLabel *lbl = qobject_cast<QLabel*>(w)) lbl->setText(locText(lang, en, ru));
+        };
+        setLabel(geomForm, spinTagW, "Tag width (mm)", "Ширина тега (мм)");
+        setLabel(geomForm, spinTagH, "Tag height (mm)", "Высота тега (мм)");
+        setLabel(geomForm, spinMarginL, "Margin left (mm)", "Отступ слева (мм)");
+        setLabel(geomForm, spinMarginT, "Margin top (mm)", "Отступ сверху (мм)");
+        setLabel(geomForm, spinMarginR, "Margin right (mm)", "Отступ справа (мм)");
+        setLabel(geomForm, spinMarginB, "Margin bottom (mm)", "Отступ снизу (мм)");
+        setLabel(geomForm, spinSpacingH, "Spacing horizontal (mm)", "Горизонтальный зазор (мм)");
+        setLabel(geomForm, spinSpacingV, "Spacing vertical (mm)", "Вертикальный зазор (мм)");
+    }
+
+    // Typography form labels
+    if (typoForm)
+    {
+        auto setLabel = [this, &lang](QFormLayout *form, QWidget *field, const QString &en, const QString &ru)
+        {
+            if (!form || !field) return;
+            QWidget *w = form->labelForField(field);
+            if (QLabel *lbl = qobject_cast<QLabel*>(w)) lbl->setText(locText(lang, en, ru));
+        };
+        setLabel(typoForm, fontFamilyBox, "Font family", "Семейство шрифта");
+        setLabel(typoForm, fontSizeSpin, "Font size", "Размер шрифта");
+        setLabel(typoForm, boldCheck, "Bold", "Жирный");
+        setLabel(typoForm, italicCheck, "Italic", "Курсив");
+        setLabel(typoForm, strikeCheck, "Strike", "Зачёркнутый");
+        setLabel(typoForm, alignBox, "Align", "Выравнивание");
+        setLabel(typoForm, textEdit, "Text", "Текст");
+        if (textEdit) textEdit->setPlaceholderText(locText(lang, "Sample/preview text for this field", "Пример/предпросмотр текста для этого поля"));
+    }
+
+    // Update comboField entries (field names)
+    for (int i = 0; i < comboField->count(); ++i)
+    {
+        TagField f = static_cast<TagField>(comboField->itemData(i).toInt());
+        QString en, ru;
+        switch (f)
+        {
+        case TagField::CompanyHeader: en = "Company header"; ru = "Заголовок компании"; break;
+        case TagField::Brand: en = "Brand"; ru = "Бренд"; break;
+        case TagField::CategoryGender: en = "Category + Gender"; ru = "Категория + Пол"; break;
+        case TagField::BrandCountry: en = "Brand country"; ru = "Страна бренда"; break;
+        case TagField::ManufacturingPlace: en = "Manufactured in"; ru = "Место производства"; break;
+        case TagField::MaterialLabel: en = "Material label"; ru = "Материал (ярлык)"; break;
+        case TagField::MaterialValue: en = "Material value"; ru = "Материал"; break;
+        case TagField::ArticleLabel: en = "Article label"; ru = "Артикул (ярлык)"; break;
+        case TagField::ArticleValue: en = "Article value"; ru = "Артикул"; break;
+        case TagField::PriceLeft: en = "Price left"; ru = "Цена старая"; break;
+        case TagField::PriceRight: en = "Price right"; ru = "Цена"; break;
+        case TagField::Signature: en = "Signature"; ru = "Подпись"; break;
+        case TagField::SupplierLabel: en = "Supplier label"; ru = "Поставщик (ярлык)"; break;
+        case TagField::SupplierValue: en = "Supplier value"; ru = "Поставщик"; break;
+        case TagField::Address: en = "Address"; ru = "Адрес"; break;
+        }
+        comboField->setItemText(i, locText(lang, en, ru));
+    }
+
+    // Alignment options
+    auto setAlignTextAt = [this, &lang](int index, const QString &en, const QString &ru){
+        if (index >= 0 && index < alignBox->count()) alignBox->setItemText(index, locText(lang, en, ru));
+    };
+    setAlignTextAt(0, "Left", "Слева");
+    setAlignTextAt(1, "Center", "По центру");
+    setAlignTextAt(2, "Right", "Справа");
+
+    // Zoom bar button
+    if (btnFitPage) btnFitPage->setText(locText(lang, "Fit", "Подогнать"));
 }
 
 void TemplateEditorWidget::rebuildScene ()

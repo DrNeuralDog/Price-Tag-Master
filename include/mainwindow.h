@@ -48,7 +48,10 @@ class MainWindow: public QMainWindow
 
 
             public: explicit MainWindow (QWidget *parent = nullptr);
-    ~MainWindow ();
+    ~MainWindow () override;
+
+    void setUiLanguage(const QString& lang); // Added for initial language setup
+    QString localized(const QString &english, const QString &russian) const; // Manual bilingual texts
 
 
 protected:

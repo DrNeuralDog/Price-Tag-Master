@@ -102,6 +102,8 @@ void MainWindow::setupToolbar ()
                      templateEditorDialog = new TemplateEditorDialog (this);
                      // initialize template defaults to editor
                      templateEditorDialog->templateEditor ()->setTagTemplate (currentTemplate);
+                    // apply current language to dialog
+                    templateEditorDialog->applyLanguage(uiLanguage);
                      connect (templateEditorDialog->templateEditor (), &TemplateEditorWidget::templateChanged, this,
                               [this] (const TagTemplate &tpl)
                               {
@@ -111,6 +113,10 @@ void MainWindow::setupToolbar ()
                                   ConfigManager::saveTemplate (currentTemplate);
                               });
                  }
+                else
+                {
+                    templateEditorDialog->applyLanguage(uiLanguage);
+                }
                  templateEditorDialog->show ();
                  templateEditorDialog->raise ();
                  templateEditorDialog->activateWindow ();
@@ -195,7 +201,10 @@ void MainWindow::setupStatisticsTab ()
 }
 void MainWindow::openFile ()
 {
-    const QString filePath = QFileDialog::getOpenFileName(this, tr("Open Excel File"), QString(), tr("Excel (*.xlsx)"));
+    const QString filePath = QFileDialog::getOpenFileName(this,
+                                                         localized("Open Excel File", "Открыть файл Excel"),
+                                                         QString(),
+                                                         localized("Excel (*.xlsx)", "Excel (*.xlsx)"));
     if (filePath.isEmpty())
         return;
     processFile(filePath);
@@ -205,14 +214,17 @@ void MainWindow::generateDocument ()
 {
     if (priceTags.isEmpty())
     {
-        QMessageBox::warning(this, tr("No Data"), tr("Please load an Excel file first."));
+        QMessageBox::warning(this,
+                             localized("No Data", "Нет данных"),
+                             localized("Please load an Excel file first.", "Пожалуйста, сначала загрузите файл Excel."));
         return;
     }
 
     const bool toExcel = (outputFormatComboBox && outputFormatComboBox->currentIndex() == 0);
-    const QString filter = toExcel ? tr("XLSX (*.xlsx)") : tr("DOCX (*.docx)");
-    QString suggested = toExcel ? tr("out.xlsx") : tr("out.docx");
-    const QString outPath = QFileDialog::getSaveFileName(this, tr("Save Output"), suggested, filter);
+    const QString filter = toExcel ? localized("XLSX (*.xlsx)", "XLSX (*.xlsx)")
+                                   : localized("DOCX (*.docx)", "DOCX (*.docx)");
+    QString suggested = toExcel ? localized("out.xlsx", "out.xlsx") : localized("out.docx", "out.docx");
+    const QString outPath = QFileDialog::getSaveFileName(this, localized("Save Output", "Сохранить вывод"), suggested, filter);
     if (outPath.isEmpty())
         return;
 
@@ -225,11 +237,15 @@ void MainWindow::generateDocument ()
 
     if (ok)
     {
-        QMessageBox::information(this, tr("Success"), tr("Saved to: %1").arg(outPath));
+        QMessageBox::information(this,
+                                 localized("Success", "Успех"),
+                                 localized("Saved to: %1", "Сохранено в: %1").arg(outPath));
     }
     else
     {
-        QMessageBox::critical(this, tr("Error"), tr("Failed to generate output."));
+        QMessageBox::critical(this,
+                               localized("Error", "Ошибка"),
+                               localized("Failed to generate output.", "Не удалось сгенерировать вывод."));
     }
 }
 
@@ -241,7 +257,9 @@ void MainWindow::processFile (const QString &filePath)
     QList<PriceTag> parsed;
     if (!excelParser->parseExcelFile(filePath, parsed))
     {
-        QMessageBox::critical(this, tr("Error"), tr("Failed to parse Excel file."));
+        QMessageBox::critical(this,
+                               localized("Error", "Ошибка"),
+                               localized("Failed to parse Excel file.", "Не удалось разобрать файл Excel."));
         return;
     }
 
@@ -260,7 +278,7 @@ void MainWindow::processFile (const QString &filePath)
     {
         setDropAreaSuccessStyle();
         const QFileInfo fi(filePath);
-        dropArea->setText(tr("Loaded: %1").arg(fi.fileName()));
+        dropArea->setText(localized("Loaded: %1", "Загружено: %1").arg(fi.fileName()));
     }
 
     showStatistics();
@@ -278,7 +296,7 @@ void MainWindow::showStatistics ()
 
     if (priceTags.isEmpty())
     {
-        statisticsText->setPlainText(tr("No data loaded."));
+        statisticsText->setPlainText(localized("No data loaded.", "Данные не загружены."));
     }
     else
     {
@@ -300,11 +318,11 @@ void MainWindow::showStatistics ()
         }
 
         QString text;
-        text += tr("Total products: %1\n").arg(totalProducts);
-        text += tr("Total tags: %1\n").arg(totalTags);
-        text += tr("Products with discount: %1\n").arg(productsWithDiscount);
-        text += tr("Unique brands: %1\n").arg(brandCount.size());
-        text += tr("Unique categories: %1\n").arg(categoryCount.size());
+        text += localized("Total products: %1\n", "Всего товаров: %1\n").arg(totalProducts);
+        text += localized("Total tags: %1\n", "Всего ценников: %1\n").arg(totalTags);
+        text += localized("Products with discount: %1\n", "Товаров со скидкой: %1\n").arg(productsWithDiscount);
+        text += localized("Unique brands: %1\n", "Уникальных брендов: %1\n").arg(brandCount.size());
+        text += localized("Unique categories: %1\n", "Уникальных категорий: %1\n").arg(categoryCount.size());
         statisticsText->setPlainText(text);
     }
 
@@ -374,7 +392,7 @@ void MainWindow::updateThemeStyles ()
     // Theme button style + text (neutral, no gradient)
     if (themeButton)
     {
-        themeButton->setText (isDark ? tr ("Dark") : tr ("Light"));
+        themeButton->setText (isDark ? localized("Dark", "Тёмная") : localized("Light", "Светлая"));
         const QString tbStyle = QString (
                 "QPushButton { border: 1px solid %1; border-radius: 14px; padding: 4px 12px; color: %2; background: %3; }"
                 "QPushButton:hover { background: %4; }"
@@ -514,29 +532,49 @@ void MainWindow::applyTemplateToGenerators (const TagTemplate &tpl)
 void MainWindow::toggleLanguage ()
 {
     uiLanguage = (uiLanguage == "EN") ? "RU" : "EN";
+    QSettings s;
+    s.setValue("ui/language", uiLanguage);
     updateLanguageTexts ();
+}
+
+void MainWindow::setUiLanguage(const QString& lang)
+{
+    uiLanguage = lang;
+    updateLanguageTexts();
+    // Note: For full re-translation, app restart is recommended
+}
+
+QString MainWindow::localized(const QString &english, const QString &russian) const
+{
+    return (uiLanguage == "RU") ? russian : english;
 }
 
 void MainWindow::updateLanguageTexts ()
 {
     if (themeButton)
-        themeButton->setText (ThemeManager::currentTheme () == AppTheme::Dark ? tr ("Dark") : tr ("Light"));
+        themeButton->setText (ThemeManager::currentTheme () == AppTheme::Dark ? localized("Dark", "Тёмная") : localized("Light", "Светлая"));
     if (langButton)
         langButton->setText (uiLanguage);
 
-    // Minimal example: update main buttons text per language
-    if (uiLanguage == "RU")
+    if (openButton) openButton->setText (localized("Open Excel File", "Открыть файл Excel"));
+    if (generateButton) generateButton->setText (localized("  Generate Price Tags", "  Сгенерировать ценники"));
+    if (refreshStatsButton) refreshStatsButton->setText (localized("Refresh Statistics", "Обновить статистику"));
+
+    // Update template editor dialog language if open
+    if (templateEditorDialog)
+        templateEditorDialog->applyLanguage(uiLanguage);
+
+    if (tabWidget)
     {
-        if (openButton) openButton->setText (tr ("Open Excel File"));
-        if (generateButton) generateButton->setText (tr ("  Generate Price Tags"));
-        if (refreshStatsButton) refreshStatsButton->setText (tr ("Refresh Statistics"));
+        int idxMain = tabWidget->indexOf(tabWidget->widget(0));
+        if (idxMain >= 0) tabWidget->setTabText(idxMain, localized("Main", "Основное"));
+        int idxStats = tabWidget->indexOf(tabWidget->widget(tabWidget->count()-1));
+        if (idxStats >= 0) tabWidget->setTabText(idxStats, localized("Statistics", "Статистика"));
     }
-    else
-    {
-        if (openButton) openButton->setText (tr ("Open Excel File"));
-        if (generateButton) generateButton->setText (tr ("  Generate Price Tags"));
-        if (refreshStatsButton) refreshStatsButton->setText (tr ("Refresh Statistics"));
-    }
+
+    if (dropArea)
+        dropArea->setText(localized("Drag and drop Excel file here or use the Open button below",
+                                    "Перетащите файл Excel сюда или используйте кнопку Открыть ниже"));
 }
 
 #ifdef USE_QT_CHARTS
@@ -594,11 +632,11 @@ void MainWindow::updateCharts ()
             others += brandPairs[i].second;
     }
     if (others > 0)
-        brandSeries->append (tr ("Others"), others);
+        brandSeries->append (localized("Others", "Другие"), others);
 
     QChart *brandChart = new QChart ();
     brandChart->addSeries (brandSeries);
-    brandChart->setTitle (tr ("Brands Distribution"));
+    brandChart->setTitle (localized("Brands Distribution", "Распределение брендов"));
     brandChart->legend ()->setVisible (true);
     brandChart->legend ()->setAlignment (Qt::AlignBottom);
     brandChartView = new QChartView (brandChart);
@@ -620,11 +658,11 @@ void MainWindow::updateCharts ()
             others += categoryPairs[i].second;
     }
     if (others > 0)
-        categorySeries->append (tr ("Others"), others);
+        categorySeries->append (localized("Others", "Другие"), others);
 
     QChart *categoryChart = new QChart ();
     categoryChart->addSeries (categorySeries);
-    categoryChart->setTitle (tr ("Categories Distribution"));
+    categoryChart->setTitle (localized("Categories Distribution", "Распределение категорий"));
     categoryChart->legend ()->setVisible (true);
     categoryChart->legend ()->setAlignment (Qt::AlignBottom);
     categoryChartView = new QChartView (categoryChart);
@@ -632,9 +670,9 @@ void MainWindow::updateCharts ()
     chartsLayout->addWidget (categoryChartView, 1);
 
     // Bar: Summary (Products vs Tags vs Discounted)
-    QBarSet *productsSet  = new QBarSet (tr ("Products"));
-    QBarSet *tagsSet	  = new QBarSet (tr ("Tags"));
-    QBarSet *discountsSet = new QBarSet (tr ("With Discount"));
+    QBarSet *productsSet  = new QBarSet (localized("Products", "Товары"));
+    QBarSet *tagsSet	  = new QBarSet (localized("Tags", "Ценники"));
+    QBarSet *discountsSet = new QBarSet (localized("With Discount", "Со скидкой"));
     *productsSet << totalProducts;
     *tagsSet << totalTags;
     *discountsSet << productsWithDiscount;
@@ -646,10 +684,10 @@ void MainWindow::updateCharts ()
 
     QChart *barChart = new QChart ();
     barChart->addSeries (barSeries);
-    barChart->setTitle (tr ("Summary"));
+    barChart->setTitle (localized("Summary", "Сводка"));
 
     QStringList categoriesAxis;
-    categoriesAxis << tr ("Total");
+    categoriesAxis << localized("Total", "Всего");
     QBarCategoryAxis *axisX = new QBarCategoryAxis ();
     axisX->append (categoriesAxis);
     barChart->addAxis (axisX, Qt::AlignBottom);
@@ -657,7 +695,7 @@ void MainWindow::updateCharts ()
 
     QValueAxis *axisY = new QValueAxis ();
     axisY->setLabelFormat ("%d");
-    axisY->setTitleText (tr ("Count"));
+    axisY->setTitleText (localized("Count", "Количество"));
     barChart->addAxis (axisY, Qt::AlignLeft);
     barSeries->attachAxis (axisY);
 

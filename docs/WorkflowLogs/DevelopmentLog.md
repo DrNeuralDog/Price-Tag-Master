@@ -43,3 +43,5 @@
 
 [2025-09-19 00:00:00] Fixed QtCharts compile errors: added QT_CHARTS_USE_NAMESPACE in `include/mainwindow.h`, switched member types to `QChartView*`, removed `using namespace QtCharts;` from `src/mainwindow.cpp` - Success
 [2025-09-19 12:00:00] Implemented UI language toggle (EN/RU) with QTranslator and settings persistence; made langButton square (28x28) with 14px spacer to themeButton; changed default export to XLSX by swapping combo items - Success
+[2025-09-19 13:00:00] Fixed missing setUiLanguage method: added to MainWindow header and cpp with updateLanguageTexts call - Success
+[2025-09-19 14:00:00] Added Russian translations: ran lupdate/lrelease, edited .ts with translations, embedded .qm in qrc, ensured all UI strings use tr() - Success

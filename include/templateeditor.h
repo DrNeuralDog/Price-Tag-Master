@@ -35,6 +35,9 @@ public:
     void setTagTemplate (const TagTemplate &tpl);
     TagTemplate currentTemplate () const { return templateModel; }
 
+    // Localization
+    void applyLanguage (const QString &lang);
+
 signals:
     void templateChanged (const TagTemplate &tpl);
 
@@ -78,6 +81,13 @@ private:
     QDoubleSpinBox *spinSpacingH;
     QDoubleSpinBox *spinSpacingV;
 
+    // Group boxes and forms for relabeling
+    QGroupBox *fieldBox = nullptr;
+    QGroupBox *geomBox = nullptr;
+    QGroupBox *typoBox = nullptr;
+    QFormLayout *geomForm = nullptr;
+    QFormLayout *typoForm = nullptr;
+
     // Style controls
     QComboBox *comboField;
     QFontComboBox *fontFamilyBox;
@@ -95,6 +105,7 @@ private:
     QPushButton *btnFitPage;
 
     TagTemplate templateModel; // current template state
+    QString currentLanguage = "EN";
 
     // Constants (A4 Portrait)
     const double pageWidthMm  = 210.0;
