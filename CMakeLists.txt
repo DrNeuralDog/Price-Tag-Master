@@ -33,11 +33,11 @@ add_subdirectory(3rdparty/qxlsx/QXlsx)
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)
 
 # Find required packages
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts)
 if (Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
 else ()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts)
     set(QT_VERSION_MAJOR 5)
 endif ()
 
@@ -100,8 +100,12 @@ target_sources(
         ${PROJECT_NAME}
         PRIVATE
         src/templateeditor.cpp
+        src/templateeditordialog.cpp
+        src/configmanager.cpp
         include/templateeditor.h
         include/templateeditordialog.h
+        include/configmanager.h
+        resources/resources.qrc
 )
 
 target_link_libraries(
@@ -113,8 +117,12 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::AxContainer
         Qt${QT_VERSION_MAJOR}::Concurrent
         Qt${QT_VERSION_MAJOR}::PrintSupport
+        Qt${QT_VERSION_MAJOR}::Charts
         QXlsx
 )
+
+# Enable charts code paths in sources
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_QT_CHARTS)
 
 # Embed Windows application icon into the executable
 if (WIN32)

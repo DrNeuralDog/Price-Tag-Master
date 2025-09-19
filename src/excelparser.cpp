@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <xlsxzipreader_p.h>
 
 
 ExcelParser::ExcelParser (QObject *parent) : QObject (parent) {}
@@ -23,13 +24,47 @@ bool ExcelParser::parseExcelFile (const QString &filePath, QList<PriceTag> &pric
     }
 
 
-    QXlsx::Document xlsx (filePath);
-    if (! xlsx.load ())
+    // Quick ZIP signature check to reject non-OOXML before QXlsx touches it (avoids debug asserts)
     {
-        qDebug () << "Failed to load XLSX file with QXlsx";
-
-        return false;
+        QFile f(filePath);
+        if (!f.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "Cannot open file for read:" << filePath;
+            return false;
+        }
+        QByteArray sig = f.read(4);
+        f.close();
+        if (sig.size() != 4 || !(sig[0] == 'P' && sig[1] == 'K'))
+        {
+            qDebug() << "Not a valid ZIP/OOXML (PK) signature";
+            return false;
+        }
     }
+
+    // Pre-scan ZIP contents to avoid triggering QXlsx drawing parser on broken files
+    {
+        QXlsx::ZipReader zr(filePath);
+        const auto files = zr.filePaths();
+        bool hasWorkbook = false;
+        bool hasAnyWorksheet = false;
+        for (const QString &p : files)
+        {
+            if (p == QLatin1String("xl/workbook.xml")) hasWorkbook = true;
+            if (p.startsWith(QLatin1String("xl/worksheets/"))) hasAnyWorksheet = true;
+            if (p.startsWith(QLatin1String("xl/drawings/")))
+            {
+                qDebug() << "Workbook contains drawings; skipping to avoid QXlsx debug asserts on malformed anchors";
+                return false;
+            }
+        }
+        if (!hasWorkbook || !hasAnyWorksheet)
+        {
+            qDebug() << "Missing core workbook parts";
+            return false;
+        }
+    }
+
+    QXlsx::Document xlsx (filePath); // Rely on lazy loading; avoid explicit load() to skip drawing parsing on bad files
 
 
     QXlsx::CellRange range = xlsx.dimension ();

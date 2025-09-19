@@ -32,3 +32,14 @@
 [2025-08-30 00:00:00] Integrated application icon: added `resources/icons/PriceTagMangerIcon.jpg` to `resources/resources.qrc` and set app/main window icon via QIcon in `src/main.cpp` - Success
 [2025-08-30 00:15:00] Switched app/window icons to .ico; added Windows resource `resources/windows/app_icon.rc`; wired into `CMakeLists.txt` to embed icon in EXE - Success
 [2025-09-01 00:00:00] Category+Gender+Size row: appended Size from new column; default centered CompanyHeader; improved address wrapping to 2 lines without word loss; removed signature text in Excel/DOCX/Preview - Success
+[2025-09-18 16:45:00] Light theme: added blue vertical gradient for primary button; Dark theme: violet-pink diagonal gradient; Fixed window icon by composing multi-size QIcon - Success
+[2025-09-18 17:00:00] Updated light theme primary gradient to diagonal with lower contrast; added toolbar gear icon (SettingsGear.png) and tag icon on Generate; preferred PNG app icon for titlebar - Success
+[2025-09-18 00:00:00] Limited drag-and-drop to Main tab only; added Statistics charts scaffolding (Qt Charts behind USE_QT_CHARTS) - Success (charts pending CMake enable)
+[
+2025-09-18 17:20:00] Template Editor interactivity: added field overlays with hover/selection highlight, click-to-select sync with style panel, and bottom-right resize handle for tag; updating spin boxes triggers scene rebuild - Success
+[
+2025-09-18 17:28:00] Template Editor UX: Ctrl+mouse wheel zoom; arrow cursor over fields; resize cursors on tag edges/BR corner; safe overlay cleanup preventing segfault - Success
+[2025-09-18 17:45:00] Template Editor: Added per-field text editing via double click and a new Text input in Typography; wired to TagTemplate texts and live preview - Success
+
+[2025-09-19 00:00:00] Fixed QtCharts compile errors: added QT_CHARTS_USE_NAMESPACE in `include/mainwindow.h`, switched member types to `QChartView*`, removed `using namespace QtCharts;` from `src/mainwindow.cpp` - Success
+[2025-09-19 12:00:00] Implemented UI language toggle (EN/RU) with QTranslator and settings persistence; made langButton square (28x28) with 14px spacer to themeButton; changed default export to XLSX by swapping combo items - Success

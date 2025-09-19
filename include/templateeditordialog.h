@@ -2,9 +2,11 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 
-#include "templateeditor.h"
+
+class TemplateEditorWidget;
 
 
 class TemplateEditorDialog: public QDialog
@@ -13,17 +15,7 @@ class TemplateEditorDialog: public QDialog
 
 
 public:
-    explicit TemplateEditorDialog (QWidget *parent = nullptr) :
-        QDialog (parent), editor (new TemplateEditorWidget (this)), buttons (new QDialogButtonBox (QDialogButtonBox::Close, this))
-    {
-        setWindowTitle (tr ("Template Editor"));
-        setModal (true);
-        auto *layout = new QVBoxLayout (this);
-        layout->addWidget (editor, 1);
-        layout->addWidget (buttons, 0);
-        connect (buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-        resize (900, 700);
-    }
+    explicit TemplateEditorDialog (QWidget *parent = nullptr);
 
     TemplateEditorWidget *templateEditor () const { return editor; }
 
@@ -31,4 +23,7 @@ public:
 private:
     TemplateEditorWidget *editor;
     QDialogButtonBox *buttons;
+    QPushButton *saveButton;
+    bool dirty;
+    bool suppressNextDirty;
 };

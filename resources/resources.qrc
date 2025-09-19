@@ -1,9 +1,11 @@
 <!DOCTYPE RCC>
 <RCC>
     <qresource prefix="/">
-        <file>icons/logo.png</file>
-        <file>icons/open.png</file>
-        <file>icons/generate.png</file>
+        <file>icons/SettingsGear.png</file>
+        <file>icons/BlackSettingsGear.png</file>
+        <file>icons/FullBlackSettingsGear.png</file>
+        <file>icons/tag.png</file>
+        <file>icons/PriceTagManagerIcon.png</file>
         <file>icons/PriceTagMangerIcon.jpg</file>
         <file>icons/PriceTagMangerIcon.ico</file>
     </qresource>

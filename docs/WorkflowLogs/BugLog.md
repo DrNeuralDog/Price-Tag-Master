@@ -2,3 +2,7 @@
 [2025-08-09 10:45:00] link error: undefined reference to `TemplateEditorWidget::TemplateEditorWidget(QWidget*)` from `TemplateEditorDialog` - Ensured `src/templateeditor.cpp` is linked via `target_sources` in `CMakeLists.txt`; reconfigure required
 [2025-08-09 10:55:00] runtime crash: opening Template Editor caused crash - Root cause: uninitialized `templateEditorDialog` pointer; Fix: default-initialize to nullptr in `include/mainwindow.h` and guard creation on click - Fixed
 
+
+[2025-09-18 17:25:00] runtime crash: Segmentation Fault in `TemplateEditorWidget::clearInteractiveOverlays()` at `scene->removeItem(it)` on field click - Root cause: removing already-detached QGraphicsItems during scene rebuild - Fixed: null scene checks, safe removal order, and `rebuildScene()` now calls `clearInteractiveOverlays()` before `scene->clear()`; no repro
+
+[2025-09-19 00:00:00] compile error: `'QtCharts' does not name a type` + moc fallout - Root cause: header used `QtCharts::` and later `QT_CHARTS_USE_NAMESPACE` macro (not available in Qt6), causing MOC to fail and `MainWindow` to be undefined - Fix: remove macro usage entirely; include `<QtCharts/QChart>` and keep unqualified types (`QChartView`, `QPieSeries`, etc.) guarded by `#ifdef USE_QT_CHARTS`; remove `using namespace QtCharts;` from cpp - Fixed

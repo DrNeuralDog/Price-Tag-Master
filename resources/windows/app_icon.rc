@@ -1,1 +1,6 @@
-IDI_APP_ICON ICON "../icons/PriceTagMangerIcon.ico"
+// Windows application icon resource
+// If you change the icon file name/path, keep this in sync with resources/icons
+
+IDI_APP_ICON ICON "resources\\icons\\PriceTagMangerIcon.ico"
+
+

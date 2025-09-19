@@ -199,7 +199,13 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
 
             int col = 0, row = 0, tagCols = 0, tagRows = 0;
-            placeTagCellRange (layoutConfig, gridCol + pageIdx * nCols, gridRow, originCol, originRow, col, row, tagCols, tagRows);
+            // Place within page grid (no horizontal page offset). We stack pages vertically.
+            placeTagCellRange (layoutConfig, gridCol, gridRow, originCol, originRow, col, row, tagCols, tagRows);
+
+            // Add separation and vertical paging: one blank Excel row between pages
+            // Compute vertical offset in raw Excel rows: full page height in rows + 1 spacer row
+            const int pageGapRows = 1; // one blank row between pages
+            row += pageIdx * (nRows * tagRows + pageGapRows);
 
             qDebug () << "Creating price tag" << tagIndex << "at position (" << row << "," << col << ")";
 
