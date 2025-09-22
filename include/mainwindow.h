@@ -20,6 +20,7 @@
 #include <QTableWidget>
 #include <QTextEdit>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 #include "configmanager.h"
@@ -62,6 +63,7 @@ protected:
     void dragEnterEvent (QDragEnterEvent *event) override;
     void dropEvent (QDropEvent *event) override;
     void dragLeaveEvent (QDragLeaveEvent *event) override;
+    bool eventFilter (QObject *obj, QEvent *event) override;
 
 
 private slots:
@@ -79,6 +81,7 @@ private:
     QPushButton *themeButton  = nullptr;
     QAction *openEditorAction = nullptr;
     QPushButton *langButton	  = nullptr;
+    QToolButton *gearButton	  = nullptr;
 
     // Main tab
     QLabel *dropArea;

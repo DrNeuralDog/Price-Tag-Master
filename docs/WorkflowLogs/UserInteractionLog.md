@@ -56,3 +56,16 @@
 [2025-09-19 13:00:00] User reported compile error: No member 'setUiLanguage' in MainWindow - Added declaration in header and implementation in cpp - Fixed
 [2025-09-19 14:00:00] User requested full Russian translations for all UI texts - Generated .ts/.qm, added to resources, wrapped remaining strings in tr() - Success
 [2025-09-20 16:05:00] User requested: unify tab sizes (Main/Statistics), align Generate button height to Open, restrict editor resize to top-left tag only, and darken light-theme drop zone - Applied edits in ThemeManager/MainWindow/TemplateEditor - Success
+[2025-09-22 00:00:00] User requested 2mm spacing for toolbar buttons and bottom line - Implemented via QToolBar padding in updateThemeStyles (src/mainwindow.cpp)
+[2025-09-22 00:10:00] User reported buttons still at top - Wrapped theme/lang buttons with 2mm top/bottom margins and added QToolBar QToolButton vertical margins for gear action - Applied in src/mainwindow.cpp
+[2025-09-22 00:20:00] User reported toolbar bottom line disappears on theme toggle - Removed toolbar padding; apply only border-bottom and toolbutton margins in updateThemeStyles - Fixed
+[2025-09-22 00:25:00] User reported gear (template editor) button became too small - Restored min clickable size 28x28 via QToolBar QToolButton min-width/min-height - Fixed
+[2025-09-22 00:35:00] User requested gear icon to match lang size and click area not oversized - Applied exact 28x28 icon and fixed size via widgetForAction(QToolButton), removed extra padding/border on QToolBar QToolButton - Fixed
+[2025-09-22 00:50:00] User requested larger gear icon like before - Cropped transparent margins from PNG and set gear button to 32×32 for parity; icon updated on theme change - Applied
+[2025-09-22 01:05:00] User requested gear icon 1.25× larger than 42px and darker background to match UI - Set 52×52 icon/button and made background transparent to blend with interface - Applied
+[2025-09-22 01:12:00] User reported toolbar/button background mismatch with UI - Set QToolBar background to palette(window) and forced transparent QToolButton background to fully match surrounding UI - Fixed
+[2025-09-22 01:25:00] User requested reduce vertical clickable area and avoid right edge stick - Added toolbar right margin 2mm, wrapped gear button with 1mm top/bottom margins around 52×52, ensured no extra padding - Applied
+[2025-09-22 02:00:00] User reported gear button clickable area exceeds icon bounds - Applied alpha-based mask from icon to QToolButton; hit area now equals icon shape; mask updates on theme change - Success
+[2025-09-22 02:08:00] User reported gear button disappeared after mask - Reverted to normal rectangular hit area (clearMask), kept 52×52 size and cropped icon for visuals - Success
+[2025-09-22 02:15:00] User requested to trim clickable area on sides only - Implemented eventFilter to accept clicks only in central rect (left/right trimmed by 2mm) without using masks - Success
+[2025-09-22 02:25:00] User reported no change with eventFilter - Implemented custom QToolButton overriding hitButton(); trimmed left/right by 4mm in logical DPI; added as toolbar widget bound to action - Success

@@ -6,6 +6,245 @@
 #include <QUrl>
 #include <algorithm>
 #include "excelgenerator.h"
+#include <QToolButton>
+#include <QRegion>
+#include <QBitmap>
+#include <QMouseEvent>
+#include <QResizeEvent>
+#include <QImage>
+#include <QPainter>
+
+// Helper: crop transparent margins around an icon to maximize visible size within given button
+static QPixmap cropTransparentMargins (const QPixmap &src)
+{
+    if (src.isNull ())
+        return src;
+
+    QImage img = src.toImage ().convertToFormat (QImage::Format_ARGB32);
+    const int w = img.width ();
+    const int h = img.height ();
+
+    int minX = w, minY = h, maxX = -1, maxY = -1;
+    for (int y = 0; y < h; ++y)
+    {
+        const QRgb *line = reinterpret_cast<const QRgb *> (img.constScanLine (y));
+        for (int x = 0; x < w; ++x)
+        {
+            if (qAlpha (line[x]) > 0)
+            {
+                if (x < minX)
+                    minX = x;
+                if (x > maxX)
+                    maxX = x;
+                if (y < minY)
+                    minY = y;
+                if (y > maxY)
+                    maxY = y;
+            }
+        }
+    }
+
+    if (maxX < minX || maxY < minY)
+        return src; // fully transparent or invalid
+
+    const QRect rect (minX, minY, maxX - minX + 1, maxY - minY + 1);
+    return QPixmap::fromImage (img.copy (rect));
+}
+
+// ToolButton with horizontally trimmed hit area
+class TrimmedHitToolButton: public QToolButton
+{
+public:
+    explicit TrimmedHitToolButton (QWidget *parent = nullptr) : QToolButton (parent) {}
+    void setHorizontalTrimPx (int px) { horizontalTrimPx = qMax (0, px); }
+    void ensureShields ()
+    {
+        if (! leftShield)
+        {
+            leftShield = new QWidget (this);
+            leftShield->setAttribute (Qt::WA_TransparentForMouseEvents, false);
+            leftShield->setMouseTracking (true);
+            leftShield->installEventFilter (this);
+        }
+        if (! rightShield)
+        {
+            rightShield = new QWidget (this);
+            rightShield->setAttribute (Qt::WA_TransparentForMouseEvents, false);
+            rightShield->setMouseTracking (true);
+            rightShield->installEventFilter (this);
+        }
+    }
+
+protected:
+    bool hitButton (const QPoint &pos) const override
+    {
+        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
+        return allowed.contains (pos);
+    }
+    void mousePressEvent (QMouseEvent *e) override
+    {
+        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
+        if (! allowed.contains (e->pos ()))
+        {
+            e->accept ();
+            return; // swallow press
+        }
+        QToolButton::mousePressEvent (e);
+    }
+    void mouseReleaseEvent (QMouseEvent *e) override
+    {
+        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
+        if (! allowed.contains (e->pos ()))
+        {
+            e->accept ();
+            return; // swallow release
+        }
+        QToolButton::mouseReleaseEvent (e);
+    }
+    void mouseDoubleClickEvent (QMouseEvent *e) override
+    {
+        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
+        if (! allowed.contains (e->pos ()))
+        {
+            e->accept ();
+            return; // swallow dblclick
+        }
+        QToolButton::mouseDoubleClickEvent (e);
+    }
+    void paintEvent (QPaintEvent *event) override
+    {
+        Q_UNUSED (event);
+        QPainter painter (this);
+        painter.setRenderHint (QPainter::SmoothPixmapTransform, true);
+        // draw icon at 95% of button diameter, centered, keep aspect ratio
+        QPixmap pm = icon ().pixmap (iconSize ());
+        if (! pm.isNull ())
+        {
+            const int base = qMin (width (), height ());
+            const int target = qMax (1, qRound (base * 0.88));
+            const QSize targetSize (target, target);
+            const QPixmap scaled = pm.scaled (targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            const int x = (width () - scaled.width ()) / 2;
+            const int y = (height () - scaled.height ()) / 2;
+            painter.drawPixmap (x, y, scaled);
+        }
+    }
+    void resizeEvent (QResizeEvent *e) override
+    {
+        QToolButton::resizeEvent (e);
+        updateShieldsGeometry ();
+    }
+    bool eventFilter (QObject *obj, QEvent *event) override
+    {
+        if (obj == leftShield || obj == rightShield)
+        {
+            switch (event->type ())
+            {
+            case QEvent::MouseButtonPress:
+            case QEvent::MouseButtonRelease:
+            case QEvent::MouseButtonDblClick:
+            case QEvent::HoverEnter:
+            case QEvent::HoverMove:
+            case QEvent::HoverLeave:
+            case QEvent::Wheel:
+                return true; // swallow
+            default:
+                break;
+            }
+        }
+        return QToolButton::eventFilter (obj, event);
+    }
+
+private:
+    int horizontalTrimPx = 0;
+    QWidget *leftShield  = nullptr;
+    QWidget *rightShield = nullptr;
+
+    void updateShieldsGeometry ()
+    {
+        if (horizontalTrimPx <= 0)
+        {
+            if (leftShield)
+                leftShield->setGeometry (0, 0, 0, 0);
+            if (rightShield)
+                rightShield->setGeometry (width (), 0, 0, height ());
+            return;
+        }
+        ensureShields ();
+        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        if (leftShield)
+        {
+            leftShield->setGeometry (0, 0, trim, height ());
+            leftShield->setStyleSheet ("background: transparent;");
+            leftShield->setAttribute (Qt::WA_NoSystemBackground, true);
+        }
+        if (rightShield)
+        {
+            rightShield->setGeometry (width () - trim, 0, trim, height ());
+            rightShield->setStyleSheet ("background: transparent;");
+            rightShield->setAttribute (Qt::WA_NoSystemBackground, true);
+        }
+        if (leftShield)
+            leftShield->raise ();
+        if (rightShield)
+            rightShield->raise ();
+    }
+};
+
+// Build precise clickable region from non-transparent pixels
+static QRegion alphaRegionFromPixmap (const QPixmap &src, int alphaThreshold = 1)
+{
+    if (src.isNull ())
+        return {};
+
+    const QImage img = src.toImage ().convertToFormat (QImage::Format_ARGB32);
+    const int w = img.width ();
+    const int h = img.height ();
+
+    QRegion region;
+    for (int y = 0; y < h; ++y)
+    {
+        const QRgb *line = reinterpret_cast<const QRgb *> (img.constScanLine (y));
+        int x = 0;
+        while (x < w)
+        {
+            while (x < w && qAlpha (line[x]) <= alphaThreshold)
+                ++x;
+            if (x >= w)
+                break;
+            const int start = x;
+            while (x < w && qAlpha (line[x]) > alphaThreshold)
+                ++x;
+            region |= QRegion (start, y, x - start, 1);
+        }
+    }
+
+    return region;
+}
+
+static void applyIconMaskToToolButton (QToolButton *button, const QIcon &icon, const QSize &iconSize)
+{
+    if (! button)
+        return;
+    const QPixmap pm = icon.pixmap (iconSize);
+    const QRegion reg = alphaRegionFromPixmap (pm, 1);
+    if (! reg.isEmpty ())
+        button->setMask (reg);
+}
+
+static void applyCircularMask (QWidget *w)
+{
+    if (! w)
+        return;
+    const QSize s = w->size ();
+    if (s.isEmpty ())
+        return;
+    w->setMask (QRegion (0, 0, s.width (), s.height (), QRegion::Ellipse));
+}
 
 
 MainWindow::MainWindow (QWidget *parent) : QMainWindow (parent)
@@ -54,11 +293,43 @@ void MainWindow::setupUI ()
     setupStatisticsTab ();
 }
 
+bool MainWindow::eventFilter (QObject *obj, QEvent *event)
+{
+    if (obj == gearButton && event && (event->type () == QEvent::MouseButtonPress || event->type () == QEvent::MouseButtonRelease || event->type () == QEvent::MouseButtonDblClick))
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const QPoint pos = static_cast<QMouseEvent *> (event)->position ().toPoint ();
+#else
+        const QPoint pos = static_cast<QMouseEvent *> (event)->pos ();
+#endif
+        // Trim 2mm on left and right from clickable zone
+        const int twoMmPx = qRound (this->logicalDpiX () * 2.0 / 25.4);
+        QRect allowed = gearButton->rect ().adjusted (twoMmPx, 0, -twoMmPx, 0);
+        if (! allowed.contains (pos))
+        {
+            // ignore click outside allowed rect
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter (obj, event);
+}
+
 void MainWindow::setupToolbar ()
 {
     mainToolbar = addToolBar (tr ("Toolbar"));
     mainToolbar->setMovable (false);
     mainToolbar->setIconSize (QSize (20, 20));
+
+    // Keep internal margins zero; we'll offset items by 2mm using wrappers and styles
+    const int twoMmPx = qRound (this->logicalDpiY () * 2.0 / 25.4);
+    mainToolbar->setContentsMargins (0, 0, 0, 0);
+
+    // Left padding ~3mm to shift theme/lang buttons right
+    {
+        QWidget *leftPad = new QWidget (this);
+        leftPad->setFixedWidth (qRound (this->logicalDpiX () * 1.0 / 25.4));
+        mainToolbar->addWidget (leftPad);
+    }
 
     // Theme button (neutral look, rounded)
     themeButton = new QPushButton (this);
@@ -67,7 +338,13 @@ void MainWindow::setupToolbar ()
     themeButton->setMinimumWidth (84);
     themeButton->setText (ThemeManager::currentTheme () == AppTheme::Dark ? tr ("Dark") : tr ("Light"));
     connect (themeButton, &QPushButton::clicked, this, &MainWindow::toggleTheme);
-    mainToolbar->addWidget (themeButton);
+    // Wrap themeButton to enforce 2mm vertical spacing inside toolbar
+    QWidget *themeWrap = new QWidget (this);
+    QVBoxLayout *themeWrapLayout = new QVBoxLayout (themeWrap);
+    themeWrapLayout->setContentsMargins (0, twoMmPx, 0, twoMmPx);
+    themeWrapLayout->setSpacing (0);
+    themeWrapLayout->addWidget (themeButton);
+    mainToolbar->addWidget (themeWrap);
 
     // Fixed spacer between theme and lang (half of lang width: 14px)
     QWidget *langSpacer = new QWidget (this);
@@ -81,14 +358,25 @@ void MainWindow::setupToolbar ()
     uiLanguage = "EN";
     langButton->setText (uiLanguage);
     connect (langButton, &QPushButton::clicked, this, &MainWindow::toggleLanguage);
-    mainToolbar->addWidget (langButton);
+    // Wrap langButton similarly for consistent vertical offset
+    QWidget *langWrap = new QWidget (this);
+    QVBoxLayout *langWrapLayout = new QVBoxLayout (langWrap);
+    langWrapLayout->setContentsMargins (0, twoMmPx, 0, twoMmPx);
+    langWrapLayout->setSpacing (0);
+    langWrapLayout->addWidget (langButton);
+    mainToolbar->addWidget (langWrap);
 
     QWidget *spacer = new QWidget (this);
     spacer->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
     mainToolbar->addWidget (spacer);
 
     const bool isDark	 = (ThemeManager::currentTheme () == AppTheme::Dark);
-    const QIcon gearIcon = isDark ? QIcon (":/icons/SettingsGear.png") : QIcon (":/icons/BlackSettingsGear.png");
+    // Load gear icon and crop transparent margins to keep real visible size large
+    const QPixmap gearPmRaw = (ThemeManager::currentTheme () == AppTheme::Dark)
+                                      ? QPixmap (":/icons/SettingsGear.png")
+                                      : QPixmap (":/icons/BlackSettingsGear.png");
+    const QPixmap gearPmCropped = cropTransparentMargins (gearPmRaw);
+    const QIcon gearIcon (gearPmCropped);
     openEditorAction	 = new QAction (gearIcon, QString (), this);
     connect (openEditorAction, &QAction::triggered, this,
              [this] ()
@@ -121,7 +409,30 @@ void MainWindow::setupToolbar ()
                  templateEditorDialog->activateWindow ();
              });
 
-    mainToolbar->addAction (openEditorAction);
+    // Create custom toolbutton for the action with trimmed horizontal hit area
+    {
+        TrimmedHitToolButton *btn = new TrimmedHitToolButton (this);
+        btn->setDefaultAction (openEditorAction);
+        btn->setAutoRaise (true);
+        btn->setToolButtonStyle (Qt::ToolButtonIconOnly);
+        const int diameter = 25;
+        btn->setFixedSize (diameter, diameter);
+        btn->setIconSize (QSize (diameter, diameter));
+        btn->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+        btn->setCursor (Qt::PointingHandCursor);
+        btn->setStyleSheet ("QToolButton { background: transparent; border: none; padding: 0px; }"
+                            "QToolButton:hover { background: transparent; }");
+        btn->setContentsMargins (0, 0, 0, 0);
+        const int fourMmPx = 0; // disable side trim; use circular mask instead
+        btn->setHorizontalTrimPx (fourMmPx);
+        applyCircularMask (btn);
+        mainToolbar->addWidget (btn);
+        // add right margin ~3mm
+        QWidget *rightPad = new QWidget (this);
+        rightPad->setFixedWidth (qRound (this->logicalDpiX () * 3.0 / 25.4));
+        mainToolbar->addWidget (rightPad);
+        gearButton = btn;
+    }
 }
 
 void MainWindow::setupMainTab ()
@@ -443,7 +754,17 @@ void MainWindow::updateThemeStyles ()
 
     setDropAreaDefaultStyle ();
     if (mainToolbar)
-        mainToolbar->setStyleSheet (QString ("QToolBar { border-bottom: 1px solid %1; } ").arg (borderColor));
+    {
+        const int twoMmPx = qRound (this->logicalDpiY () * 2.0 / 25.4);
+        // Match toolbar background to window; keep only bottom border; buttons have no extra background
+        mainToolbar->setStyleSheet (
+                QString (
+                        "QToolBar { background: palette(window); border: none; border-bottom: 1px solid %1; } "
+                        "QToolBar QToolButton { margin-top: %2px; margin-bottom: %2px; padding: 0px; border: none; background: transparent; } "
+                        "QToolBar QToolButton:hover { background: transparent; } ")
+                        .arg (borderColor)
+                        .arg (twoMmPx));
+    }
 
     // Theme button style + text (neutral, no gradient)
     if (themeButton)
@@ -471,9 +792,19 @@ void MainWindow::updateThemeStyles ()
         langButton->setText (uiLanguage);
     }
 
-    // Editor gear icon per theme
+    // Editor gear icon per theme (use cropped pixmap to maximize visible area)
     if (openEditorAction)
-        openEditorAction->setIcon (isDark ? QIcon (":/icons/SettingsGear.png") : QIcon (":/icons/BlackSettingsGear.png"));
+    {
+        const QPixmap gearPmRaw = isDark ? QPixmap (":/icons/SettingsGear.png") : QPixmap (":/icons/BlackSettingsGear.png");
+        openEditorAction->setIcon (QIcon (cropTransparentMargins (gearPmRaw)));
+        if (gearButton)
+        {
+            const int diameter = 25;
+            gearButton->setFixedSize (diameter, diameter);
+            gearButton->setIconSize (QSize (diameter, diameter));
+            applyCircularMask (gearButton);
+        }
+    }
 
     updateButtonsPrimaryStyles ();
 }
@@ -564,6 +895,8 @@ void MainWindow::dragLeaveEvent (QDragLeaveEvent *event)
 
     setDropAreaDefaultStyle ();
 }
+
+// removed eventFilter override (not used)
 
 
 void MainWindow::applyTemplateToGenerators (const TagTemplate &tpl)

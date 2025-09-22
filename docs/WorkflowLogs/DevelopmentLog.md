@@ -51,3 +51,16 @@
 [2025-09-20 16:12:00] Enforced equal heights for Open/Generate/Refresh buttons per theme (32/34px) in updateButtonsPrimaryStyles - Success
 [2025-09-22 13:05:30] Fixed massive build break on new machine: removed `QT_CHARTS_USE_NAMESPACE` from header, scoped QtCharts to function, and qualified chart view members with `QtCharts::QChartView*`; advise rebuild - Applied
 [2025-09-20 16:18:00] Restored continuous resize for top-left tag (right/bottom/BR), kept non-resizable for others - Success
+[2025-09-22 00:00:00] Adjusted toolbar spacing to exact 2 mm using QToolBar padding (top/bottom) set via DPI-based pixels; buttons and bottom border aligned as requested - Success
+[2025-09-22 00:10:00] Ensured 2mm drop for toolbar items: wrapped theme/lang buttons in 2mm-margin containers; added 2mm top/bottom margin to QToolBar QToolButton (gear) - Success
+[2025-09-22 00:20:00] Fixed disappearing toolbar bottom line on theme toggle by removing toolbar padding and setting only border-bottom + toolbutton margins in updateThemeStyles - Success
+[2025-09-22 00:25:00] Restored template editor gear button size: set QToolBar QToolButton min size to 28×28 so it matches lang button; margins kept at 2mm - Success
+[2025-09-22 00:35:00] Precisely matched gear button to lang button: set QToolButton icon and fixed size to 28×28 via widgetForAction; constrained QToolBar QToolButton padding/border to avoid oversized click area - Success
+[2025-09-22 00:50:00] Increased gear icon to previous visual size: cropped transparent margins and set toolbutton fixed/icon size to 32×32, updated icon on theme switch accordingly - Success
+[2025-09-22 01:05:00] Enlarged gear button/icon to 52×52 (1.25× from 42) and set transparent background to match darker UI shade; vertical toolbar margins unchanged - Success
+[2025-09-22 01:12:00] Unified toolbar background with window color and made toolbuttons fully transparent to eliminate any background tint mismatch; kept 2mm vertical margins - Success
+[2025-09-22 01:25:00] Reduced excessive vertical hit area for gear button by wrapping 52×52 toolbutton in 1mm top/bottom margins; added 2mm toolbar right margin to avoid edge sticking - Success
+[2025-09-22 02:00:00] Constrained gear button hit area strictly to icon using alpha mask in MainWindow; mask reapplied on theme change - Success
+[2025-09-22 02:08:00] Reverted gear button to rectangular hit area to avoid invisibility on toolbar; retained 52×52 sizing and cropped icon - Success
+[2025-09-22 02:15:00] Limited gear button clickable area horizontally by 2mm on both sides via eventFilter; avoided masks for stable visuals - Success
+[2025-09-22 02:25:00] Replaced eventFilter approach with custom toolbutton (override hitButton) trimming 4mm on each side; added as toolbar widget with defaultAction - Success
