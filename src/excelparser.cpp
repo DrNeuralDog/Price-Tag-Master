@@ -26,45 +26,55 @@ bool ExcelParser::parseExcelFile (const QString &filePath, QList<PriceTag> &pric
 
     // Quick ZIP signature check to reject non-OOXML before QXlsx touches it (avoids debug asserts)
     {
-        QFile f(filePath);
-        if (!f.open(QIODevice::ReadOnly))
+        QFile f (filePath);
+        if (! f.open (QIODevice::ReadOnly))
         {
-            qDebug() << "Cannot open file for read:" << filePath;
+            qDebug () << "Cannot open file for read:" << filePath;
+
             return false;
         }
-        QByteArray sig = f.read(4);
-        f.close();
-        if (sig.size() != 4 || !(sig[0] == 'P' && sig[1] == 'K'))
+
+        QByteArray sig = f.read (4);
+        f.close ();
+        if (sig.size () != 4 || ! (sig[0] == 'P' && sig[1] == 'K'))
         {
-            qDebug() << "Not a valid ZIP/OOXML (PK) signature";
+            qDebug () << "Not a valid ZIP/OOXML (PK) signature";
+
             return false;
         }
     }
 
     // Pre-scan ZIP contents to avoid triggering QXlsx drawing parser on broken files
     {
-        QXlsx::ZipReader zr(filePath);
-        const auto files = zr.filePaths();
-        bool hasWorkbook = false;
+        QXlsx::ZipReader zr (filePath);
+        const auto files	 = zr.filePaths ();
+        bool hasWorkbook	 = false;
         bool hasAnyWorksheet = false;
+
         for (const QString &p : files)
         {
-            if (p == QLatin1String("xl/workbook.xml")) hasWorkbook = true;
-            if (p.startsWith(QLatin1String("xl/worksheets/"))) hasAnyWorksheet = true;
-            if (p.startsWith(QLatin1String("xl/drawings/")))
+            if (p == QLatin1String ("xl/workbook.xml"))
+                hasWorkbook = true;
+            if (p.startsWith (QLatin1String ("xl/worksheets/")))
+                hasAnyWorksheet = true;
+            if (p.startsWith (QLatin1String ("xl/drawings/")))
             {
-                qDebug() << "Workbook contains drawings; skipping to avoid QXlsx debug asserts on malformed anchors";
+                qDebug () << "Workbook contains drawings; skipping to avoid QXlsx debug asserts on malformed anchors";
+
                 return false;
             }
         }
-        if (!hasWorkbook || !hasAnyWorksheet)
+
+        if (! hasWorkbook || ! hasAnyWorksheet)
         {
-            qDebug() << "Missing core workbook parts";
+            qDebug () << "Missing core workbook parts";
+
             return false;
         }
     }
 
-    QXlsx::Document xlsx (filePath); // Rely on lazy loading; avoid explicit load() to skip drawing parsing on bad files
+    // Rely on lazy loading; avoid explicit load() to skip drawing parsing on bad files
+    QXlsx::Document xlsx (filePath);
 
 
     QXlsx::CellRange range = xlsx.dimension ();
@@ -101,6 +111,7 @@ bool ExcelParser::parseExcelFile (const QString &filePath, QList<PriceTag> &pric
             if (validatePriceTag (priceTag))
             {
                 priceTags.append (priceTag);
+
                 qDebug () << "Added price tag:" << priceTag.getBrand () << priceTag.getCategory () << "Price:" << priceTag.getPrice ();
             }
         }
@@ -117,8 +128,6 @@ QString ExcelParser::normalizeText (const QString &text)
     QString normalized = text;
 
     normalized = normalized.simplified ();
-
-
     normalized = normalized.remove (QRegularExpression ("^[\"']+|[\"']+$"));
 
 
@@ -128,9 +137,7 @@ QString ExcelParser::normalizeText (const QString &text)
         QString decoded	 = QString::fromLocal8Bit (bytes);
 
         if (! decoded.contains (QRegularExpression ("[\\x80-\\xFF]")))
-        {
             normalized = decoded;
-        }
     }
 
 
@@ -192,8 +199,10 @@ bool ExcelParser::findHeaders (QXlsx::Document *xlsx, const QXlsx::CellRange &ra
                     if (normalizedCellText.contains (QRegularExpression ("[\\x80-\\xFF]")))
                     {
                         qDebug () << "Contains encoding issues, trying to fix...";
+
                         QByteArray bytes = cellText.toLocal8Bit ();
                         QString decoded	 = QString::fromLocal8Bit (bytes);
+
                         qDebug () << "Decoded:" << decoded;
                     }
                 }
@@ -206,6 +215,7 @@ bool ExcelParser::findHeaders (QXlsx::Document *xlsx, const QXlsx::CellRange &ra
                     if (normalizedCellText.compare (expectedHeader, Qt::CaseInsensitive) == 0)
                     {
                         *(it.value ()) = col;
+
                         qDebug () << "Found header '" << expectedHeader << "' at row" << row << "column" << col;
 
                         break;
@@ -245,9 +255,7 @@ int ExcelParser::findMaxDataRow (QXlsx::Document *xlsx, const QXlsx::CellRange &
             QVariant cellValue = xlsx->read (row, mapping.nameColumn);
 
             if (cellValue.isValid () && ! cellValue.toString ().trimmed ().isEmpty ())
-            {
                 hasData = true;
-            }
         }
 
         if (mapping.priceColumn > 0)
@@ -255,15 +263,11 @@ int ExcelParser::findMaxDataRow (QXlsx::Document *xlsx, const QXlsx::CellRange &
             QVariant cellValue = xlsx->read (row, mapping.priceColumn);
 
             if (cellValue.isValid () && ! cellValue.toString ().trimmed ().isEmpty ())
-            {
                 hasData = true;
-            }
         }
 
         if (hasData)
-        {
             maxRow = row;
-        }
     }
 
     qDebug () << "Max data row found:" << maxRow;
@@ -301,7 +305,9 @@ bool ExcelParser::parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapp
             {
                 priceStr.remove (QRegularExpression ("[^0-9.,]"));
                 priceStr.replace (",", ".");
+
                 double price = priceStr.toDouble ();
+
                 if (price > 0)
                 {
                     priceTag.setPrice (price);
@@ -520,35 +526,4 @@ bool ExcelParser::validatePriceTag (const PriceTag &priceTag)
 
 
     return true;
-}
-
-
-bool ExcelParser::extractXlsxFile (const QString &filePath, const QString &extractDir)
-{
-    // Этот метод больше не используется
-    return false;
-}
-
-bool ExcelParser::parseSharedStrings (const QString &sharedStringsPath, QMap<int, QString> &sharedStrings)
-{
-    // Этот метод больше не используется
-    return false;
-}
-
-bool ExcelParser::parseWorksheet (const QString &worksheetPath, QMap<int, QString> &sharedStrings, QList<PriceTag> &priceTags)
-{
-    // Этот метод больше не используется
-    return false;
-}
-
-QString ExcelParser::getColumnValue (const QString &cellRef)
-{
-    // Этот метод больше не используется
-    return QString ();
-}
-
-QString ExcelParser::getColumnLetter (int columnIndex)
-{
-    // Этот метод больше не используется
-    return QString ();
 }

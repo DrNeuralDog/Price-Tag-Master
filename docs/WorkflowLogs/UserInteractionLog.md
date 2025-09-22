@@ -2,6 +2,11 @@
 [2025-08-08 00:10:00] User requested structured CR creation (Qt C++ project) - CR created in docs/CR.md
 [2025-08-08 00:20:00] User requested base project documentation - Implementation, structure, and UI/UX docs created; task checklist updated
 
+[2025-09-20 15:05:00] User asked to revert tab font weight in Light theme; keep only color tweaks - Applied: removed bold from QTabBar::tab (light), retained updated color tokens
+[2025-09-20 15:12:00] User requested stronger visual emphasis in Light theme - Applied: added input focus/hover states, stronger selected/hover tabs, GroupBox title accent, scrollbar hover, button focus border
+[2025-09-20 15:18:00] User asked to emphasize drag-and-drop area - Applied: thicker dashed border (3px), larger radius (14px), light gradient background; hover/success preserved
+[2025-09-20 15:25:00] User requested rollback of drop area visuals with darker gray border and brighter gray fill - Applied: reverted size/radius; border to #CBD5E1, fill to #F1F5F9; kept hover/success colors
+[2025-09-20 14:51:00] User reported build failure (QtCharts types + drag/drop API). Applied namespace macro and Qt5/Qt6 DnD fix; pending rebuild - Changes applied
 [2025-08-08 00:30:00] User requested Light/Dark UI design deliverables for Figma - Created tokens and spec files (docs/Figma_Tokens_LightDark.json, docs/Figma_Spec_LightDark.md)
 
 [2025-08-08 00:40:00] User asked for Figma import instructions - Step-by-step guide provided
@@ -9,6 +14,7 @@
 [2025-08-08 00:45:00] User requested alternative (non-Figma) design preview - Added offline HTML preview at docs/DesignPreview/index.html
 
 [2025-09-19 00:00:00] User reported QtCharts compile errors (QtCharts namespace/types) in `mainwindow` - Revised fix: removed `QT_CHARTS_USE_NAMESPACE` (Qt6), added `<QtCharts/QChart>`, kept unqualified chart types, removed `using namespace QtCharts` - Success
+[2025-09-22 13:05:00] User reported 200+ build errors after project move - Applied fix: removed `QT_CHARTS_USE_NAMESPACE` usage in `include/mainwindow.h`, added `QtCharts::` qualifiers for member types, limited `using namespace QtCharts` to `updateCharts()`; awaiting rebuild - Pending
 
 [2025-09-19 00:02:00] Requested permission to commit QtCharts fix to git - Pending
 [2025-08-30 00:00:00] User asked to auto-apply new app icon `@PriceTagMangerIcon.jpg` - Implemented: resource added to `resources/resources.qrc`, app/window icon set in `src/main.cpp`; build skipped by user
@@ -49,3 +55,4 @@
 [2025-09-19 12:00:00] User requested language switching mechanism, square rounded lang button with spacing, and default export to Excel - Implemented via code edits; language dynamic switch suggests restart - Success
 [2025-09-19 13:00:00] User reported compile error: No member 'setUiLanguage' in MainWindow - Added declaration in header and implementation in cpp - Fixed
 [2025-09-19 14:00:00] User requested full Russian translations for all UI texts - Generated .ts/.qm, added to resources, wrapped remaining strings in tr() - Success
+[2025-09-20 16:05:00] User requested: unify tab sizes (Main/Statistics), align Generate button height to Open, restrict editor resize to top-left tag only, and darken light-theme drop zone - Applied edits in ThemeManager/MainWindow/TemplateEditor - Success

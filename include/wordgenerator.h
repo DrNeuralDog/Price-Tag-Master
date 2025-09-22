@@ -11,16 +11,17 @@
 
 class WordGenerator: public QObject
 {
-    Q_OBJECT //
+    Q_OBJECT
 
 
-            public: explicit WordGenerator (QObject *parent = nullptr);
+public:
+    explicit WordGenerator (QObject *parent = nullptr);
     ~WordGenerator ();
 
 
+    // Small tag size to fit multiple per row on A4
     struct DocxLayoutConfig
     {
-        // Small tag size to fit multiple per row on A4
         double tagWidthMm	  = 38.0;
         double tagHeightMm	  = 28.0;
         double marginLeftMm	  = 8.0;

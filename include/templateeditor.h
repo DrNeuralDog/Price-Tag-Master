@@ -1,20 +1,20 @@
 #pragma once
 
+#include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFontComboBox>
 #include <QFormLayout>
+#include <QGraphicsRectItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QGraphicsRectItem>
 #include <QGroupBox>
-#include <QFontComboBox>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QCheckBox>
-#include <QSlider>
+#include <QMap>
 #include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
 #include <QSplitter>
 #include <QWidget>
-#include <QMap>
 
 #include "tagtemplate.h"
 
@@ -38,33 +38,6 @@ public:
     // Localization
     void applyLanguage (const QString &lang);
 
-signals:
-    void templateChanged (const TagTemplate &tpl);
-
-
-private slots:
-    void onParametersChanged ();
-
-
-private:
-    void initializeUi ();
-    void rebuildScene ();
-    void drawGrid ();
-    void drawTagAtMm (double xMm, double yMm, double tagWMm, double tagHMm, bool buildInteractive = false);
-    void fitPageInView ();
-    void setZoomPercent (int percent);
-
-    static double mmToPx (double mm);
-    static double ptToMm (double pt) { return pt * 25.4 / 72.0; }
-
-    // Interactive helpers
-    void clearInteractiveOverlays ();
-    void buildInteractiveOverlays (const QRectF &tagPxRect,
-                                   const double gridX[5],
-                                   const double gridY[13]);
-    void selectField (TagField field);
-    int  findFieldIndexInCombo (TagField field) const;
-
 
 private:
     // Scene/View
@@ -82,9 +55,9 @@ private:
     QDoubleSpinBox *spinSpacingV;
 
     // Group boxes and forms for relabeling
-    QGroupBox *fieldBox = nullptr;
-    QGroupBox *geomBox = nullptr;
-    QGroupBox *typoBox = nullptr;
+    QGroupBox *fieldBox	  = nullptr;
+    QGroupBox *geomBox	  = nullptr;
+    QGroupBox *typoBox	  = nullptr;
     QFormLayout *geomForm = nullptr;
     QFormLayout *typoForm = nullptr;
 
@@ -96,7 +69,7 @@ private:
     QCheckBox *italicCheck;
     QCheckBox *strikeCheck;
     QComboBox *alignBox;
-    QLineEdit *textEdit; // live text editor for selected field
+    QLineEdit *textEdit;
 
     // Zoom controls
     QSlider *zoomSlider;
@@ -104,7 +77,8 @@ private:
     QPushButton *btnZoomIn;
     QPushButton *btnFitPage;
 
-    TagTemplate templateModel; // current template state
+    // current template state
+    TagTemplate templateModel;
     QString currentLanguage = "EN";
 
     // Constants (A4 Portrait)
@@ -112,22 +86,50 @@ private:
     const double pageHeightMm = 297.0;
 
     // Interactive state
-    QList<QGraphicsRectItem *> fieldOverlays;        // clickable/hoverable rects
-    QMap<QGraphicsRectItem *, TagField> overlayMap;  // overlay -> field
-    QGraphicsRectItem *selectedOverlay = nullptr;    // current selection
-    QGraphicsRectItem *hoveredOverlay  = nullptr;    // current hover
-    QGraphicsRectItem *resizeHandle    = nullptr;    // bottom-right tag handle
-    QGraphicsRectItem *resizePreview   = nullptr;    // rubber-band preview while dragging
-    QRectF firstTagPxRect;                           // cached rect of interactive tag
+    QList<QGraphicsRectItem *> fieldOverlays;		// clickable/hoverable rects
+    QMap<QGraphicsRectItem *, TagField> overlayMap; // overlay -> field
+    QGraphicsRectItem *selectedOverlay = nullptr;	// current selection
+    QGraphicsRectItem *hoveredOverlay  = nullptr;	// current hover
+    QGraphicsRectItem *resizeHandle	   = nullptr;	// bottom-right tag handle
+    QGraphicsRectItem *resizePreview   = nullptr;	// rubber-band preview while dragging
+    QRectF firstTagPxRect;							// cached rect of interactive tag
     bool resizing = false;
     QPointF resizeStartScenePos;
     double originalTagWidthMm  = 0.0;
     double originalTagHeightMm = 0.0;
-    QGraphicsItem *pageItem            = nullptr;    // page shape for fitting (rounded)
-    bool initialFitDone = false;                     // fit only once on first render
+    QGraphicsItem *pageItem	   = nullptr;
+    bool initialFitDone		   = false;
+
+
+    void initializeUi ();
+    void rebuildScene ();
+    void drawGrid ();
+    void drawTagAtMm (double xMm, double yMm, double tagWMm, double tagHMm, bool buildInteractive = false);
+    void fitPageInView ();
+    void setZoomPercent (int percent);
+
+    static double mmToPx (double mm);
+    static double ptToMm (double pt) { return pt * 25.4 / 72.0; }
+
+    // Interactive helpers:
+    void clearInteractiveOverlays ();
+    void buildInteractiveOverlays (const QRectF &tagPxRect, const double gridX[5], const double gridY[12]);
+    void selectField (TagField field);
+
+    // fit only once on first render
+    int findFieldIndexInCombo (TagField field) const;
+
 
 protected:
     void resizeEvent (QResizeEvent *event) override;
     void showEvent (QShowEvent *event) override;
     bool eventFilter (QObject *obj, QEvent *ev) override;
+
+
+signals:
+    void templateChanged (const TagTemplate &tpl);
+
+
+private slots:
+    void onParametersChanged ();
 };

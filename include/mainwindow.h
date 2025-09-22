@@ -3,8 +3,8 @@
 #include <QAction>
 #include <QComboBox>
 #include <QDragEnterEvent>
-#include <QDropEvent>
 #include <QDragLeaveEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -22,36 +22,40 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
+#include "configmanager.h"
 #include "excelgenerator.h"
 #include "excelparser.h"
 #include "pricetag.h"
 #include "templateeditor.h"
 #include "templateeditordialog.h"
 #include "thememanager.h"
-#include "configmanager.h"
 #include "wordgenerator.h"
 
 #ifdef USE_QT_CHARTS
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
 #include <QtCharts/QChart>
 #include <QtCharts/QChartView>
 #include <QtCharts/QPieSeries>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
 #endif
 
 
 class MainWindow: public QMainWindow
 {
-    Q_OBJECT //
+    Q_OBJECT
 
 
-            public: explicit MainWindow (QWidget *parent = nullptr);
+public:
+    explicit MainWindow (QWidget *parent = nullptr);
     ~MainWindow () override;
 
-    void setUiLanguage(const QString& lang); // Added for initial language setup
-    QString localized(const QString &english, const QString &russian) const; // Manual bilingual texts
+    // For initial language setup
+    void setUiLanguage (const QString &lang);
+
+    // Manual bilingual texts
+    QString localized (const QString &english, const QString &russian) const;
 
 
 protected:
@@ -64,40 +68,17 @@ private slots:
     void openFile ();
     void generateDocument ();
     void processFile (const QString &filePath);
-    void updatePreview ();
     void showStatistics ();
 
 
 private:
-    void setupUI ();
-    void setupMainTab ();
-    void setupPreviewTab (); // no-op (legacy)
-    void setupStatisticsTab ();
-    void setupToolbar ();
-    void updateStatistics ();
-    void updateCharts ();
-    void toggleTheme ();
-    void updateThemeStyles ();
-    QString buildPrimaryButtonStyle (bool isDark) const;
-    void updateButtonsPrimaryStyles ();
-    void applyTemplateToGenerators (const TagTemplate &tpl);
-
-    // Language helpers
-    void updateLanguageTexts ();
-    void toggleLanguage ();
-
-    // Drop area styles
-    void setDropAreaDefaultStyle ();
-    void setDropAreaHoverStyle ();
-    void setDropAreaSuccessStyle ();
-
     QWidget *centralWidget;
     QTabWidget *tabWidget;
     QToolBar *mainToolbar;
     QAction *toggleThemeAction;
-    QPushButton *themeButton = nullptr;
+    QPushButton *themeButton  = nullptr;
     QAction *openEditorAction = nullptr;
-    QPushButton *langButton = nullptr;
+    QPushButton *langButton	  = nullptr;
 
     // Main tab
     QLabel *dropArea;
@@ -105,19 +86,10 @@ private:
     QPushButton *generateButton;
     QProgressBar *progressBar;
 
-
-    TemplateEditorDialog *templateEditorDialog = nullptr; // dialog instance
+    TemplateEditorDialog *templateEditorDialog = nullptr;
 
     QTextEdit *statisticsText;
     QPushButton *refreshStatsButton;
-
-#ifdef USE_QT_CHARTS
-    QWidget *chartsContainer = nullptr;
-    QHBoxLayout *chartsLayout = nullptr;
-    QChartView *brandChartView = nullptr;
-    QChartView *categoryChartView = nullptr;
-    QChartView *summaryBarChartView = nullptr;
-#endif
 
     QString currentFilePath;
     ExcelParser *excelParser;
@@ -128,8 +100,43 @@ private:
 
     QSettings settings;
 
-    TagTemplate currentTemplate; // last template from editor
+    TagTemplate currentTemplate;
 
-    // UI language: "EN" or "RU"
+    // UI language "EN" or "RU"
     QString uiLanguage = "EN";
+
+
+#ifdef USE_QT_CHARTS
+    QWidget *chartsContainer		= nullptr;
+    QHBoxLayout *chartsLayout		= nullptr;
+    QChartView *brandChartView		= nullptr;
+    QChartView *categoryChartView	= nullptr;
+    QChartView *summaryBarChartView = nullptr;
+#endif
+
+
+    void setupUI ();
+    void setupMainTab ();
+    void setupStatisticsTab ();
+    void setupToolbar ();
+
+    void updateStatistics ();
+    void updateCharts ();
+    void updateThemeStyles ();
+    void updateButtonsPrimaryStyles ();
+
+    void toggleTheme ();
+
+    void applyTemplateToGenerators (const TagTemplate &tpl);
+
+    QString buildPrimaryButtonStyle (bool isDark) const;
+
+    // Language helpers:
+    void updateLanguageTexts ();
+    void toggleLanguage ();
+
+    // Drop area styles:
+    void setDropAreaDefaultStyle ();
+    void setDropAreaHoverStyle ();
+    void setDropAreaSuccessStyle ();
 };

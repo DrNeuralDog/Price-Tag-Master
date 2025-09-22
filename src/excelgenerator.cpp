@@ -14,13 +14,12 @@ ExcelGenerator::ExcelGenerator (QObject *parent) : QObject (parent) {}
 ExcelGenerator::~ExcelGenerator () {}
 
 
+const double points = 2.834645669; // Excel row height is in points (1/72 inch). 1 mm = 2.83465 points
+
+
 static double mmToExcelColumnWidth (double mm) { return mm / 2.4; }
 
-// Excel row height is in points (1/72 inch). 1 mm = 2.83465 points
-static double mmToRowHeightPt (double mm)
-{
-    return mm * 2.834645669; // points
-}
+static double mmToRowHeightPt (double mm) { return mm * points; }
 
 static void computeGrid (const ExcelGenerator::ExcelLayoutConfig &cfg, int &nCols, int &nRows)
 {
@@ -37,7 +36,7 @@ static void placeTagCellRange (const ExcelGenerator::ExcelLayoutConfig &cfg, int
                                int &startCol, int &startRow, int &tagCols, int &tagRows)
 {
     tagCols = 4;
-    tagRows = 12;
+    tagRows = 11; // signature row removed
 
     startCol = originCol + gridCol * tagCols;
     startRow = originRow + gridRow * tagRows;
@@ -62,18 +61,19 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
     const double spacerHrow = mmToRowHeightPt (layoutConfig.spacingVMm);
 
 
-    const TagTextStyle stCompany   = tagTemplate.styleOrDefault (TagField::CompanyHeader);
-    const TagTextStyle stBrand     = tagTemplate.styleOrDefault (TagField::Brand);
-    const TagTextStyle stCategory  = tagTemplate.styleOrDefault (TagField::CategoryGender);
-    const TagTextStyle stBrandC    = tagTemplate.styleOrDefault (TagField::BrandCountry);
-    const TagTextStyle stManuf     = tagTemplate.styleOrDefault (TagField::ManufacturingPlace);
-    const TagTextStyle stMatLab    = tagTemplate.styleOrDefault (TagField::MaterialLabel);
-    const TagTextStyle stMatVal    = tagTemplate.styleOrDefault (TagField::MaterialValue);
-    const TagTextStyle stArtLab    = tagTemplate.styleOrDefault (TagField::ArticleLabel);
-    const TagTextStyle stArtVal    = tagTemplate.styleOrDefault (TagField::ArticleValue);
-    const TagTextStyle stPriceL    = tagTemplate.styleOrDefault (TagField::PriceLeft);
-    const TagTextStyle stPriceR    = tagTemplate.styleOrDefault (TagField::PriceRight);
-    const TagTextStyle stSign      = tagTemplate.styleOrDefault (TagField::Signature);
+    const TagTextStyle stCompany  = tagTemplate.styleOrDefault (TagField::CompanyHeader);
+    const TagTextStyle stBrand	  = tagTemplate.styleOrDefault (TagField::Brand);
+    const TagTextStyle stCategory = tagTemplate.styleOrDefault (TagField::CategoryGender);
+    const TagTextStyle stBrandC	  = tagTemplate.styleOrDefault (TagField::BrandCountry);
+    const TagTextStyle stManuf	  = tagTemplate.styleOrDefault (TagField::ManufacturingPlace);
+    const TagTextStyle stMatLab	  = tagTemplate.styleOrDefault (TagField::MaterialLabel);
+    const TagTextStyle stMatVal	  = tagTemplate.styleOrDefault (TagField::MaterialValue);
+    const TagTextStyle stArtLab	  = tagTemplate.styleOrDefault (TagField::ArticleLabel);
+    const TagTextStyle stArtVal	  = tagTemplate.styleOrDefault (TagField::ArticleValue);
+    const TagTextStyle stPriceL	  = tagTemplate.styleOrDefault (TagField::PriceLeft);
+    const TagTextStyle stPriceR	  = tagTemplate.styleOrDefault (TagField::PriceRight);
+
+    // Signature row removed per latest requirements
     const TagTextStyle stSupplierL = tagTemplate.styleOrDefault (TagField::SupplierLabel);
     const TagTextStyle stSupplierV = tagTemplate.styleOrDefault (TagField::SupplierValue);
     const TagTextStyle stAddress   = tagTemplate.styleOrDefault (TagField::Address);
@@ -95,9 +95,12 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
     {
         switch (a)
         {
-        case TagTextAlign::Left: return QXlsx::Format::AlignLeft;
-        case TagTextAlign::Center: return QXlsx::Format::AlignHCenter;
-        case TagTextAlign::Right: return QXlsx::Format::AlignRight;
+            case TagTextAlign::Left:
+                return QXlsx::Format::AlignLeft;
+            case TagTextAlign::Center:
+                return QXlsx::Format::AlignHCenter;
+            case TagTextAlign::Right:
+                return QXlsx::Format::AlignRight;
         }
         return QXlsx::Format::AlignLeft;
     };
@@ -150,12 +153,12 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
     QXlsx::Format strikePriceFormat;
     applyStyle (strikePriceFormat, stPriceL, halignFrom (stPriceL.align));
     strikePriceFormat.setFontStrikeOut (true);
+
     // Draw a diagonal slash across the cell to visually cross the old price when two prices are present
     strikePriceFormat.setDiagonalBorderStyle (QXlsx::Format::BorderThin);
     strikePriceFormat.setDiagonalBorderType (QXlsx::Format::DiagonalBorderUp);
 
-    QXlsx::Format signatureFormat;
-    applyStyle (signatureFormat, stSign, halignFrom (stSign.align));
+    // (no signatureFormat)
 
     QXlsx::Format supplierFormat;
     applyStyle (supplierFormat, stSupplierL, halignFrom (stSupplierL.align));
@@ -218,7 +221,8 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             xlsx.setColumnWidth (col + 3, 3.43);
 
 
-            const double rhPts[12] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 10.50, 13.50, 9.75, 9.75};
+            // 11 rows now (removed empty signature row between price and supplier)
+            const double rhPts[11] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 13.50, 9.75, 9.75};
             for (int r = 0; r < tagRows; ++r)
                 xlsx.setRowHeight (row + r, rhPts[r]);
 
@@ -308,20 +312,13 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
                 xlsx.write (row + 7, col + 1, QString::number (tag.getPrice ()) + " =", fmtRight);
             }
 
-
-            {
-                const QXlsx::Format fmt = withOuterEdges (signatureFormat, true, true, false, false);
-                xlsx.mergeCells (QXlsx::CellRange (row + 8, col, row + 8, col + tagCols - 1), fmt);
-                xlsx.write (row + 8, col, "", fmt);
-            }
-
-
+            // Supplier row moves up by one (was row+9)
             {
                 const QXlsx::Format fmtLeft	 = withOuterEdges (supplierFormat, true, false, false, false);
                 const QXlsx::Format fmtRight = withOuterEdges (supplierFormat, false, true, false, false);
-                xlsx.write (row + 9, col, "Поставщик:", fmtLeft);
-                xlsx.mergeCells (QXlsx::CellRange (row + 9, col + 1, row + 9, col + tagCols - 1), fmtRight);
-                xlsx.write (row + 9, col + 1, tag.getSupplier (), fmtRight);
+                xlsx.write (row + 8, col, "Поставщик:", fmtLeft);
+                xlsx.mergeCells (QXlsx::CellRange (row + 8, col + 1, row + 8, col + tagCols - 1), fmtRight);
+                xlsx.write (row + 8, col + 1, tag.getSupplier (), fmtRight);
             }
 
 
@@ -331,6 +328,7 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             QStringList words			= addressText.split (' ', Qt::SkipEmptyParts);
 			QString line1, line2;
 			int iWord = 0;
+
 			while (iWord < words.size ())
 			{
                 const QString &w   = words[iWord];
@@ -351,6 +349,7 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
                     break;
                 }
 			}
+
 			while (iWord < words.size ())
 			{
                 const QString &w   = words[iWord];
@@ -376,16 +375,16 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 			{
 				const QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, false);
 
-				xlsx.mergeCells (QXlsx::CellRange (row + 10, col, row + 10, col + tagCols - 1), fmt);
-				xlsx.write (row + 10, col, line1, fmt);
+                xlsx.mergeCells (QXlsx::CellRange (row + 9, col, row + 9, col + tagCols - 1), fmt);
+                xlsx.write (row + 9, col, line1, fmt);
 			}
 
 
 			{
 				const QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, true);
 
-				xlsx.mergeCells (QXlsx::CellRange (row + 11, col, row + 11, col + tagCols - 1), fmt);
-				xlsx.write (row + 11, col, line2, fmt);
+                xlsx.mergeCells (QXlsx::CellRange (row + 10, col, row + 10, col + tagCols - 1), fmt);
+                xlsx.write (row + 10, col, line2, fmt);
 			}
 
 
@@ -403,8 +402,9 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
         xlsx.defineName ("_xlnm.Print_Area", printArea);
     }
 
-    qDebug () << "Saving Excel document to:" << outputPath;
     bool result = xlsx.saveAs (outputPath);
+
+    qDebug () << "Saving Excel document to:" << outputPath;
     qDebug () << "Save result:" << result;
 
 

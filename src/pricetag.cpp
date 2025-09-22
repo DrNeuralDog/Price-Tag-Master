@@ -1,9 +1,11 @@
 #include "pricetag.h"
 
+
 PriceTag::PriceTag () : price (0.0), quantity (0), price2 (0.0) {}
 
-PriceTag::PriceTag (const QString &name, const QString &description, double price, int quantity) : name (name), description (description),
-    price (price), quantity (quantity), price2 (0.0) {}
+PriceTag::PriceTag (const QString &name, const QString &description, double price, int quantity) :
+    name (name), description (description), price (price), quantity (quantity), price2 (0.0)
+{}
 
 
 QString PriceTag::getName () const { return name; }
@@ -76,12 +78,16 @@ QString PriceTag::getAdditionalData2 () const { return additionalData2; }
 void PriceTag::setAdditionalData2 (const QString &data) { this->additionalData2 = data; }
 
 
+// Service methods:
 QString PriceTag::getFormattedCategory () const
 {
-    if (category.isEmpty ()) { return QString (); }
+    if (category.isEmpty ())
+        return QString ();
 
 
-    if (category.length () <= 12 && ! gender.isEmpty ()) { return category + " " + gender; }
+    if (category.length () <= 12 && ! gender.isEmpty ())
+        return category + " " + gender;
+
 
     return category;
 }

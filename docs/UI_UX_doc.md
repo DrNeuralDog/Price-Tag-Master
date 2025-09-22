@@ -6,6 +6,17 @@
 
 ## Design System
 - Themes: Light and Dark; toggle in `MainWindow` toolbar/menu.
+- Light theme tokens (updated):
+  - Canvas `#F8FAFC`, Surface `#FFFFFF`, Subtle `#F1F5F9/#F3F7FF`
+  - Text `#0F172A`
+  - Border `#E2E8F0` (neutral), Emphasis `#CBD5E1`
+  - Primary accent `#2563EB` (blue-600); success `#22C55E` (green-500)
+  - Primary gradient (buttons): `#2563EB → #22C55E` (hover `#1D4ED8 → #16A34A`)
+  - Focus/selection: palette Highlight `#2563EB`
+  - Inputs focus: border `#2563EB`, background `#EEF2FF`
+  - Tabs: hover `#F3F7FF`, selected border `#2563EB`
+  - GroupBox title color `#2563EB`
+- Drop area (Main): default border 2px dashed `#CBD5E1`, hover `#2563EB`, success `#10B981`; radius 12px; default canvas `#F1F5F9`
 - Colors: Follow Qt palette for widgets; ensure contrast for disabled states (AC-6).
 - Typography: Default system sans-serif; font family/size configurable per template field.
 - Spacing: Use mm for geometry; maintain consistent paddings within tags.

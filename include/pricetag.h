@@ -10,7 +10,7 @@ public:
     PriceTag ();
     PriceTag (const QString &name, const QString &description, double price, int quantity);
 
-    // Main fields:
+    // Filling main fields:
     QString getName () const;
     void setName (const QString &name);
 
@@ -61,6 +61,7 @@ public:
 
     QString getAdditionalData2 () const;
     void setAdditionalData2 (const QString &data);
+
 
     // Service methods:
     QString getFormattedCategory () const;

@@ -17,10 +17,11 @@
 
 class ExcelParser: public QObject
 {
-    Q_OBJECT //
+    Q_OBJECT
 
 
-            public: explicit ExcelParser (QObject *parent = nullptr);
+public:
+    explicit ExcelParser (QObject *parent = nullptr);
     ~ExcelParser ();
 
     bool parseExcelFile (const QString &filePath, QList<PriceTag> &priceTags);
@@ -48,16 +49,11 @@ private:
 
     bool findHeaders (QXlsx::Document *xlsx, const QXlsx::CellRange &range, ColumnMapping &mapping);
     int findMaxDataRow (QXlsx::Document *xlsx, const QXlsx::CellRange &range, const ColumnMapping &mapping);
+
     bool parseDataRow (QXlsx::Document *xlsx, int row, const ColumnMapping &mapping, QString &currentSupplier, QString &currentAddress,
                        PriceTag &priceTag);
 
     bool validatePriceTag (const PriceTag &priceTag);
 
     QString normalizeText (const QString &text);
-
-    bool extractXlsxFile (const QString &filePath, const QString &extractDir);
-    bool parseSharedStrings (const QString &sharedStringsPath, QMap<int, QString> &sharedStrings);
-    bool parseWorksheet (const QString &worksheetPath, QMap<int, QString> &sharedStrings, QList<PriceTag> &priceTags);
-    QString getColumnValue (const QString &cellRef);
-    QString getColumnLetter (int columnIndex);
 };

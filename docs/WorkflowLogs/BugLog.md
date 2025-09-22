@@ -2,6 +2,9 @@
 [2025-08-09 10:45:00] link error: undefined reference to `TemplateEditorWidget::TemplateEditorWidget(QWidget*)` from `TemplateEditorDialog` - Ensured `src/templateeditor.cpp` is linked via `target_sources` in `CMakeLists.txt`; reconfigure required
 [2025-08-09 10:55:00] runtime crash: opening Template Editor caused crash - Root cause: uninitialized `templateEditorDialog` pointer; Fix: default-initialize to nullptr in `include/mainwindow.h` and guard creation on click - Fixed
 
+[2025-09-20 14:51:00] compile error: 'QChartView' does not name a type; Qt5 drag/drop 'position()' - Root cause: QtCharts types out of namespace and Qt6-only event->position() used on Qt5. Fix: added QT_CHARTS_USE_NAMESPACE in include/mainwindow.h; wrapped dragEnterEvent/dropEvent to use event->pos() on Qt5. - Fixed
+
+[2025-09-20 15:05:00] Word cannot open generated out.docx ("не удалось прочитать содержимое") - Investigated; applied fixes in DOCX packaging (added root relationships to docProps and ensured <w:p/> before <w:sectPr> in word/document.xml); awaiting verification
 
 [2025-09-18 17:25:00] runtime crash: Segmentation Fault in `TemplateEditorWidget::clearInteractiveOverlays()` at `scene->removeItem(it)` on field click - Root cause: removing already-detached QGraphicsItems during scene rebuild - Fixed: null scene checks, safe removal order, and `rebuildScene()` now calls `clearInteractiveOverlays()` before `scene->clear()`; no repro
 

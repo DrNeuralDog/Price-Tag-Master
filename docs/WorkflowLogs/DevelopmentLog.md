@@ -1,3 +1,4 @@
+[2025-09-20 15:05:10] Light theme polish: boosted primary colors, refined dropArea states; reverted tab font weight to previous style - Success
 [2025-09-09 00:00:00] Adjusted output: Size is appended only after Gender in Category line; ensured reading from column "Размер" remains active - Success
 [2025-08-08 00:00:00] Created AI-friendly PRD in `docs/PRD.md`; added logs; prepared for git commit - Success
 [2025-08-08 00:10:00] Authored structured CR aligned with PRD; saved to `docs/CR.md`; updated interaction logs - Success
@@ -45,3 +46,8 @@
 [2025-09-19 12:00:00] Implemented UI language toggle (EN/RU) with QTranslator and settings persistence; made langButton square (28x28) with 14px spacer to themeButton; changed default export to XLSX by swapping combo items - Success
 [2025-09-19 13:00:00] Fixed missing setUiLanguage method: added to MainWindow header and cpp with updateLanguageTexts call - Success
 [2025-09-19 14:00:00] Added Russian translations: ran lupdate/lrelease, edited .ts with translations, embedded .qm in qrc, ensured all UI strings use tr() - Success
+[2025-09-20 15:06:00] Investigated DOCX open issue; added relationships to docProps and inserted <w:p/> before <w:sectPr>; ready to rebuild and retest - Changes applied
+[2025-09-20 16:05:00] Tabs unified to dark-size metrics; primary button height aligned across themes; light theme drop area background slightly darker; editor resize limited strictly to top-left tag - Success
+[2025-09-20 16:12:00] Enforced equal heights for Open/Generate/Refresh buttons per theme (32/34px) in updateButtonsPrimaryStyles - Success
+[2025-09-22 13:05:30] Fixed massive build break on new machine: removed `QT_CHARTS_USE_NAMESPACE` from header, scoped QtCharts to function, and qualified chart view members with `QtCharts::QChartView*`; advise rebuild - Applied
+[2025-09-20 16:18:00] Restored continuous resize for top-left tag (right/bottom/BR), kept non-resizable for others - Success

@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 
 project(PriceTagMaster VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexec-charset=UTF-8")
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -15,14 +16,30 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # Явно добавляем флаг -std=c++17 в CMAKE_CXX_FLAGS
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-# Добавляем опции компиляции для поддержки C++17 (Windows)
+
+message(STATUS "Using C++ standard: ${CMAKE_CXX_STANDARD}")
+
+#Обеспечивает выполнение автоматического запуска qwindeploy после сборки проекта - раскомментировать только, если вы уверенны что система сборки позволяет выполнять кастомные команды cmake
+#set(WHETHER_QTWINDEPLOY_NECESSARY ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+
+
+# Флаги компиляции для MinGW по обязательной проверки наличия возвращаемого значения
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+endif()
+
+
+#Без этой команды подключить C++ версии старшей чем 14 не получится!
 add_compile_options(
      $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
 )
+
 
 cmake_policy(SET CMP0091 NEW)
 
@@ -41,11 +58,13 @@ else ()
     set(QT_VERSION_MAJOR 5)
 endif ()
 
+
 # Qt projects includes:
 get_target_property(QtCore_Include_Dir Qt${QT_VERSION_MAJOR}::Core INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(QtWidget_Include_Dir Qt${QT_VERSION_MAJOR}::Widgets INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(QtConcurrent_Include_Dir Qt${QT_VERSION_MAJOR}::Concurrent INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(QtCore_Include_Dir Qt${QT_VERSION_MAJOR}::Core INTERFACE_INCLUDE_DIRECTORIES)
+
 
 file(GLOB_RECURSE ALL_PROJECT_FILES "src/*.h" "src/*.cpp" "src/*.ui" "include/*.h" "include/*.cpp" "include/*.ui")
 
@@ -72,6 +91,7 @@ else ()
     endif ()
 endif ()
 
+
 set(PROJECT_PATHS "")
 
 file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true "src/*")
@@ -87,6 +107,7 @@ endforeach ()
 
 list(APPEND PROJECT_PATHS "src/")
 
+
 target_include_directories(
         ${PROJECT_NAME}
         PUBLIC
@@ -94,6 +115,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxlsx/QXlsx/header
 )
+
 
 # Ensure new editor sources are linked even if CMake hasn't regenerated globs
 target_sources(
@@ -108,6 +130,7 @@ target_sources(
         resources/resources.qrc
 )
 
+
 target_link_libraries(
         ${PROJECT_NAME}
         PUBLIC
@@ -120,6 +143,7 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Charts
         QXlsx
 )
+
 
 # Enable charts code paths in sources
 target_compile_definitions(${PROJECT_NAME} PRIVATE USE_QT_CHARTS)
@@ -137,6 +161,7 @@ install(TARGETS
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+
 #Other settings:
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
@@ -144,6 +169,7 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
 
 if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
