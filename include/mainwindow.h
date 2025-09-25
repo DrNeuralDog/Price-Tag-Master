@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
+#include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QGroupBox>
@@ -61,6 +62,7 @@ public:
 
 protected:
     void dragEnterEvent (QDragEnterEvent *event) override;
+    void dragMoveEvent (QDragMoveEvent *event) override;
     void dropEvent (QDropEvent *event) override;
     void dragLeaveEvent (QDragLeaveEvent *event) override;
     bool eventFilter (QObject *obj, QEvent *event) override;

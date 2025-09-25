@@ -72,3 +72,4 @@
 [2025-09-22 02:25:00] User reported no change with eventFilter - Implemented custom QToolButton overriding hitButton(); trimmed left/right by 4mm in logical DPI; added as toolbar widget bound to action - Success
 [2025-09-25 01:20] Запрос от пользователя: в XLSX заменить ведущий пробел на 'П' в текстах из редактора шаблонов - Выполнено
 [2025-09-25 01:28] Запрос от пользователя: заменить 'П' на прозрачные '*' в XLSX - Выполнено
+[2025-09-25 01:50] Запрос от пользователя: добавить кнопку сброса формата ценников до значений по умолчанию (в окне настроек, снизу слева, RU/EN, сохранять в TagTemplate.json) - Реализовано: добавлена кнопка Reset в TemplateEditorDialog; сбрасывает шаблон к дефолту, обновляет превью и сохраняет TagTemplate.json

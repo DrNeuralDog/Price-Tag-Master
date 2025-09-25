@@ -6,6 +6,7 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 
 
 TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
@@ -22,7 +23,26 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
     auto *layout = new QVBoxLayout (this);
 
     layout->addWidget (editor, 1);
-    layout->addWidget (buttons, 0);
+
+    // Bottom bar: Reset on the left, Save/Close on the right
+    QWidget *bottomBar       = new QWidget (this);
+    QHBoxLayout *bottomLayout = new QHBoxLayout (bottomBar);
+    bottomLayout->setContentsMargins (0, 0, 0, 0);
+
+    resetButton = new QPushButton (bottomBar);
+    if (parent && parent->inherits ("MainWindow"))
+    {
+        auto *mw = static_cast<MainWindow *> (parent);
+        resetButton->setText (mw->localized ("Reset to defaults", "Сбросить по умолчанию"));
+    }
+    else
+        resetButton->setText (tr ("Reset to defaults"));
+
+    bottomLayout->addWidget (resetButton, 0, Qt::AlignLeft);
+    bottomLayout->addStretch (1);
+    bottomLayout->addWidget (buttons, 0);
+
+    layout->addWidget (bottomBar, 0);
 
     // Wire buttons
     connect (buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -51,6 +71,26 @@ TemplateEditorDialog::TemplateEditorDialog (QWidget *parent) :
                      dirty = false;
 
                      saveButton->setEnabled (false);
+                 });
+    }
+
+    // Reset handler: restore defaults, update preview, persist config, and keep Save disabled
+    if (resetButton)
+    {
+        connect (resetButton, &QPushButton::clicked, this,
+                 [this] ()
+                 {
+                     suppressNextDirty = true; // prevent enabling Save for this programmatic change
+
+                     TagTemplate defaults; // default-constructed contains built-in defaults
+                     editor->setTagTemplate (defaults);
+
+                     // Persist immediately (MainWindow also persists on templateChanged)
+                     ConfigManager::saveTemplate (defaults);
+
+                     dirty = false;
+                     if (saveButton)
+                         saveButton->setEnabled (false);
                  });
     }
 
@@ -96,6 +136,9 @@ void TemplateEditorDialog::applyLanguage (const QString &lang)
 
     if (saveButton)
         saveButton->setText (loc ("Save", "Сохранить"));
+
+    if (resetButton)
+        resetButton->setText (loc ("Reset to defaults", "Сбросить по умолчанию"));
 
     if (QPushButton *closeBtn = buttons->button (QDialogButtonBox::Close))
         closeBtn->setText (loc ("Close", "Закрыть"));

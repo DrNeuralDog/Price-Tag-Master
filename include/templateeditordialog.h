@@ -25,6 +25,7 @@ private:
     TemplateEditorWidget *editor;
     QDialogButtonBox *buttons;
     QPushButton *saveButton;
+    QPushButton *resetButton;
     bool dirty;
     bool suppressNextDirty;
 };
