@@ -1,11 +1,13 @@
 #include "excelgenerator.h"
 #include <QBrush>
+#include <QColor>
 #include <QDebug>
 #include <cmath>
 #include <xlsxcellrange.h>
 #include <xlsxdocument.h>
 #include <xlsxformat.h>
 #include <xlsxworksheet.h>
+#include <xlsxrichstring.h>
 #include "pricetag.h"
 
 
@@ -20,6 +22,80 @@ const double points = 2.834645669; // Excel row height is in points (1/72 inch).
 static double mmToExcelColumnWidth (double mm) { return mm / 2.4; }
 
 static double mmToRowHeightPt (double mm) { return mm * points; }
+// Extract readable label from template text (e.g. "Страна: ..." -> "Страна:")
+static QString extractLabelFromTemplate (const QString &tmpl, const QString &fallback)
+{
+    // Preserve leading spaces exactly; detect label up to ':'
+    const QString original = tmpl;
+    const QString trimmed  = original.trimmed ();
+    if (trimmed.isEmpty ())
+        return fallback;
+    int colon = original.indexOf (':');
+    if (colon >= 0)
+        return original.left (colon + 1);
+    for (const QChar &ch : trimmed)
+    {
+        if (ch.isLetter ())
+            return original;
+    }
+    return fallback;
+}
+
+// Excel may visually collapse leading ASCII spaces. Replace leading spaces with NBSP to preserve them.
+static QString preserveLeadingSpacesExcel (const QString &s)
+{
+    int n = 0;
+    while (n < s.size () && s.at (n) == QChar (' '))
+        ++n;
+    if (n == 0)
+        return s;
+    return QString (n, QChar (0x00A0)) + s.mid (n);
+}
+
+static int countLeadingSpacesGeneric (const QString &s)
+{
+    int n = 0;
+    while (n < s.size ())
+    {
+        const QChar ch = s.at (n);
+        if (ch == QChar (' ') || ch == QChar (0x00A0))
+            ++n;
+        else
+            break;
+    }
+    return n;
+}
+
+static void writeWithInvisiblePad (QXlsx::Document &xlsx, int row, int col, const QXlsx::Format &cellFmt, const QString &text)
+{
+    const int lead = countLeadingSpacesGeneric (text);
+    if (lead <= 0)
+    {
+        xlsx.write (row, col, text, cellFmt);
+        return;
+    }
+
+    QXlsx::Format padFmt = cellFmt;
+    padFmt.setFontColor (QColor (255, 255, 255)); // make leading '*' invisible on white background
+
+    QXlsx::RichString rich;
+    rich.addFragment (QString (lead, QChar ('*')), padFmt);
+    rich.addFragment (text.mid (lead), cellFmt);
+
+    xlsx.write (row, col, rich, cellFmt);
+}
+
+static QString replaceLeadingSpacesWithThin (const QString &s)
+{
+    int n = 0;
+    while (n < s.size () && s.at (n) == QChar (' '))
+        ++n;
+    if (n == 0)
+        return s;
+    const QChar hair (0x200A); // hair space
+    return QString (n, hair) + s.mid (n);
+}
+
 
 static void computeGrid (const ExcelGenerator::ExcelLayoutConfig &cfg, int &nCols, int &nRows)
 {
@@ -89,6 +165,8 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
         fmt.setHorizontalAlignment (halign);
         fmt.setVerticalAlignment (QXlsx::Format::AlignVCenter);
         fmt.setTextWrap (true);
+        if (st.align == TagTextAlign::Left)
+            fmt.setIndent (0); // минимальный визуальный отступ (~0–0.5 мм)
     };
 
     auto halignFrom = [] (TagTextAlign a)
@@ -144,11 +222,7 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
     QXlsx::Format priceFormatCell2;
     applyStyle (priceFormatCell2, stPriceR, halignFrom (stPriceR.align));
-    priceFormatCell2.setBorderStyle (QXlsx::Format::BorderMedium);
-    priceFormatCell2.setLeftBorderStyle (QXlsx::Format::BorderMedium);
-    priceFormatCell2.setRightBorderStyle (QXlsx::Format::BorderMedium);
-    priceFormatCell2.setTopBorderStyle (QXlsx::Format::BorderMedium);
-    priceFormatCell2.setBottomBorderStyle (QXlsx::Format::BorderMedium);
+    priceFormatCell2.setBorderStyle (QXlsx::Format::BorderThin); // внутренние границы тонкие; внешние усилим отдельно
 
     QXlsx::Format strikePriceFormat;
     applyStyle (strikePriceFormat, stPriceL, halignFrom (stPriceL.align));
@@ -213,12 +287,21 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             qDebug () << "Creating price tag" << tagIndex << "at position (" << row << "," << col << ")";
 
 
-            // Adjusted to yield visible widths in cm
-            // Target: col1 ≈ 7.71 cm; col2 ≈ 3.57 cm; col3 ≈ 3.57 cm; col4 ≈ 2.71 cm
-            xlsx.setColumnWidth (col + 0, 8.60);
-            xlsx.setColumnWidth (col + 1, 4.46);
-            xlsx.setColumnWidth (col + 2, 4.46);
-            xlsx.setColumnWidth (col + 3, 3.43);
+            // Scale inner columns to match current tag width from template
+            {
+                const double colMm[4] = {77.1, 35.7, 35.7, 27.1};
+                const double sumMm = colMm[0] + colMm[1] + colMm[2] + colMm[3];
+                const double targetMm = layoutConfig.tagWidthMm;
+                const double k = (sumMm > 0.0) ? (targetMm / sumMm) : 1.0;
+                const double w0 = mmToExcelColumnWidth (colMm[0] * k);
+                const double w1 = mmToExcelColumnWidth (colMm[1] * k);
+                const double w2 = mmToExcelColumnWidth (colMm[2] * k);
+                const double w3 = mmToExcelColumnWidth (colMm[3] * k);
+                xlsx.setColumnWidth (col + 0, w0);
+                xlsx.setColumnWidth (col + 1, w1);
+                xlsx.setColumnWidth (col + 2, w2);
+                xlsx.setColumnWidth (col + 3, w3);
+            }
 
 
             // 11 rows now (removed empty signature row between price and supplier)
@@ -228,21 +311,25 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
 
             {
-                const QXlsx::Format fmt = withOuterEdges (headerFormat, true, true, true, false);
+                QXlsx::Format fmt = withOuterEdges (headerFormat, true, true, true, false);
+                const QString txt = tagTemplate.textOrDefault (TagField::CompanyHeader);
                 xlsx.mergeCells (QXlsx::CellRange (row, col, row, col + tagCols - 1), fmt);
-                xlsx.write (row, col, "ИП Новиков А.В.", fmt);
+                writeWithInvisiblePad (xlsx, row, col, fmt, txt);
             }
 
 
             {
-                const QXlsx::Format fmt = withOuterEdges (brandFormat, true, true, false, false);
+                QXlsx::Format fmt = withOuterEdges (brandFormat, true, true, false, false);
                 xlsx.mergeCells (QXlsx::CellRange (row + 1, col, row + 1, col + tagCols - 1), fmt);
-                xlsx.write (row + 1, col, tag.getBrand (), fmt);
+                const QString txt = tag.getBrand ();
+                const int lead	  = countLeadingSpacesGeneric (txt);
+                if (lead > 0) fmt.setIndent (qMin (15, lead));
+                writeWithInvisiblePad (xlsx, row + 1, col, fmt, txt.mid (lead));
             }
 
 
             {
-                const QXlsx::Format fmt = withOuterEdges (categoryFormat, true, true, false, false);
+                QXlsx::Format fmt = withOuterEdges (categoryFormat, true, true, false, false);
                 xlsx.mergeCells (QXlsx::CellRange (row + 2, col, row + 2, col + tagCols - 1), fmt);
                 QString categoryText = tag.getCategory ();
 
@@ -254,39 +341,51 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
                 }
                 if (appendedGender && ! tag.getSize ().isEmpty ())
                     categoryText += " " + tag.getSize ();
-                xlsx.write (row + 2, col, categoryText, fmt);
+                const int lead = countLeadingSpacesGeneric (categoryText);
+                if (lead > 0) fmt.setIndent (qMin (15, lead));
+                writeWithInvisiblePad (xlsx, row + 2, col, fmt, categoryText.mid (lead));
             }
 
 
             {
-                const QXlsx::Format fmt = withOuterEdges (brendCountryFormat, true, true, false, false);
+                QXlsx::Format fmt = withOuterEdges (brendCountryFormat, true, true, false, false);
                 xlsx.mergeCells (QXlsx::CellRange (row + 3, col, row + 3, col + tagCols - 1), fmt);
-                xlsx.write (row + 3, col, "Страна: " + tag.getBrandCountry (), fmt);
+                const QString labelRaw = extractLabelFromTemplate (tagTemplate.textOrDefault (TagField::BrandCountry), QString::fromUtf8 ("Страна:"));
+                writeWithInvisiblePad (xlsx, row + 3, col, fmt, labelRaw + " " + tag.getBrandCountry ());
             }
 
 
             {
-                const QXlsx::Format fmt = withOuterEdges (developCountryFormat, true, true, false, false);
+                QXlsx::Format fmt = withOuterEdges (developCountryFormat, true, true, false, false);
                 xlsx.mergeCells (QXlsx::CellRange (row + 4, col, row + 4, col + tagCols - 1), fmt);
-                xlsx.write (row + 4, col, "Место: " + tag.getManufacturingPlace (), fmt);
+                const QString labelRaw = extractLabelFromTemplate (tagTemplate.textOrDefault (TagField::ManufacturingPlace), QString::fromUtf8 ("Место:"));
+                writeWithInvisiblePad (xlsx, row + 4, col, fmt, labelRaw + " " + tag.getManufacturingPlace ());
             }
 
 
             {
-                const QXlsx::Format fmtLeft	 = withOuterEdges (materialHeaderFormat, true, false, false, false);
-                const QXlsx::Format fmtRight = withOuterEdges (materialValueFormat, false, true, false, false);
-                xlsx.write (row + 5, col, "Матер-л:", fmtLeft);
+                QXlsx::Format fmtLeft	 = withOuterEdges (materialHeaderFormat, true, false, false, false);
+                QXlsx::Format fmtRight = withOuterEdges (materialValueFormat, false, true, false, false);
+                const QString labelRaw = extractLabelFromTemplate (tagTemplate.textOrDefault (TagField::MaterialLabel), QString::fromUtf8 ("Матер-л:"));
+                writeWithInvisiblePad (xlsx, row + 5, col, fmtLeft, labelRaw);
                 xlsx.mergeCells (QXlsx::CellRange (row + 5, col + 1, row + 5, col + tagCols - 1), fmtRight);
-                xlsx.write (row + 5, col + 1, tag.getMaterial (), fmtRight);
+                const QString val = tag.getMaterial ();
+                const int valLeadMat = countLeadingSpacesGeneric (val);
+                if (valLeadMat > 0) fmtRight.setIndent (qMin (15, valLeadMat));
+                writeWithInvisiblePad (xlsx, row + 5, col + 1, fmtRight, val.mid (valLeadMat));
             }
 
 
             {
-                const QXlsx::Format fmtLeft	 = withOuterEdges (articulHeaderFormat, true, false, false, false);
-                const QXlsx::Format fmtRight = withOuterEdges (articulValueFormat, false, true, false, false);
-                xlsx.write (row + 6, col, "Артикул:", fmtLeft);
+                QXlsx::Format fmtLeft	 = withOuterEdges (articulHeaderFormat, true, false, false, false);
+                QXlsx::Format fmtRight = withOuterEdges (articulValueFormat, false, true, false, false);
+                const QString labelRaw = extractLabelFromTemplate (tagTemplate.textOrDefault (TagField::ArticleLabel), QString::fromUtf8 ("Артикул:"));
+                writeWithInvisiblePad (xlsx, row + 6, col, fmtLeft, labelRaw);
                 xlsx.mergeCells (QXlsx::CellRange (row + 6, col + 1, row + 6, col + tagCols - 1), fmtRight);
-                xlsx.write (row + 6, col + 1, tag.getArticle (), fmtRight);
+                const QString val = tag.getArticle ();
+                const int valLeadArt = countLeadingSpacesGeneric (val);
+                if (valLeadArt > 0) fmtRight.setIndent (qMin (15, valLeadArt));
+                writeWithInvisiblePad (xlsx, row + 6, col + 1, fmtRight, val.mid (valLeadArt));
             }
 
 
@@ -294,19 +393,21 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             {
                 // For two prices: show only the first price number in the left cell (no label), with strikethrough and diagonal slash
                 QString priceText			 = QString::number (tag.getPrice ());
-                const QXlsx::Format fmtLeft	 = withOuterEdges (strikePriceFormat, true, false, false, false);
+                QXlsx::Format fmtLeft	 = withOuterEdges (strikePriceFormat, true, false, false, false);
                 const QXlsx::Format fmtRight = withOuterEdges (priceFormatCell2, false, true, false, false);
-                xlsx.write (row + 7, col, priceText, fmtLeft);
+                const int lead = countLeadingSpacesGeneric (priceText);
+                if (lead > 0) fmtLeft.setIndent (qMin (15, lead));
+                xlsx.write (row + 7, col, priceText.mid (lead), fmtLeft);
 
                 xlsx.mergeCells (QXlsx::CellRange (row + 7, col + 1, row + 7, col + tagCols - 1), fmtRight);
                 xlsx.write (row + 7, col + 1, QString::number (tag.getPrice2 ()) + " =", fmtRight);
             }
             else
             {
-                QString priceText			 = "Цена";
-                const QXlsx::Format fmtLeft	 = withOuterEdges (priceFormatCell1, true, false, false, false);
+                const QString priceTextRaw = tagTemplate.textOrDefault (TagField::PriceLeft);
+                QXlsx::Format fmtLeft = withOuterEdges (priceFormatCell1, true, false, false, false);
                 const QXlsx::Format fmtRight = withOuterEdges (priceFormatCell2, false, true, false, false);
-                xlsx.write (row + 7, col, priceText, fmtLeft);
+                writeWithInvisiblePad (xlsx, row + 7, col, fmtLeft, priceTextRaw);
 
                 xlsx.mergeCells (QXlsx::CellRange (row + 7, col + 1, row + 7, col + tagCols - 1), fmtRight);
                 xlsx.write (row + 7, col + 1, QString::number (tag.getPrice ()) + " =", fmtRight);
@@ -314,11 +415,15 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
             // Supplier row moves up by one (was row+9)
             {
-                const QXlsx::Format fmtLeft	 = withOuterEdges (supplierFormat, true, false, false, false);
-                const QXlsx::Format fmtRight = withOuterEdges (supplierFormat, false, true, false, false);
-                xlsx.write (row + 8, col, "Поставщик:", fmtLeft);
+                QXlsx::Format fmtLeft	 = withOuterEdges (supplierFormat, true, false, false, false);
+                QXlsx::Format fmtRight = withOuterEdges (supplierFormat, false, true, false, false);
+                const QString labelRaw = extractLabelFromTemplate (tagTemplate.textOrDefault (TagField::SupplierLabel), QString::fromUtf8 ("Поставщик:"));
+                writeWithInvisiblePad (xlsx, row + 8, col, fmtLeft, labelRaw);
                 xlsx.mergeCells (QXlsx::CellRange (row + 8, col + 1, row + 8, col + tagCols - 1), fmtRight);
-                xlsx.write (row + 8, col + 1, tag.getSupplier (), fmtRight);
+                const QString val = tag.getSupplier ();
+                const int valLeadSup = countLeadingSpacesGeneric (val);
+                if (valLeadSup > 0) fmtRight.setIndent (qMin (15, valLeadSup));
+                writeWithInvisiblePad (xlsx, row + 8, col + 1, fmtRight, val.mid (valLeadSup));
             }
 
 
@@ -373,18 +478,22 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
 
 			{
-				const QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, false);
+				QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, false);
 
                 xlsx.mergeCells (QXlsx::CellRange (row + 9, col, row + 9, col + tagCols - 1), fmt);
-                xlsx.write (row + 9, col, line1, fmt);
+                const int lead = countLeadingSpacesGeneric (line1);
+                if (lead > 0) fmt.setIndent (qMin (15, lead));
+                writeWithInvisiblePad (xlsx, row + 9, col, fmt, line1.mid (lead));
 			}
 
 
 			{
-				const QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, true);
+				QXlsx::Format fmt = withOuterEdges (addressFormat, true, true, false, true);
 
                 xlsx.mergeCells (QXlsx::CellRange (row + 10, col, row + 10, col + tagCols - 1), fmt);
-                xlsx.write (row + 10, col, line2, fmt);
+                const int lead = countLeadingSpacesGeneric (line2);
+                if (lead > 0) fmt.setIndent (qMin (15, lead));
+                writeWithInvisiblePad (xlsx, row + 10, col, fmt, line2.mid (lead));
 			}
 
 

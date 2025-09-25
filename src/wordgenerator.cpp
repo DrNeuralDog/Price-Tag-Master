@@ -262,12 +262,37 @@ static QString paragraphWithStyle (const QString &text, const TagTextStyle &st)
     else if (st.align == TagTextAlign::Right)
         ppr = "<w:pPr><w:keepLines/><w:spacing w:before=\"0\" w:after=\"0\"/><w:jc w:val=\"right\"/></w:pPr>";
     else
-        ppr = "<w:pPr><w:keepLines/><w:spacing w:before=\"0\" w:after=\"0\"/><w:jc w:val=\"left\"/></w:pPr>";
+    {
+        const int indentTw = mmToTwipsLocal (.5); // .5 mm left indent by default
+        ppr = QString ("<w:pPr><w:keepLines/><w:spacing w:before=\"0\" w:after=\"0\"/><w:ind w:left=\"%1\"/><w:jc w:val=\"left\"/></w:pPr>")
+                      .arg (indentTw);
+    }
 
     return QString ("<w:p>%1<w:r>%2<w:t xml:space=\"preserve\">%3</w:t></w:r></w:p>").arg (ppr, rpr, xmlEscapeLocal (text));
 }
 
-static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
+// Extract readable label from template text (e.g. "Страна: ..." -> "Страна:")
+static QString extractLabelFromTemplate (const QString &tmpl, const QString &fallback)
+{
+    // Preserve leading spaces exactly as provided in template
+    const QString original = tmpl;
+    const QString trimmed  = original.trimmed ();
+    if (trimmed.isEmpty ())
+        return fallback;
+    // Detect label up to colon on original string (keeps leading spaces)
+    int colon = original.indexOf (':');
+    if (colon >= 0)
+        return original.left (colon + 1);
+    // If there are letters (custom label without colon) – use as is (preserve spaces)
+    for (const QChar &ch : trimmed)
+    {
+        if (ch.isLetter ())
+            return original;
+    }
+    return fallback;
+}
+
+static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl, int outerCellWidthTwips)
 {
     // Heights in points for 11 rows
     const double pt[11] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 13.50, 9.75, 9.75};
@@ -327,23 +352,33 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
                 .arg (rightContent);
     };
 
+    // Compute scaled column widths to exactly fit parent cell (no centering/shrink)
+    const int targetWidth = qMax (outerCellWidthTwips, 1);
+    const double sumMm = colMm[0] + colMm[1] + colMm[2] + colMm[3];
+    const int sumTwips = mmToTwipsLocal (sumMm);
+    const double k = sumTwips > 0 ? static_cast<double> (targetWidth) / static_cast<double> (sumTwips) : 1.0;
+    int colTw[4];
+    for (int i = 0; i < 3; ++i)
+        colTw[i] = qMax (1, static_cast<int> (std::llround (mmToTwipsLocal (colMm[i]) * k)));
+    colTw[3] = qMax (1, targetWidth - (colTw[0] + colTw[1] + colTw[2]));
+
     QString xml;
-    xml += "<w:tbl><w:tblPr><w:tblW w:w=\"0\" w:type=\"auto\"/><w:tblCellMar><w:top w:w=\"0\" w:type=\"dxa\"/><w:left w:w=\"0\" "
-           "w:type=\"dxa\"/><w:bottom w:w=\"0\" w:type=\"dxa\"/><w:right w:w=\"0\" w:type=\"dxa\"/></w:tblCellMar><w:tblBorders>"
-           "<w:top w:val=\"single\" w:sz=\"8\"/><w:left w:val=\"single\" w:sz=\"8\"/><w:bottom w:val=\"single\" w:sz=\"8\"/><w:right "
-           "w:val=\"single\" w:sz=\"8\"/>"
-           "<w:insideH w:val=\"single\" w:sz=\"4\"/><w:insideV w:val=\"single\" w:sz=\"4\"/>"
-           "</w:tblBorders></w:tblPr>";
+    xml += "<w:tbl><w:tblPr><w:tblW w:w=\"%1\" w:type=\"dxa\"/><w:tblLayout w:type=\"fixed\"/>";
+    xml = xml.arg (targetWidth);
+    xml += "<w:tblCellMar><w:top w:w=\"0\" w:type=\"dxa\"/><w:left w:w=\"0\" w:type=\"dxa\"/><w:bottom w:w=\"0\" w:type=\"dxa\"/><w:right w:w=\"0\" w:type=\"dxa\"/></w:tblCellMar><w:tblBorders>";
+    xml += "<w:top w:val=\"single\" w:sz=\"8\"/><w:left w:val=\"single\" w:sz=\"8\"/><w:bottom w:val=\"single\" w:sz=\"8\"/><w:right w:val=\"single\" w:sz=\"8\"/>";
+    xml += "<w:insideH w:val=\"single\" w:sz=\"4\"/><w:insideV w:val=\"single\" w:sz=\"4\"/></w:tblBorders></w:tblPr>";
 
-    // Define table grid with 4 columns; allow scaling (pack multiple tags per outer cell width)
+    // Define table grid with 4 columns scaled to parent width
     xml += "<w:tblGrid>";
-
     for (int i = 0; i < 4; ++i)
-        xml += QString ("<w:gridCol w:w=\"%1\"/>").arg (mmToTwipsLocal (colMm[i]));
-
+        xml += QString ("<w:gridCol w:w=\"%1\"/>").arg (colTw[i]);
     xml += "</w:tblGrid>";
 
-    xml += trMerged (ptToTwipsLocal (pt[0]), paragraphWithStyle ("ИП Новиков А.В.", tpl.styleOrDefault (TagField::CompanyHeader)), 4);
+    xml += trMerged (ptToTwipsLocal (pt[0]),
+                     paragraphWithStyle (tpl.textOrDefault (TagField::CompanyHeader),
+                                         tpl.styleOrDefault (TagField::CompanyHeader)),
+                     4);
     xml += trMerged (ptToTwipsLocal (pt[1]), paragraphWithStyle (t.getBrand (), tpl.styleOrDefault (TagField::Brand)), 4);
 
 
@@ -360,15 +395,25 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
         category += " " + t.getSize ();
 
     xml += trMerged (ptToTwipsLocal (pt[2]), paragraphWithStyle (category, tpl.styleOrDefault (TagField::CategoryGender)), 4);
-    xml += trMerged (ptToTwipsLocal (pt[3]),
-                     paragraphWithStyle ("Страна: " + t.getBrandCountry (), tpl.styleOrDefault (TagField::BrandCountry)), 4);
-    xml += trMerged (ptToTwipsLocal (pt[4]),
-                     paragraphWithStyle ("Место: " + t.getManufacturingPlace (), tpl.styleOrDefault (TagField::ManufacturingPlace)), 4);
+    {
+        const QString label = extractLabelFromTemplate (tpl.textOrDefault (TagField::BrandCountry), QString::fromUtf8 ("Страна:"));
+        xml += trMerged (ptToTwipsLocal (pt[3]),
+                         paragraphWithStyle (label + " " + t.getBrandCountry (), tpl.styleOrDefault (TagField::BrandCountry)),
+                         4);
+    }
+    {
+        const QString label = extractLabelFromTemplate (tpl.textOrDefault (TagField::ManufacturingPlace), QString::fromUtf8 ("Место:"));
+        xml += trMerged (ptToTwipsLocal (pt[4]),
+                         paragraphWithStyle (label + " " + t.getManufacturingPlace (),
+                                             tpl.styleOrDefault (TagField::ManufacturingPlace)),
+                         4);
+    }
 
 
     // Material row split into two cells
     {
-        QString left  = paragraphWithStyle ("Матер-л:", tpl.styleOrDefault (TagField::MaterialLabel));
+        const QString label = extractLabelFromTemplate (tpl.textOrDefault (TagField::MaterialLabel), QString::fromUtf8 ("Матер-л:"));
+        QString left  = paragraphWithStyle (label, tpl.styleOrDefault (TagField::MaterialLabel));
         QString right = paragraphWithStyle (t.getMaterial (), tpl.styleOrDefault (TagField::MaterialValue));
 
         xml += trTwoCells (ptToTwipsLocal (pt[5]), left, right, false, false, 4);
@@ -376,7 +421,8 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
 
     // Article row split into two cells; label not bold
     {
-        QString left  = paragraphWithStyle ("Артикул:", tpl.styleOrDefault (TagField::ArticleLabel));
+        const QString label = extractLabelFromTemplate (tpl.textOrDefault (TagField::ArticleLabel), QString::fromUtf8 ("Артикул:"));
+        QString left  = paragraphWithStyle (label, tpl.styleOrDefault (TagField::ArticleLabel));
         QString right = paragraphWithStyle (t.getArticle (), tpl.styleOrDefault (TagField::ArticleValue));
 
         xml += trTwoCells (ptToTwipsLocal (pt[6]), left, right, false, false, 2);
@@ -398,7 +444,8 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
     else
     { // Left cell: label "Цена"; Right cell: current price
 
-        QString leftContent = paragraphWithStyle ("Цена", tpl.styleOrDefault (TagField::PriceLeft));
+        const QString priceLabel = tpl.textOrDefault (TagField::PriceLeft);
+        QString leftContent = paragraphWithStyle (priceLabel, tpl.styleOrDefault (TagField::PriceLeft));
         QString rightContent =
                 paragraphWithStyle (QString::number (t.getPrice (), 'f', 0) + " =", tpl.styleOrDefault (TagField::PriceRight));
 
@@ -406,7 +453,8 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl)
     }
     // Supplier row split into label and value
     {
-        QString left  = paragraphWithStyle ("Поставщик:", tpl.styleOrDefault (TagField::SupplierLabel));
+        const QString label = extractLabelFromTemplate (tpl.textOrDefault (TagField::SupplierLabel), QString::fromUtf8 ("Поставщик:"));
+        QString left  = paragraphWithStyle (label, tpl.styleOrDefault (TagField::SupplierLabel));
         QString right = paragraphWithStyle (t.getSupplier (), tpl.styleOrDefault (TagField::SupplierValue));
 
         // Supplier row moved up (index 8)
@@ -496,12 +544,13 @@ QString WordGenerator::buildDocumentXml (const QList<PriceTag> &expandedTags)
 
     // Single outer table; Word paginates automatically. Rows are non-splittable.
     xml += "<w:tbl>";
-    xml += "<w:tblPr><w:tblW w:w=\"0\" w:type=\"auto\"/><w:tblCellMar><w:top w:w=\"0\" w:type=\"dxa\"/><w:left w:w=\"0\" "
-           "w:type=\"dxa\"/><w:bottom w:w=\"0\" w:type=\"dxa\"/><w:right w:w=\"0\" w:type=\"dxa\"/></w:tblCellMar><w:tblBorders>"
-           "<w:top w:val=\"single\" w:sz=\"4\"/><w:left w:val=\"single\" w:sz=\"4\"/><w:bottom w:val=\"single\" w:sz=\"4\"/><w:right "
-           "w:val=\"single\" w:sz=\"4\"/>"
-           "<w:insideH w:val=\"single\" w:sz=\"4\"/><w:insideV w:val=\"single\" w:sz=\"4\"/>"
-           "</w:tblBorders></w:tblPr>";
+    const int outerTblWidth = tagW * nCols;
+    xml += QString("<w:tblPr><w:tblW w:w=\"%1\" w:type=\"dxa\"/><w:tblLayout w:type=\"fixed\"/>")
+                   .arg(outerTblWidth);
+    xml += "<w:tblCellMar><w:top w:w=\"0\" w:type=\"dxa\"/><w:left w:w=\"0\" w:type=\"dxa\"/><w:bottom w:w=\"0\" w:type=\"dxa\"/><w:right w:w=\"0\" w:type=\"dxa\"/></w:tblCellMar><w:tblBorders>";
+    // make only the right outer border thicker (12 = 25% thinner than 16)
+    xml += "<w:top w:val=\"single\" w:sz=\"4\"/><w:left w:val=\"single\" w:sz=\"4\"/><w:bottom w:val=\"single\" w:sz=\"4\"/><w:right w:val=\"single\" w:sz=\"12\"/>";
+    xml += "<w:insideH w:val=\"single\" w:sz=\"4\"/><w:insideV w:val=\"single\" w:sz=\"4\"/></w:tblBorders></w:tblPr>";
     xml += "<w:tblGrid>";
 
     for (int c = 0; c < nCols; ++c)
@@ -523,7 +572,7 @@ QString WordGenerator::buildDocumentXml (const QList<PriceTag> &expandedTags)
                            .arg (tagW);
 
             if (idx < total)
-                xml += makeInnerTagTable (expandedTags[idx], tagTemplate);
+                xml += makeInnerTagTable (expandedTags[idx], tagTemplate, tagW);
             else
                 xml += paragraph ("");
 

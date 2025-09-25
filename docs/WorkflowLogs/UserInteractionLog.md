@@ -1,3 +1,4 @@
+[2025-09-25 00:00] Запрос от пользователя: исправить формат DOCX ценников (после 3-й строки теги тоньше) - Начата работа над фиксацией макета таблиц Word
 [2025-08-08 00:00:00] User requested structured PRD rewrite (Qt 6, Excel API) - PRD updated in docs/PRD.md
 [2025-08-08 00:10:00] User requested structured CR creation (Qt C++ project) - CR created in docs/CR.md
 [2025-08-08 00:20:00] User requested base project documentation - Implementation, structure, and UI/UX docs created; task checklist updated
@@ -69,3 +70,5 @@
 [2025-09-22 02:08:00] User reported gear button disappeared after mask - Reverted to normal rectangular hit area (clearMask), kept 52×52 size and cropped icon for visuals - Success
 [2025-09-22 02:15:00] User requested to trim clickable area on sides only - Implemented eventFilter to accept clicks only in central rect (left/right trimmed by 2mm) without using masks - Success
 [2025-09-22 02:25:00] User reported no change with eventFilter - Implemented custom QToolButton overriding hitButton(); trimmed left/right by 4mm in logical DPI; added as toolbar widget bound to action - Success
+[2025-09-25 01:20] Запрос от пользователя: в XLSX заменить ведущий пробел на 'П' в текстах из редактора шаблонов - Выполнено
+[2025-09-25 01:28] Запрос от пользователя: заменить 'П' на прозрачные '*' в XLSX - Выполнено
