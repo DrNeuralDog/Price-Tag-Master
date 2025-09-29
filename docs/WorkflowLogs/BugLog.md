@@ -3,6 +3,8 @@
 [2025-08-09 10:55:00] runtime crash: opening Template Editor caused crash - Root cause: uninitialized `templateEditorDialog` pointer; Fix: default-initialize to nullptr in `include/mainwindow.h` and guard creation on click - Fixed
 
 [2025-09-20 14:51:00] compile error: 'QChartView' does not name a type; Qt5 drag/drop 'position()' - Root cause: QtCharts types out of namespace and Qt6-only event->position() used on Qt5. Fix: added QT_CHARTS_USE_NAMESPACE in include/mainwindow.h; wrapped dragEnterEvent/dropEvent to use event->pos() on Qt5. - Fixed
+[2025-09-26 14:05:00] DnD bug: первый перенос Excel-файла показывает красный запрет, нужно 3–5 попыток для принятия - Root cause: dragEnter требовал точного попадания внутрь `dropArea` перед accept; UX: запрет до входа воспринимался как «не работает». Fix: dragEnter сразу принимает валидный `.xlsx`, hover-стиль активируется только над `dropArea`; dragMove переключает accept/styling в зависимости от позиции. - Fixed
+[2025-09-26 13:51:00] compile error: 'QChartView does not name a type' (Qt5 MinGW) - Root cause: поля-члены без квалификации QtCharts в заголовке (MOC) и отсутствие ограниченного использования неймспейса. Fix: `QtCharts::QChartView*` в `include/mainwindow.h`; `using namespace QtCharts` только внутри `updateCharts()`; пересборка требуется
 
 [2025-09-20 15:05:00] Word cannot open generated out.docx ("не удалось прочитать содержимое") - Investigated; applied fixes in DOCX packaging (added root relationships to docProps and ensured <w:p/> before <w:sectPr> in word/document.xml); awaiting verification
 

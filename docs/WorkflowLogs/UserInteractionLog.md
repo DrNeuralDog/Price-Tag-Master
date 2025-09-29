@@ -20,6 +20,7 @@
 [2025-09-19 00:02:00] Requested permission to commit QtCharts fix to git - Pending
 [2025-08-30 00:00:00] User asked to auto-apply new app icon `@PriceTagMangerIcon.jpg` - Implemented: resource added to `resources/resources.qrc`, app/window icon set in `src/main.cpp`; build skipped by user
 [2025-08-30 00:15:00] User provided `.ico`; requested proper Windows EXE icon - Implemented .rc (`resources/windows/app_icon.rc`), added to CMake; compile step skipped by user
+[2025-09-26 16:10:00] User asked for Linux/macOS readiness; confirmed removal of Windows-specific flags and optional resources; CMake streamlined for cross-platform - Applied
 
 [2025-08-08 12:00:00] User requested two UI themes implementation (Light/Dark) - Implemented ThemeManager, toolbar toggle, persisted setting
 [2025-08-09 10:00:00] User reported theme/UX mismatch with Figma spec - Applied token-based QPalette+QSS, updated toolbar/dropzone/button styles; theme toggle persists - Fixed
@@ -73,3 +74,9 @@
 [2025-09-25 01:20] Запрос от пользователя: в XLSX заменить ведущий пробел на 'П' в текстах из редактора шаблонов - Выполнено
 [2025-09-25 01:28] Запрос от пользователя: заменить 'П' на прозрачные '*' в XLSX - Выполнено
 [2025-09-25 01:50] Запрос от пользователя: добавить кнопку сброса формата ценников до значений по умолчанию (в окне настроек, снизу слева, RU/EN, сохранять в TagTemplate.json) - Реализовано: добавлена кнопка Reset в TemplateEditorDialog; сбрасывает шаблон к дефолту, обновляет превью и сохраняет TagTemplate.json
+[2025-09-25 02:05] Запрос от пользователя: первая попытка DnD не принимается — убрать первичный блок - Исправлено: добавлен dragMoveEvent, теперь перетаскивание принимается сразу над зоной сброса
+[2025-09-26 14:05] Запрос от пользователя: dnd зона показывает красный запрет и принимает файл только после 5 попыток - Изменено поведение: dragEnter теперь сразу принимает валидные .xlsx, визуальный hover включается только при наведении над `dropArea`; dragMove переключает стиль/accept в зависимости от позиции
+[2025-09-26 14:06] Запрос подтверждения: выполнить git commit с правками DnD и обновлёнными логами - Ожидается подтверждение
+[2025-09-26 15:10] Пользователь запросил аудит кроссплатформенности (Linux/macOS): выявлен безусловный AxContainer и Windows-ресурсы; подготовлены правки CMake (AxContainer только на WIN32, MACOSX_BUNDLE hook) и перенос пути конфига в AppData на Unix - В процессе
+[2025-09-26 16:30] Запрос от пользователя: проверить препятствия сборки под Linux/macOS и предложить замены - Выполнено аудит: WinAPI в проекте не используется; ActiveX (AxContainer) подключается только на WIN32; конфиги на Unix/macOS — через QStandardPaths; ресурсы .ico не тянутcя в Unix. Предложены улучшения: (1) отключить сборку Xlsx DOCX/ZIP приватных хедеров без лишних include на публичных API; (2) добавить ENABLE_QT_CHARTS опцию; (3) генерацию .app и .desktop в Install шаге - Ожидает подтверждения
+[2025-09-26 13:51] Пользователь: ошибки сборки Qt5 MinGW по типам QtCharts (QChartView/QPieSeries) - Внесены правки: квалифицировал QtCharts:: в заголовке и ограничил using в updateCharts(); готово к пересборке

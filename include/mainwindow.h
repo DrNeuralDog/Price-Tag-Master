@@ -114,9 +114,9 @@ private:
 #ifdef USE_QT_CHARTS
     QWidget *chartsContainer		= nullptr;
     QHBoxLayout *chartsLayout		= nullptr;
-    QChartView *brandChartView		= nullptr;
-    QChartView *categoryChartView	= nullptr;
-    QChartView *summaryBarChartView = nullptr;
+    QtCharts::QChartView *brandChartView		= nullptr;
+    QtCharts::QChartView *categoryChartView	= nullptr;
+    QtCharts::QChartView *summaryBarChartView = nullptr;
 #endif
 
 

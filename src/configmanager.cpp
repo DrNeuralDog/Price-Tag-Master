@@ -1,4 +1,4 @@
-#include "configmanager.h"
+#include "../include/configmanager.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -9,15 +9,19 @@
 
 QString ConfigManager::templateConfigFilePath ()
 {
-    // Always store next to the application executable
+    // Prefer storing next to the executable on Windows for portability
+    // On Unix-like systems, use writable AppData location
+#if defined(Q_OS_WIN)
     const QString exeDir = QCoreApplication::applicationDirPath ();
     QDir dir (exeDir);
-
-    if (! dir.exists ())
-        dir.mkpath (".");
-
-
+    if (! dir.exists ()) dir.mkpath (".");
     return dir.filePath ("TagTemplate.json");
+#else
+    const QString configDir = QStandardPaths::writableLocation (QStandardPaths::AppDataLocation);
+    QDir dir (configDir);
+    if (! dir.exists ()) dir.mkpath (".");
+    return dir.filePath ("TagTemplate.json");
+#endif
 }
 
 

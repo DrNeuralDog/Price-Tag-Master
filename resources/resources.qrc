@@ -6,8 +6,8 @@
         <file>icons/FullBlackSettingsGear.png</file>
         <file>icons/tag.png</file>
         <file>icons/PriceTagManagerIcon.png</file>
-        <file>icons/PriceTagMangerIcon.jpg</file>
-        <file>icons/PriceTagMangerIcon.ico</file>
+        <!-- .ico специфичен для Windows; .jpg не нужен как иконка приложения -->
+        <!-- Удаляем из ресурса, чтобы не тянуть платформенно-специфичные артефакты на Linux/macOS -->
     </qresource>
     <!-- Translations are embedded via CMake's qt_add_resources(translations_qm) -->
 </RCC> 

@@ -16,17 +16,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Явно добавляем флаг -std=c++17 в CMAKE_CXX_FLAGS
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-
 
 message(STATUS "Using C++ standard: ${CMAKE_CXX_STANDARD}")
 
 #Обеспечивает выполнение автоматического запуска qwindeploy после сборки проекта - раскомментировать только, если вы уверенны что система сборки позволяет выполнять кастомные команды cmake
 #set(WHETHER_QTWINDEPLOY_NECESSARY ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # На Linux PIC включается автоматически для SHARED/LIBRARY; для EXECUTABLE не требуется
+    # Останемся без глобального -fPIC, чтобы не ломать сборку на macOS/Windows
+endif ()
 
 
 # Флаги компиляции для MinGW по обязательной проверки наличия возвращаемого значения
@@ -36,9 +35,7 @@ endif()
 
 
 #Без этой команды подключить C++ версии старшей чем 14 не получится!
-add_compile_options(
-     $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
-)
+# -std=c++17 выставляется через CMAKE_CXX_STANDARD; лишние флаги не добавляем
 
 
 cmake_policy(SET CMP0091 NEW)
@@ -49,13 +46,21 @@ add_subdirectory(3rdparty/qxlsx/QXlsx)
 # Отключение поиска Vulkan, если он не нужен
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)
 
-# Find required packages
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts LinguistTools)
+# Find required Qt packages (Charts optional)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent PrintSupport)
 if (Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
 else ()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent AxContainer PrintSupport Charts LinguistTools)
+    # Qt5: избегаем жесткой зависимости от LinguistTools, она не используется
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Concurrent PrintSupport)
     set(QT_VERSION_MAJOR 5)
+endif ()
+
+# Try to find Qt Charts optionally
+find_package(Qt${QT_VERSION_MAJOR} QUIET COMPONENTS Charts)
+set(HAVE_QT_CHARTS OFF)
+if (TARGET Qt${QT_VERSION_MAJOR}::Charts)
+    set(HAVE_QT_CHARTS ON)
 endif ()
 
 
@@ -137,21 +142,36 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets
-        Qt${QT_VERSION_MAJOR}::AxContainer
         Qt${QT_VERSION_MAJOR}::Concurrent
         Qt${QT_VERSION_MAJOR}::PrintSupport
-        Qt${QT_VERSION_MAJOR}::Charts
         QXlsx
 )
+if (HAVE_QT_CHARTS)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::Charts)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_QT_CHARTS)
+endif ()
+
+# AxContainer (ActiveX) is Windows-only; link it conditionally
+if (WIN32)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS AxContainer)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::AxContainer)
+endif ()
 
 
-# Enable charts code paths in sources
-target_compile_definitions(${PROJECT_NAME} PRIVATE USE_QT_CHARTS)
+# Enable charts code paths only if Charts found (handled above)
 
 # Embed Windows application icon into the executable
 if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE resources/windows/app_icon.rc)
     set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif ()
+
+# macOS bundle icon (.icns) support (expects resources/icons/AppIcon.icns if provided)
+if (APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+    # Uncomment if an .icns is added later:
+    # set_source_files_properties(resources/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    # target_sources(${PROJECT_NAME} PRIVATE resources/icons/AppIcon.icns)
 endif ()
 
 # Install
@@ -173,7 +193,4 @@ install(TARGETS ${PROJECT_NAME}
 
 if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
-else ()
-    # For Qt5, leave resources/resources.qrc as-is
-    target_sources(${PROJECT_NAME} PRIVATE resources/resources.qrc)
 endif ()

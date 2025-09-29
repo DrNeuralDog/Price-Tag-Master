@@ -13,6 +13,8 @@
 #include <QResizeEvent>
 #include <QImage>
 #include <QPainter>
+#include <QPixmap>
+#include <QRect>
 
 // Helper: crop transparent margins around an icon to maximize visible size within given button
 static QPixmap cropTransparentMargins (const QPixmap &src)
@@ -676,6 +678,46 @@ void MainWindow::dragEnterEvent (QDragEnterEvent *event)
 
         return;
     }
+    // Accept drag immediately for valid data; refine feedback during dragMove
+    event->acceptProposedAction ();
+
+    // Provide visual hint only when actually over the drop area
+    const QPoint globalPos = this->mapToGlobal (
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            event->position ().toPoint ()
+#else
+            event->pos ()
+#endif
+    );
+    const QPoint posInDrop = dropArea->mapFromGlobal (globalPos);
+    if (dropArea->rect ().contains (posInDrop))
+        setDropAreaHoverStyle ();
+    else
+        setDropAreaDefaultStyle ();
+}
+
+void MainWindow::dragMoveEvent (QDragMoveEvent *event)
+{
+    if (! event || ! event->mimeData () || ! event->mimeData ()->hasUrls () || ! dropArea || ! tabWidget || tabWidget->currentIndex () != 0)
+    {
+        if (event)
+            event->ignore ();
+        return;
+    }
+
+    const QList<QUrl> urls = event->mimeData ()->urls ();
+    if (urls.isEmpty ())
+    {
+        event->ignore ();
+        return;
+    }
+
+    const QString path = urls.first ().toLocalFile ();
+    if (! path.endsWith (".xlsx", Qt::CaseInsensitive))
+    {
+        event->ignore ();
+        return;
+    }
 
     const QPoint globalPos = this->mapToGlobal (
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -686,16 +728,17 @@ void MainWindow::dragEnterEvent (QDragEnterEvent *event)
     );
 
     const QPoint posInDrop = dropArea->mapFromGlobal (globalPos);
-
-    if (! dropArea->rect ().contains (posInDrop))
+    if (dropArea->rect ().contains (posInDrop))
     {
-        event->ignore ();
-
-        return;
+        event->acceptProposedAction ();
+        setDropAreaHoverStyle ();
     }
-
-    event->acceptProposedAction ();
-    setDropAreaHoverStyle ();
+    else
+    {
+        event->setDropAction (Qt::IgnoreAction);
+        event->accept ();
+        setDropAreaDefaultStyle ();
+    }
 }
 
 void MainWindow::dropEvent (QDropEvent *event)
@@ -984,6 +1027,7 @@ void MainWindow::updateLanguageTexts ()
 #ifdef USE_QT_CHARTS
 void MainWindow::updateCharts ()
 {
+    using namespace QtCharts; // Limit QtCharts symbols to this function for Qt5 compatibility
     // Qt 6: types are available directly after including <QtCharts/...>
     if (! chartsLayout)
         return;
