@@ -1,20 +1,31 @@
 #include "mainwindow.h"
+#include <QBitmap>
 #include <QFileInfo>
 #include <QHeaderView>
-#include <QMap>
-#include <QSet>
-#include <QUrl>
-#include <algorithm>
-#include "excelgenerator.h"
-#include <QToolButton>
-#include <QRegion>
-#include <QBitmap>
-#include <QMouseEvent>
-#include <QResizeEvent>
 #include <QImage>
+#include <QMap>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
 #include <QRect>
+
+#ifdef USE_QT_CHARTS
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QValueAxis>
+#endif
+#include <QRegion>
+#include <QResizeEvent>
+#include <QSet>
+#include <QToolButton>
+#include <QUrl>
+#include <algorithm>
+#include "excelgenerator.h"
+
 
 // Helper: crop transparent margins around an icon to maximize visible size within given button
 static QPixmap cropTransparentMargins (const QPixmap &src)
@@ -22,7 +33,7 @@ static QPixmap cropTransparentMargins (const QPixmap &src)
     if (src.isNull ())
         return src;
 
-    QImage img = src.toImage ().convertToFormat (QImage::Format_ARGB32);
+    QImage img	= src.toImage ().convertToFormat (QImage::Format_ARGB32);
     const int w = img.width ();
     const int h = img.height ();
 
@@ -80,13 +91,13 @@ public:
 protected:
     bool hitButton (const QPoint &pos) const override
     {
-        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const int trim		= qMin (horizontalTrimPx, width () / 2 - 1);
         const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
         return allowed.contains (pos);
     }
     void mousePressEvent (QMouseEvent *e) override
     {
-        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const int trim		= qMin (horizontalTrimPx, width () / 2 - 1);
         const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
         if (! allowed.contains (e->pos ()))
         {
@@ -97,7 +108,7 @@ protected:
     }
     void mouseReleaseEvent (QMouseEvent *e) override
     {
-        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const int trim		= qMin (horizontalTrimPx, width () / 2 - 1);
         const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
         if (! allowed.contains (e->pos ()))
         {
@@ -108,7 +119,7 @@ protected:
     }
     void mouseDoubleClickEvent (QMouseEvent *e) override
     {
-        const int trim = qMin (horizontalTrimPx, width () / 2 - 1);
+        const int trim		= qMin (horizontalTrimPx, width () / 2 - 1);
         const QRect allowed = rect ().adjusted (trim, 0, -trim, 0);
         if (! allowed.contains (e->pos ()))
         {
@@ -126,12 +137,12 @@ protected:
         QPixmap pm = icon ().pixmap (iconSize ());
         if (! pm.isNull ())
         {
-            const int base = qMin (width (), height ());
+            const int base	 = qMin (width (), height ());
             const int target = qMax (1, qRound (base * 0.88));
             const QSize targetSize (target, target);
             const QPixmap scaled = pm.scaled (targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            const int x = (width () - scaled.width ()) / 2;
-            const int y = (height () - scaled.height ()) / 2;
+            const int x			 = (width () - scaled.width ()) / 2;
+            const int y			 = (height () - scaled.height ()) / 2;
             painter.drawPixmap (x, y, scaled);
         }
     }
@@ -146,16 +157,16 @@ protected:
         {
             switch (event->type ())
             {
-            case QEvent::MouseButtonPress:
-            case QEvent::MouseButtonRelease:
-            case QEvent::MouseButtonDblClick:
-            case QEvent::HoverEnter:
-            case QEvent::HoverMove:
-            case QEvent::HoverLeave:
-            case QEvent::Wheel:
-                return true; // swallow
-            default:
-                break;
+                case QEvent::MouseButtonPress:
+                case QEvent::MouseButtonRelease:
+                case QEvent::MouseButtonDblClick:
+                case QEvent::HoverEnter:
+                case QEvent::HoverMove:
+                case QEvent::HoverLeave:
+                case QEvent::Wheel:
+                    return true; // swallow
+                default:
+                    break;
             }
         }
         return QToolButton::eventFilter (obj, event);
@@ -163,7 +174,7 @@ protected:
 
 private:
     int horizontalTrimPx = 0;
-    QWidget *leftShield  = nullptr;
+    QWidget *leftShield	 = nullptr;
     QWidget *rightShield = nullptr;
 
     void updateShieldsGeometry ()
@@ -204,14 +215,14 @@ static QRegion alphaRegionFromPixmap (const QPixmap &src, int alphaThreshold = 1
         return {};
 
     const QImage img = src.toImage ().convertToFormat (QImage::Format_ARGB32);
-    const int w = img.width ();
-    const int h = img.height ();
+    const int w		 = img.width ();
+    const int h		 = img.height ();
 
     QRegion region;
     for (int y = 0; y < h; ++y)
     {
         const QRgb *line = reinterpret_cast<const QRgb *> (img.constScanLine (y));
-        int x = 0;
+        int x			 = 0;
         while (x < w)
         {
             while (x < w && qAlpha (line[x]) <= alphaThreshold)
@@ -232,7 +243,7 @@ static void applyIconMaskToToolButton (QToolButton *button, const QIcon &icon, c
 {
     if (! button)
         return;
-    const QPixmap pm = icon.pixmap (iconSize);
+    const QPixmap pm  = icon.pixmap (iconSize);
     const QRegion reg = alphaRegionFromPixmap (pm, 1);
     if (! reg.isEmpty ())
         button->setMask (reg);
@@ -297,7 +308,9 @@ void MainWindow::setupUI ()
 
 bool MainWindow::eventFilter (QObject *obj, QEvent *event)
 {
-    if (obj == gearButton && event && (event->type () == QEvent::MouseButtonPress || event->type () == QEvent::MouseButtonRelease || event->type () == QEvent::MouseButtonDblClick))
+    if (obj == gearButton && event &&
+        (event->type () == QEvent::MouseButtonPress || event->type () == QEvent::MouseButtonRelease ||
+         event->type () == QEvent::MouseButtonDblClick))
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         const QPoint pos = static_cast<QMouseEvent *> (event)->position ().toPoint ();
@@ -306,7 +319,7 @@ bool MainWindow::eventFilter (QObject *obj, QEvent *event)
 #endif
         // Trim 2mm on left and right from clickable zone
         const int twoMmPx = qRound (this->logicalDpiX () * 2.0 / 25.4);
-        QRect allowed = gearButton->rect ().adjusted (twoMmPx, 0, -twoMmPx, 0);
+        QRect allowed	  = gearButton->rect ().adjusted (twoMmPx, 0, -twoMmPx, 0);
         if (! allowed.contains (pos))
         {
             // ignore click outside allowed rect
@@ -341,7 +354,7 @@ void MainWindow::setupToolbar ()
     themeButton->setText (ThemeManager::currentTheme () == AppTheme::Dark ? tr ("Dark") : tr ("Light"));
     connect (themeButton, &QPushButton::clicked, this, &MainWindow::toggleTheme);
     // Wrap themeButton to enforce 2mm vertical spacing inside toolbar
-    QWidget *themeWrap = new QWidget (this);
+    QWidget *themeWrap			 = new QWidget (this);
     QVBoxLayout *themeWrapLayout = new QVBoxLayout (themeWrap);
     themeWrapLayout->setContentsMargins (0, twoMmPx, 0, twoMmPx);
     themeWrapLayout->setSpacing (0);
@@ -361,7 +374,7 @@ void MainWindow::setupToolbar ()
     langButton->setText (uiLanguage);
     connect (langButton, &QPushButton::clicked, this, &MainWindow::toggleLanguage);
     // Wrap langButton similarly for consistent vertical offset
-    QWidget *langWrap = new QWidget (this);
+    QWidget *langWrap			= new QWidget (this);
     QVBoxLayout *langWrapLayout = new QVBoxLayout (langWrap);
     langWrapLayout->setContentsMargins (0, twoMmPx, 0, twoMmPx);
     langWrapLayout->setSpacing (0);
@@ -372,14 +385,13 @@ void MainWindow::setupToolbar ()
     spacer->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
     mainToolbar->addWidget (spacer);
 
-    const bool isDark	 = (ThemeManager::currentTheme () == AppTheme::Dark);
+    const bool isDark = (ThemeManager::currentTheme () == AppTheme::Dark);
     // Load gear icon and crop transparent margins to keep real visible size large
-    const QPixmap gearPmRaw = (ThemeManager::currentTheme () == AppTheme::Dark)
-                                      ? QPixmap (":/icons/SettingsGear.png")
-                                      : QPixmap (":/icons/BlackSettingsGear.png");
+    const QPixmap gearPmRaw		= (ThemeManager::currentTheme () == AppTheme::Dark) ? QPixmap (":/icons/SettingsGear.png")
+                                                                                    : QPixmap (":/icons/BlackSettingsGear.png");
     const QPixmap gearPmCropped = cropTransparentMargins (gearPmRaw);
     const QIcon gearIcon (gearPmCropped);
-    openEditorAction	 = new QAction (gearIcon, QString (), this);
+    openEditorAction = new QAction (gearIcon, QString (), this);
     connect (openEditorAction, &QAction::triggered, this,
              [this] ()
              {
@@ -800,13 +812,12 @@ void MainWindow::updateThemeStyles ()
     {
         const int twoMmPx = qRound (this->logicalDpiY () * 2.0 / 25.4);
         // Match toolbar background to window; keep only bottom border; buttons have no extra background
-        mainToolbar->setStyleSheet (
-                QString (
-                        "QToolBar { background: palette(window); border: none; border-bottom: 1px solid %1; } "
-                        "QToolBar QToolButton { margin-top: %2px; margin-bottom: %2px; padding: 0px; border: none; background: transparent; } "
-                        "QToolBar QToolButton:hover { background: transparent; } ")
-                        .arg (borderColor)
-                        .arg (twoMmPx));
+        mainToolbar->setStyleSheet (QString ("QToolBar { background: palette(window); border: none; border-bottom: 1px solid %1; } "
+                                             "QToolBar QToolButton { margin-top: %2px; margin-bottom: %2px; padding: 0px; border: none; "
+                                             "background: transparent; } "
+                                             "QToolBar QToolButton:hover { background: transparent; } ")
+                                            .arg (borderColor)
+                                            .arg (twoMmPx));
     }
 
     // Theme button style + text (neutral, no gradient)
@@ -869,7 +880,7 @@ QString MainWindow::buildPrimaryButtonStyle (bool isDark) const
 
 void MainWindow::updateButtonsPrimaryStyles ()
 {
-    const bool isDark	   = (ThemeManager::currentTheme () == AppTheme::Dark);
+    const bool isDark		   = (ThemeManager::currentTheme () == AppTheme::Dark);
     const QString primaryStyle = buildPrimaryButtonStyle (isDark);
 
     // Enforce equal heights regardless of icon/text paddings
@@ -905,7 +916,7 @@ void MainWindow::updateButtonsPrimaryStyles ()
 
 void MainWindow::setDropAreaDefaultStyle ()
 {
-    const bool isDark	  = (ThemeManager::currentTheme () == AppTheme::Dark);
+    const bool isDark		  = (ThemeManager::currentTheme () == AppTheme::Dark);
     const QString borderColor = isDark ? "#475569" : "#CBD5E1"; // slightly darker neutral
     const QString subtleBg	  = isDark ? "#1F2937" : "#E5E7EB"; // slightly grayer to stand out in light theme
 
@@ -1027,6 +1038,9 @@ void MainWindow::updateLanguageTexts ()
 #ifdef USE_QT_CHARTS
 void MainWindow::updateCharts ()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    using namespace QtCharts;
+#endif
     // Qt 6: types are available directly after including <QtCharts/...>
     if (! chartsLayout)
         return;
@@ -1067,8 +1081,8 @@ void MainWindow::updateCharts ()
 
 
     // Pie: Brands distribution (top N to keep it readable)
-    const int maxSlices		= 8;
-    QtCharts::QPieSeries *brandSeries = new QtCharts::QPieSeries ();
+    const int maxSlices				  = 8;
+    QPieSeries *brandSeries = new QPieSeries ();
     QList<QPair<QString, int>> brandPairs;
 
     for (auto it = brandCount.begin (); it != brandCount.end (); ++it)
@@ -1087,19 +1101,19 @@ void MainWindow::updateCharts ()
     if (others > 0)
         brandSeries->append (localized ("Others", "Другие"), others);
 
-    QtCharts::QChart *brandChart = new QtCharts::QChart ();
+    QChart *brandChart = new QChart ();
     brandChart->addSeries (brandSeries);
     brandChart->setTitle (localized ("Brands Distribution", "Распределение брендов"));
     brandChart->legend ()->setVisible (true);
     brandChart->legend ()->setAlignment (Qt::AlignBottom);
-    QtCharts::QChartView *brandView = new QtCharts::QChartView (brandChart);
+    QChartView *brandView = new QChartView (brandChart);
     brandView->setRenderHint (QPainter::Antialiasing);
     chartsLayout->addWidget (brandView, 1);
     brandChartView = brandView;
 
 
     // Pie: Categories distribution (top N)
-    QtCharts::QPieSeries *categorySeries = new QtCharts::QPieSeries ();
+    QPieSeries *categorySeries = new QPieSeries ();
     QList<QPair<QString, int>> categoryPairs;
 
     for (auto it = categoryCount.begin (); it != categoryCount.end (); ++it)
@@ -1119,50 +1133,50 @@ void MainWindow::updateCharts ()
         categorySeries->append (localized ("Others", "Другие"), others);
 
 
-    QtCharts::QChart *categoryChart = new QtCharts::QChart ();
+    QChart *categoryChart = new QChart ();
 
     categoryChart->addSeries (categorySeries);
     categoryChart->setTitle (localized ("Categories Distribution", "Распределение категорий"));
     categoryChart->legend ()->setVisible (true);
     categoryChart->legend ()->setAlignment (Qt::AlignBottom);
-    QtCharts::QChartView *categoryView = new QtCharts::QChartView (categoryChart);
+    QChartView *categoryView = new QChartView (categoryChart);
     categoryView->setRenderHint (QPainter::Antialiasing);
     chartsLayout->addWidget (categoryView, 1);
     categoryChartView = categoryView;
 
     // Bar - Summary
-    QtCharts::QBarSet *productsSet  = new QtCharts::QBarSet (localized ("Products", "Товары"));
-    QtCharts::QBarSet *tagsSet	  = new QtCharts::QBarSet (localized ("Tags", "Ценники"));
-    QtCharts::QBarSet *discountsSet = new QtCharts::QBarSet (localized ("With Discount", "Со скидкой"));
+    QBarSet *productsSet	= new QBarSet (localized ("Products", "Товары"));
+    QBarSet *tagsSet		= new QBarSet (localized ("Tags", "Ценники"));
+    QBarSet *discountsSet = new QBarSet (localized ("With Discount", "Со скидкой"));
 
     *productsSet << totalProducts;
     *tagsSet << totalTags;
     *discountsSet << productsWithDiscount;
 
 
-    QtCharts::QBarSeries *barSeries = new QtCharts::QBarSeries ();
+    QBarSeries *barSeries = new QBarSeries ();
     barSeries->append (productsSet);
     barSeries->append (tagsSet);
     barSeries->append (discountsSet);
 
-    QtCharts::QChart *barChart = new QtCharts::QChart ();
+    QChart *barChart = new QChart ();
     barChart->addSeries (barSeries);
     barChart->setTitle (localized ("Summary", "Сводка"));
 
     QStringList categoriesAxis;
     categoriesAxis << localized ("Total", "Всего");
-    QtCharts::QBarCategoryAxis *axisX = new QtCharts::QBarCategoryAxis ();
+    QBarCategoryAxis *axisX = new QBarCategoryAxis ();
     axisX->append (categoriesAxis);
     barChart->addAxis (axisX, Qt::AlignBottom);
     barSeries->attachAxis (axisX);
 
-    QtCharts::QValueAxis *axisY = new QtCharts::QValueAxis ();
+    QValueAxis *axisY = new QValueAxis ();
     axisY->setLabelFormat ("%d");
     axisY->setTitleText (localized ("Count", "Количество"));
     barChart->addAxis (axisY, Qt::AlignLeft);
     barSeries->attachAxis (axisY);
 
-    QtCharts::QChartView *summaryView = new QtCharts::QChartView (barChart);
+    QChartView *summaryView = new QChartView (barChart);
     summaryView->setRenderHint (QPainter::Antialiasing);
     chartsLayout->addWidget (summaryView, 1);
     summaryBarChartView = summaryView;
