@@ -1027,7 +1027,6 @@ void MainWindow::updateLanguageTexts ()
 #ifdef USE_QT_CHARTS
 void MainWindow::updateCharts ()
 {
-    using namespace QtCharts; // Limit QtCharts symbols to this function for Qt5 compatibility
     // Qt 6: types are available directly after including <QtCharts/...>
     if (! chartsLayout)
         return;
@@ -1069,7 +1068,7 @@ void MainWindow::updateCharts ()
 
     // Pie: Brands distribution (top N to keep it readable)
     const int maxSlices		= 8;
-    QPieSeries *brandSeries = new QPieSeries ();
+    QtCharts::QPieSeries *brandSeries = new QtCharts::QPieSeries ();
     QList<QPair<QString, int>> brandPairs;
 
     for (auto it = brandCount.begin (); it != brandCount.end (); ++it)
@@ -1088,18 +1087,19 @@ void MainWindow::updateCharts ()
     if (others > 0)
         brandSeries->append (localized ("Others", "Другие"), others);
 
-    QChart *brandChart = new QChart ();
+    QtCharts::QChart *brandChart = new QtCharts::QChart ();
     brandChart->addSeries (brandSeries);
     brandChart->setTitle (localized ("Brands Distribution", "Распределение брендов"));
     brandChart->legend ()->setVisible (true);
     brandChart->legend ()->setAlignment (Qt::AlignBottom);
-    brandChartView = new QChartView (brandChart);
-    brandChartView->setRenderHint (QPainter::Antialiasing);
-    chartsLayout->addWidget (brandChartView, 1);
+    QtCharts::QChartView *brandView = new QtCharts::QChartView (brandChart);
+    brandView->setRenderHint (QPainter::Antialiasing);
+    chartsLayout->addWidget (brandView, 1);
+    brandChartView = brandView;
 
 
     // Pie: Categories distribution (top N)
-    QPieSeries *categorySeries = new QPieSeries ();
+    QtCharts::QPieSeries *categorySeries = new QtCharts::QPieSeries ();
     QList<QPair<QString, int>> categoryPairs;
 
     for (auto it = categoryCount.begin (); it != categoryCount.end (); ++it)
@@ -1119,50 +1119,52 @@ void MainWindow::updateCharts ()
         categorySeries->append (localized ("Others", "Другие"), others);
 
 
-    QChart *categoryChart = new QChart ();
+    QtCharts::QChart *categoryChart = new QtCharts::QChart ();
 
     categoryChart->addSeries (categorySeries);
     categoryChart->setTitle (localized ("Categories Distribution", "Распределение категорий"));
     categoryChart->legend ()->setVisible (true);
     categoryChart->legend ()->setAlignment (Qt::AlignBottom);
-    categoryChartView = new QChartView (categoryChart);
-    categoryChartView->setRenderHint (QPainter::Antialiasing);
-    chartsLayout->addWidget (categoryChartView, 1);
+    QtCharts::QChartView *categoryView = new QtCharts::QChartView (categoryChart);
+    categoryView->setRenderHint (QPainter::Antialiasing);
+    chartsLayout->addWidget (categoryView, 1);
+    categoryChartView = categoryView;
 
     // Bar - Summary
-    QBarSet *productsSet  = new QBarSet (localized ("Products", "Товары"));
-    QBarSet *tagsSet	  = new QBarSet (localized ("Tags", "Ценники"));
-    QBarSet *discountsSet = new QBarSet (localized ("With Discount", "Со скидкой"));
+    QtCharts::QBarSet *productsSet  = new QtCharts::QBarSet (localized ("Products", "Товары"));
+    QtCharts::QBarSet *tagsSet	  = new QtCharts::QBarSet (localized ("Tags", "Ценники"));
+    QtCharts::QBarSet *discountsSet = new QtCharts::QBarSet (localized ("With Discount", "Со скидкой"));
 
     *productsSet << totalProducts;
     *tagsSet << totalTags;
     *discountsSet << productsWithDiscount;
 
 
-    QBarSeries *barSeries = new QBarSeries ();
+    QtCharts::QBarSeries *barSeries = new QtCharts::QBarSeries ();
     barSeries->append (productsSet);
     barSeries->append (tagsSet);
     barSeries->append (discountsSet);
 
-    QChart *barChart = new QChart ();
+    QtCharts::QChart *barChart = new QtCharts::QChart ();
     barChart->addSeries (barSeries);
     barChart->setTitle (localized ("Summary", "Сводка"));
 
     QStringList categoriesAxis;
     categoriesAxis << localized ("Total", "Всего");
-    QBarCategoryAxis *axisX = new QBarCategoryAxis ();
+    QtCharts::QBarCategoryAxis *axisX = new QtCharts::QBarCategoryAxis ();
     axisX->append (categoriesAxis);
     barChart->addAxis (axisX, Qt::AlignBottom);
     barSeries->attachAxis (axisX);
 
-    QValueAxis *axisY = new QValueAxis ();
+    QtCharts::QValueAxis *axisY = new QtCharts::QValueAxis ();
     axisY->setLabelFormat ("%d");
     axisY->setTitleText (localized ("Count", "Количество"));
     barChart->addAxis (axisY, Qt::AlignLeft);
     barSeries->attachAxis (axisY);
 
-    summaryBarChartView = new QChartView (barChart);
-    summaryBarChartView->setRenderHint (QPainter::Antialiasing);
-    chartsLayout->addWidget (summaryBarChartView, 1);
+    QtCharts::QChartView *summaryView = new QtCharts::QChartView (barChart);
+    summaryView->setRenderHint (QPainter::Antialiasing);
+    chartsLayout->addWidget (summaryView, 1);
+    summaryBarChartView = summaryView;
 }
 #endif
