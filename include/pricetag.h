@@ -1,7 +1,6 @@
 #pragma once
 
-#include <QMap>
-#include <QString>
+#include "Common.h"
 
 
 class PriceTag

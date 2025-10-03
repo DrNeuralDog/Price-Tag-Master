@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QList>
-#include <QObject>
-#include <QString>
 #include "pricetag.h"
 #include "tagtemplate.h"
 

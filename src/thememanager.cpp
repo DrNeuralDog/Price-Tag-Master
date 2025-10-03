@@ -96,6 +96,8 @@ QString ThemeManager::buildLightQss ()
      QPushButton:hover { background: #F3F6FB; }
      QPushButton:focus { border-color: #2563EB; }
      QPushButton:disabled { background: #F1F5F9; color: #94A3B8; border-color: #E2E8F0; }
+     /* Language toggle button: override global pushbutton padding/height */
+     QPushButton#lang { height: 28px; min-width: 40px; max-width: 40px; padding: 0; border-radius: 14px; }
      /* Primary button helper via objectName="primary" */
      QPushButton#primary {
          color: #FFFFFF;

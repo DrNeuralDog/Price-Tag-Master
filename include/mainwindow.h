@@ -1,38 +1,5 @@
 #pragma once
 
-#include <QAction>
-#include <QComboBox>
-#include <QDragEnterEvent>
-#include <QDragLeaveEvent>
-#include <QDragMoveEvent>
-#include <QDropEvent>
-#include <QFileDialog>
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QMainWindow>
-#include <QMessageBox>
-#include <QMimeData>
-#include <QProgressBar>
-#include <QPushButton>
-#include <QSettings>
-#include <QString>
-#include <QTabWidget>
-#include <QTableWidget>
-#include <QTextEdit>
-#include <QToolBar>
-#include <QToolButton>
-#include <QVBoxLayout>
-
-#include "configmanager.h"
-#include "excelgenerator.h"
-#include "excelparser.h"
-#include "pricetag.h"
-#include "templateeditor.h"
-#include "templateeditordialog.h"
-#include "thememanager.h"
-#include "wordgenerator.h"
-
 #ifdef USE_QT_CHARTS
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QBarSeries>
@@ -42,6 +9,21 @@
 #include <QtCharts/QPieSeries>
 #include <QtCharts/QValueAxis>
 #endif
+
+#include "configmanager.h"
+#include "excelgenerator.h"
+#include "excelparser.h"
+#include "templateeditor.h"
+#include "templateeditordialog.h"
+#include "thememanager.h"
+#include "wordgenerator.h"
+
+
+// Necessary for compatibility of builds with MinGw compilers for Qt 5 and 6 versions
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+using namespace QtCharts;
+#endif
+// Qt 6: types are available directly after including <QtCharts/...>
 
 
 class MainWindow: public QMainWindow
@@ -112,10 +94,10 @@ private:
 
 
 #ifdef USE_QT_CHARTS
-    QWidget *chartsContainer		= nullptr;
-    QHBoxLayout *chartsLayout		= nullptr;
-    QWidget *brandChartView		= nullptr;
-    QWidget *categoryChartView	= nullptr;
+    QWidget *chartsContainer	 = nullptr;
+    QHBoxLayout *chartsLayout	 = nullptr;
+    QWidget *brandChartView		 = nullptr;
+    QWidget *categoryChartView	 = nullptr;
     QWidget *summaryBarChartView = nullptr;
 #endif
 
@@ -144,4 +126,43 @@ private:
     void setDropAreaDefaultStyle ();
     void setDropAreaHoverStyle ();
     void setDropAreaSuccessStyle ();
+
+    // UI helpers
+    int mmToPxX (double mm) const;
+    int mmToPxY (double mm) const;
+
+    // Toolbar helpers
+    void addToolbarLeftPadding ();
+    void initThemeButtonWithWrapper (int twoMmPx);
+    void addLangButtonWithWrapper (int twoMmPx);
+    void addToolbarExpandingSpacer ();
+    void setupOpenEditorAction ();
+    void setupGearToolButton ();
+
+    // Drag-n-Drop helpers
+    bool mimeHasXlsx (const QMimeData *mime) const;
+    QString firstXlsxFromMime (const QMimeData *mime) const;
+    QPoint mapGlobalToDropArea (const QPoint &globalPos) const;
+    bool isInsideDropArea (const QPoint &posInDrop) const;
+    void updateDropVisualOnEnter (const QPoint &posInDrop, QDragEnterEvent *event);
+    void updateDropVisualOnMove (const QPoint &posInDrop, QDragMoveEvent *event);
+
+    // Statistics helpers
+    QString buildStatisticsText () const;
+
+#ifdef USE_QT_CHARTS
+    // Charts helpers (declarations avoid exposing QtCharts types in signatures)
+    void clearChartsLayout ();
+    void aggregateChartData (QMap<QString, int> &brandCount, QMap<QString, int> &categoryCount, int &totalProducts, int &totalTags,
+                             int &productsWithDiscount) const;
+    void buildBrandChart (const QMap<QString, int> &brandCount);
+    void buildCategoryChart (const QMap<QString, int> &categoryCount);
+    void buildSummaryBarChart (int totalProducts, int totalTags, int productsWithDiscount);
+#endif
+
+    // Theme styling helpers
+    void styleToolbarFrame (int twoMmPx, const QString &borderColor);
+    void styleThemeButton (bool isDark);
+    void styleLanguageButton (bool isDark);
+    void updateGearButtonIconAndSize (bool isDark);
 };

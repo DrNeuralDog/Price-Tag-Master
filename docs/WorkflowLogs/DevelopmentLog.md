@@ -1,3 +1,7 @@
+[REVERTED 2025-10-03] Запись снята: правки Excel генератора (A4 -10%, пунктирные A4 рамки) отменены по запросу пользователя; код возвращён к предыдущей версии
+[2025-10-02 16:36:00] Откат дефолтов шаблона: вернул `PriceLeft` к центрированному стилю и тексту "9 990" в `include/tagtemplate.h`; изменена генерация: Excel/Word при отсутствии скидки всегда ставят слева метку "Цена: " с левым выравниванием, правее — текущая цена с " =" - Успешно
+[2025-10-02 16:21:00] Обновлён дефолт поля цены: вместо цифры "9 990" теперь метка "Цена: "; выравнивание по умолчанию для `PriceLeft` изменено на левое в `include/tagtemplate.h` - Успешно
+[2025-09-30 10:00:00] Рефакторинг parseDataRow в excelparser.cpp: добавлены приватные хелперы, логика неизменна - Успешно
 [2025-09-25 01:05] Excel: внедрён RichString с невидимыми '*' (белый цвет) для имитации ведущих пробелов - Успех
 [2025-09-25 01:09] Excel: эксперимент — замена ведущих пробелов на буквы 'П' для диагностики - Успех
 [2025-09-25 00:58] Excel: дополнительный обход — ведущие пробелы заменяются на hair space (U+200A) после учёта indent - Успех
@@ -90,3 +94,35 @@
 2025-09-26 16:10:00] Кроссплатформенность: почистил CMake — удалил ручные флаги -std=c++17 и -fPIC (полагаться на CMAKE_CXX_STANDARD/PIC), убрал дублирующее добавление resources.qrc для Qt5, исключил LinguistTools из find_package (не используется); ресурсы .ico/.jpg убраны из qrc как необязательные для Linux/macOS - Успех
 [
 2025-09-26 16:30:00] Аудит кроссплатформенности: проверены исходники на WinAPI/ActiveX использование — WinAPI отсутствует; ActiveX подключен условно (WIN32). Проверены пути конфигов: Windows — рядом с EXE; Unix/macOS — AppDataLocation. Проверены ресурсы: .ico не включён в qrc. Предложены улучшения (опции ENABLE_QT_CHARTS, генерация .desktop/.app при install) — ожидает подтверждения - Успех (аудит)
+[2025-09-30 00:00:00] Рефакторинг: разбит длинный метод `MainWindow::updateCharts()` на подметоды (`clearChartsLayout`, `aggregateChartData`, `buildBrandChart`, `buildCategoryChart`, `buildSummaryBarChart`) без изменения логики и поведения; объявления добавлены в `include/mainwindow.h`; линтер — без ошибок - Success
+[2025-09-30 00:20:00] Рефакторинг: `setupToolbar()` вынесен в хелперы (`addToolbarLeftPadding`, `initThemeButtonWithWrapper`, `addLangButtonWithWrapper`, `addToolbarExpandingSpacer`, `setupOpenEditorAction`, `setupGearToolButton`); поведение без изменений - Success
+[2025-09-30 00:22:00] Рефакторинг: DnD-обработчики вынесены в хелперы (`mimeHasXlsx`, `firstXlsxFromMime`, `mapGlobalToDropArea`, `isInsideDropArea`, `updateDropVisualOnEnter`, `updateDropVisualOnMove`); логика без изменений - Success
+[2025-09-30 00:25:00] Рефакторинг: `showStatistics()` — формирование текста вынесено в `buildStatisticsText()`; логика без изменений - Success
+[2025-09-30 00:30:00] Рефакторинг: `updateThemeStyles()` переведён на хелперы (`styleToolbarFrame`, `styleThemeButton`, `styleLanguageButton`, `updateGearButtonIconAndSize`); поведение сохранено - Success
+[2025-09-30 00:45:00] Рефакторинг: `excelparser.cpp` — `parseExcelFile()` разбит на хелперы (`quickZipSignatureCheck`, `preScanZipForWorkbookAndSheets`, `readAndValidateDimension`, `parseAllRows`); логика не изменена - Success
+[2025-09-30 00:55:00] Рефакторинг: `ExcelParser::findHeaders()` разбит на хелперы (`resetColumnMapping`, `buildHeaderColumnMap`, `tryAssignHeaderMatch`); логика без изменений - Success
+[2025-09-30 19:25:00] UI: увеличен размер кнопки смены языка на тулбаре — высота 28px, минимальная ширина 42px; надписи RU/EN умещаются - Success
+[
+2025-09-30 20:05:00] UI Light theme bug: клиппинг текста в кнопке языка (видна только центральная часть) - Исправлено: убран отрицательный паддинг, в стилях кнопки задано фиксированное окно размеров (min/max 40×28) и font-weight; стили применяются в `MainWindow::styleLanguageButton` - Success
+[2025-09-30 21:06:00] Рефакторинг: `ExcelGenerator::generateExcelDocument()` разобран на хелперы (`createTagFormats`, `configureColumnsForTagWidth`, `setTagRowHeights`, `writeCompanyHeaderRow`, `writeBrandRow`, `writeCategoryRow`, `writeBrandCountryRow`, `writeManufacturingPlaceRow`, `writeMaterialRow`, `writeArticleRow`, `writePriceRow`, `writeSupplierRow`, `splitAddressTwoLines`, `writeAddressRows`, `renderTag`); добавлен короткий оркестратор; логика и визуальный результат не изменены - Success
+[2025-09-30 21:45:30] Рефакторинг: `src/configmanager.cpp` разбит на хелперы в анонимном неймспейсе (`tagTemplateFileName`, `ensureDirExists`, OS-специфичные билдеры пути, `readFileAll`, `writeFileAll`, `parseTagTemplateFromJson`); публичный API неизменен; логика и поведение сохранены. Линтер чисто - Success
+[2025-10-01 12:00:00] Рефакторинг метода applyLanguage в templateeditor.cpp: разбит на специализированные приватные методы (updateGroupTitles, updateFormLabels, updateComboFieldTexts, updateAlignmentOptions, updateButtonTexts) без изменения логики - Успешно
+[2025-10-01 12:05:00] Добавлены объявления приватных методов рефакторинга applyLanguage в include/templateeditor.h для соответствия стандартам C++ - Успешно
+[2025-10-01 12:10:00] Рефакторинг метода initializeUi в templateeditor.cpp: разбит на специализированные приватные методы (setupSplitterAndPanels, configureSpinBoxes, createFormsAndGroups, setupStyleControls, createTypographyGroup, createViewAndScene, setupZoomControls, connectSignals) без изменения логики - Успешно
+[2025-10-01 12:15:00] Добавлены объявления приватных методов рефакторинга initializeUi в include/templateeditor.h для соответствия стандартам C++ - Успешно
+[2025-10-01 12:20:00] Исправлен порядок панелей в сплиттере initializeUi: редактирование слева, вью справа; настроены stretch factors для правильных размеров - Успешно
+[2025-10-01 12:25:00] Исправлена ошибка компиляции в setupZoomControls: добавлен параметр rightPanel и обновлены объявления в заголовке - Успешно
+[2025-10-01 12:30:00] Исправлен порядок панелей в сплиттере: вью слева, формы справа, как ожидалось пользователем - Успешно
+[2025-10-01 12:35:00] Увеличена ширина панели форм (окно редактирования ценников) на ~10% через stretch factor - Успешно
+[2025-10-01 12:40:00] Исправлено: увеличена ширина вью (окно редактирования ценников) на ~10%, формы стандартные - Успешно
+[2025-10-01 12:45:00] Увеличена ширина вью ещё больше (на ~20%) для заметного эффекта - Успешно
+[2025-10-01 12:50:00] Установлены минимальные ширины для панелей и увеличен stretch factor вью до 2:1 для заметного увеличения окна редактирования - Успешно
+[2025-10-01 15:30:00] Настроена иконка приложения для панели задач Windows: добавлен PriceTagMangerIcon.ico в ресурсы Qt, обновлен app_icon.rc для использования ресурса вместо внешнего файла - Успешно
+[2025-10-01 19:35:00] Исправлена ошибка сборки Windows ресурсов: изменен путь в app_icon.rc с Qt resource syntax на файловый путь для windres.exe - Успешно
+[2025-10-01 19:40:00] Исправлен путь к иконке в app_icon.rc: указан относительный путь ../resources/icons/PriceTagMangerIcon.ico от build директории - Успешно
+[2025-10-01 19:45:00] Исправлен путь к иконке в app_icon.rc: изменен на ../../resources/icons/PriceTagMangerIcon.ico для корректного доступа из build/Debug директории - Успешно
+[2025-10-01 19:50:00] Пользователь сообщил о повторной ошибке - применен абсолютный путь к файлу иконки в app_icon.rc для надежной работы windres.exe - Успешно
+[2025-10-02 14:30:00] Структурирован CMakeLists.txt файл с четкими разделителями в стиле ===================================================================================================================== для лучшей читаемости и организации кода - Успешно
+[2025-10-02 15:00:00] Исправлены ошибки сборки после реструктуризации CMakeLists.txt - перемещен блок конфигурации цели после её создания, проект конфигурируется без ошибок - Успешно
+[2025-10-03 18:27:00] Исправлена ошибка windres: файл иконки не найден. Обновил `resources/windows/app_icon.rc` на относительный путь `../../resources/icons/PriceTagManagerIcon.ico`; сборка прошла, EXE линкнулся - Успешно
++[2025-10-03 20:20:00] Добавлен pageSafetyMm = 1.0 мм в расчёт количества рядов на страницу (nRows) для консервативного вычисления и предотвращения переносов строк ценников между страницами - Изменён src/excelgenerator.cpp

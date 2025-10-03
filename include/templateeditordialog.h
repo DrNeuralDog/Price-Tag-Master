@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QPushButton>
-#include <QVBoxLayout>
+#include "Common.h"
 
 
 class TemplateEditorWidget;
@@ -22,6 +19,11 @@ public:
 
 
 private:
+    void setupUI ();
+    void setupButtons ();
+    void setupConnections ();
+    QString getLocalizedText (const QString &english, const QString &russian) const;
+
     TemplateEditorWidget *editor;
     QDialogButtonBox *buttons;
     QPushButton *saveButton;

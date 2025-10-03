@@ -1,13 +1,8 @@
-<!DOCTYPE RCC>
 <RCC>
     <qresource prefix="/">
-        <file>icons/SettingsGear.png</file>
-        <file>icons/BlackSettingsGear.png</file>
-        <file>icons/FullBlackSettingsGear.png</file>
-        <file>icons/tag.png</file>
-        <file>icons/PriceTagManagerIcon.png</file>
-        <!-- .ico специфичен для Windows; .jpg не нужен как иконка приложения -->
-        <!-- Удаляем из ресурса, чтобы не тянуть платформенно-специфичные артефакты на Linux/macOS -->
+        <file>sprites/SettingsGear.png</file>
+        <file>sprites/BlackSettingsGear.png</file>
+        <file>sprites/tag.png</file>
+        <file>icons/PriceTagManagerIcon.ico</file>
     </qresource>
-    <!-- Translations are embedded via CMake's qt_add_resources(translations_qm) -->
-</RCC> 
+</RCC>

@@ -33,11 +33,10 @@ public:
     };
 
     void setLayoutConfig (const DocxLayoutConfig &cfg) { layoutConfig = cfg; }
-    DocxLayoutConfig layout () const { return layoutConfig; }
-
     void setTagTemplate (const TagTemplate &tpl) { tagTemplate = tpl; }
-    TagTemplate tagTpl () const { return tagTemplate; }
 
+    DocxLayoutConfig layout () const { return layoutConfig; }
+    TagTemplate tagTpl () const { return tagTemplate; }
 
     bool generateWordDocument (const QList<PriceTag> &priceTags, const QString &outputPath);
 
@@ -49,9 +48,7 @@ private:
 
     static inline int mmToTwips (double mm) { return static_cast<int> (mm * 1440.0 / 25.4 + 0.5); }
 
-
     static void computeGrid (const DocxLayoutConfig &cfg, int &nCols, int &nRows);
-
 
     void writeContentTypes (QXlsx::ZipWriter &zip);
     void writeRelsRoot (QXlsx::ZipWriter &zip);
@@ -60,8 +57,34 @@ private:
     void writeSettings (QXlsx::ZipWriter &zip);
     void writeDocumentXml (QXlsx::ZipWriter &zip, const QList<PriceTag> &expandedTags);
 
-
     QString buildDocumentXml (const QList<PriceTag> &expandedTags);
+
+
+private:
+    // Structure to hold document dimensions and margins
+    struct DocumentDimensions
+    {
+        int pageWidthTwips;
+        int pageHeightTwips;
+        int marginLeft;
+        int marginRight;
+        int marginTop;
+        int marginBottom;
+        int tagWidth;
+        int columns;
+        int rows;
+    };
+
+    // Helper method to calculate document dimensions
+    DocumentDimensions calculateDocumentDimensions (const DocxLayoutConfig &layoutConfig) const;
+
+    // Helper methods for building document XML
+    QString createDocumentHeader () const;
+    QString createOuterTableStructure (int tableWidth) const;
+    QString createOuterTableGrid (int columns, int tagWidth) const;
+
+    QString addTableRows (const QList<PriceTag> &expandedTags, int columns, int tagWidth) const;
+    QString addSectionProperties (const DocumentDimensions &dims) const;
 
 
     // Utilities:

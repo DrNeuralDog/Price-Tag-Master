@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QApplication>
-#include <QPalette>
-#include <QSettings>
-#include <QString>
+#include "Common.h"
 
 
 enum class AppTheme
@@ -17,15 +14,18 @@ class ThemeManager
 {
 public:
     static AppTheme loadThemeFromSettings (QSettings &settings);
+
     static void saveThemeToSettings (QSettings &settings, AppTheme theme);
 
     static void applyThemeToApplication (AppTheme theme);
+
     static AppTheme currentTheme ();
 
 
 private:
     static QPalette buildLightPalette ();
     static QPalette buildDarkPalette ();
+
     static QString buildLightQss ();
     static QString buildDarkQss ();
 };

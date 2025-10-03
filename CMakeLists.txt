@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.16)
 project(PriceTagMaster VERSION 1.0.0 LANGUAGES CXX)
 
 
+# =====================================================================================================================
+# БАЗОВЫЕ НАСТРОЙКИ ПРОЕКТА И СБОРКИ
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,10 +20,20 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+# Явно добавляем флаг -std=c++17 в CMAKE_CXX_FLAGS
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+
+#Без этой команды подключить C++ версии старшей чем 14 не получится для Windows!
+add_compile_options(
+     $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
+)
+
 message(STATUS "Using C++ standard: ${CMAKE_CXX_STANDARD}")
+
 
 #Обеспечивает выполнение автоматического запуска qwindeploy после сборки проекта - раскомментировать только, если вы уверенны что система сборки позволяет выполнять кастомные команды cmake
 #set(WHETHER_QTWINDEPLOY_NECESSARY ON)
+
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # На Linux PIC включается автоматически для SHARED/LIBRARY; для EXECUTABLE не требуется
@@ -34,17 +47,27 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 
-#Без этой команды подключить C++ версии старшей чем 14 не получится!
-# -std=c++17 выставляется через CMAKE_CXX_STANDARD; лишние флаги не добавляем
-
-
 cmake_policy(SET CMP0091 NEW)
-
-add_subdirectory(3rdparty/qxlsx/QXlsx)
 
 
 # Отключение поиска Vulkan, если он не нужен
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)
+
+# =====================================================================================================================
+
+
+
+# =====================================================================================================================
+# ПОДКЛЮЧЕНИЕ СТОРОННИХ ЗАВИСИМОСТЕЙ
+
+add_subdirectory(3rdparty/qxlsx/QXlsx)
+
+# =====================================================================================================================
+
+
+
+# =====================================================================================================================
+# ПОДКЛЮЧЕНИЕ НЕОБХОДИМЫХ ПРОЕКТУ КОМПОНЕНТОВ QT
 
 # Find required Qt packages (Charts optional)
 find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Concurrent PrintSupport)
@@ -64,14 +87,40 @@ if (TARGET Qt${QT_VERSION_MAJOR}::Charts)
 endif ()
 
 
-# Qt projects includes:
+# Qt projects includes для последующего использования
 get_target_property(QtCore_Include_Dir Qt${QT_VERSION_MAJOR}::Core INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(QtWidget_Include_Dir Qt${QT_VERSION_MAJOR}::Widgets INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(QtConcurrent_Include_Dir Qt${QT_VERSION_MAJOR}::Concurrent INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(QtCore_Include_Dir Qt${QT_VERSION_MAJOR}::Core INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(QtPrintSupport_Include_Dir Qt${QT_VERSION_MAJOR}::PrintSupport INTERFACE_INCLUDE_DIRECTORIES)
+
+# =====================================================================================================================
 
 
-file(GLOB_RECURSE ALL_PROJECT_FILES "src/*.h" "src/*.cpp" "src/*.ui" "include/*.h" "include/*.cpp" "include/*.ui")
+
+# =====================================================================================================================
+# ПОДГОТОВКА ФАЙЛОВ ПРОЕКТА И ПУТЕЙ ВКЛЮЧЕНИЯ
+
+file(GLOB_RECURSE ALL_PROJECT_FILES "src/*.h" "src/*.cpp" "src/*.ui" "include/*.h" "include/*.cpp" "include/*.ui" "resources/*.qrc")
+
+# Сбор путей к директориям проекта для include
+set(PROJECT_PATHS "")
+file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true "src/*")
+
+foreach (SUBDIR IN LISTS SUBDIRS)
+    get_filename_component(ABS_SUBDIR "${SUBDIR}" ABSOLUTE)
+    if (IS_DIRECTORY "${ABS_SUBDIR}")
+        list(APPEND PROJECT_PATHS "${ABS_SUBDIR}")
+    endif ()
+endforeach ()
+
+list(APPEND PROJECT_PATHS "src/")
+
+# =====================================================================================================================
+
+
+
+# =====================================================================================================================
+# КРОССПЛАТФОРМЕННЫЕ КОНФИГУРАЦИИ И СВОЙСТВА ПРОЕКТА
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(
@@ -92,27 +141,20 @@ else ()
         add_executable(
                 ${PROJECT_NAME}
                 ${ALL_PROJECT_FILES}
+                include/Constants.h
+                include/Common.h
         )
     endif ()
 endif ()
 
-
-set(PROJECT_PATHS "")
-
-file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true "src/*")
-
-foreach (SUBDIR IN LISTS SUBDIRS)
-    get_filename_component(ABS_SUBDIR "${SUBDIR}" ABSOLUTE)
-
-    if (IS_DIRECTORY "${ABS_SUBDIR}")
-        list(APPEND PROJECT_PATHS "${ABS_SUBDIR}")
-    endif ()
-
-endforeach ()
-
-list(APPEND PROJECT_PATHS "src/")
+# =====================================================================================================================
 
 
+
+# =====================================================================================================================
+# КОНФИГУРАЦИЯ ЦЕЛЕВОГО ПРОЕКТА
+
+# Настройка include путей для проекта
 target_include_directories(
         ${PROJECT_NAME}
         PUBLIC
@@ -121,21 +163,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qxlsx/QXlsx/header
 )
 
-
-# Ensure new editor sources are linked even if CMake hasn't regenerated globs
-target_sources(
-        ${PROJECT_NAME}
-        PRIVATE
-        src/templateeditor.cpp
-        src/templateeditordialog.cpp
-        src/configmanager.cpp
-        include/templateeditor.h
-        include/templateeditordialog.h
-        include/configmanager.h
-        resources/resources.qrc
-)
-
-
+# Линковка библиотек Qt и сторонних зависимостей
 target_link_libraries(
         ${PROJECT_NAME}
         PUBLIC
@@ -146,10 +174,15 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::PrintSupport
         QXlsx
 )
+
+
+
+# Подключение Qt Charts если доступен
 if (HAVE_QT_CHARTS)
     target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::Charts)
     target_compile_definitions(${PROJECT_NAME} PRIVATE USE_QT_CHARTS)
 endif ()
+
 
 # AxContainer (ActiveX) is Windows-only; link it conditionally
 if (WIN32)
@@ -157,8 +190,12 @@ if (WIN32)
     target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::AxContainer)
 endif ()
 
+# =====================================================================================================================
 
-# Enable charts code paths only if Charts found (handled above)
+
+
+# =====================================================================================================================
+# НАСТРОЙКИ ПЛАТФОРМЕННЫХ ОСОБЕННОСТЕЙ
 
 # Embed Windows application icon into the executable
 if (WIN32)
@@ -169,10 +206,14 @@ endif ()
 # macOS bundle icon (.icns) support (expects resources/icons/AppIcon.icns if provided)
 if (APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
-    # Uncomment if an .icns is added later:
-    # set_source_files_properties(resources/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    # target_sources(${PROJECT_NAME} PRIVATE resources/icons/AppIcon.icns)
 endif ()
+
+# =====================================================================================================================
+
+
+
+# =====================================================================================================================
+# УСТАНОВКА ПРОЕКТА
 
 # Install
 install(TARGETS
@@ -190,7 +231,15 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+# =====================================================================================================================
+
+
+
+# =====================================================================================================================
+# ФИНАЛИЗАЦИЯ ПРОЕКТА ДЛЯ QT6
 
 if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif ()
+
+# =====================================================================================================================

@@ -3,9 +3,8 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QList>
-#include <QMap>
-#include <QString>
+
+#include "Common.h"
 
 
 enum class TagTextAlign
@@ -18,11 +17,11 @@ enum class TagTextAlign
 
 struct TagTextStyle
 {
-    QString fontFamily = "Times New Roman";
     int fontSizePt	   = 11;
     bool bold		   = false;
     bool italic		   = false;
     bool strike		   = false;
+    QString fontFamily = "Times New Roman";
     TagTextAlign align = TagTextAlign::Left;
 };
 
@@ -50,7 +49,6 @@ enum class TagField
 class TagTemplate
 {
 public:
-    // Geometry in millimeters:
     double tagWidthMm	  = 50.0;
     double tagHeightMm	  = 30.0;
     double marginLeftMm	  = 10.0;
@@ -60,10 +58,7 @@ public:
     double spacingHMm	  = 5.0;
     double spacingVMm	  = 5.0;
 
-    // Styles for individual fields:
     QMap<TagField, TagTextStyle> styles;
-
-    // Preview/static texts for fields:
     QMap<TagField, QString> texts;
 
 
@@ -73,6 +68,7 @@ public:
 
         if (it != styles.constEnd ())
             return it.value ();
+
 
         return defaultStyle (field);
     }
@@ -151,6 +147,8 @@ public:
             case TagField::Address:
                 return small7BoldIt;
         }
+
+
         return def;
     }
 
@@ -189,6 +187,8 @@ public:
             case TagField::Address:
                 return QObject::tr ("г. Москва, ул. Пушкина 1\nТЦ Пример, бутик 5");
         }
+
+
         return {};
     }
 
@@ -198,6 +198,7 @@ public:
 
         if (it != texts.constEnd ())
             return it.value ();
+
 
         return defaultText (field);
     }
@@ -209,6 +210,7 @@ public:
                 TagField::ManufacturingPlace, TagField::MaterialLabel, TagField::MaterialValue,	 TagField::ArticleLabel,
                 TagField::ArticleValue,		  TagField::PriceLeft,	   TagField::PriceRight,	 TagField::Signature,
                 TagField::SupplierLabel,	  TagField::SupplierValue, TagField::Address};
+
 
         return fields;
     }
@@ -229,11 +231,13 @@ public:
 
 
         QJsonArray stylesArr;
+
         // Emit style for EVERY field (falling back to defaults when not overridden)
         for (TagField f : allFields ())
         {
             const TagTextStyle &st = styleOrDefault (f);
             QJsonObject s;
+
             s["field"]		= static_cast<int> (f);
             s["fontFamily"] = st.fontFamily;
             s["fontSizePt"] = st.fontSizePt;
@@ -241,21 +245,28 @@ public:
             s["italic"]		= st.italic;
             s["strike"]		= st.strike;
             s["align"]		= static_cast<int> (st.align);
+
             stylesArr.append (s);
         }
+
         o["styles"] = stylesArr;
 
 
         QJsonArray textsArr;
+
         for (TagField f : allFields ())
         {
             const QString txt = textOrDefault (f);
             QJsonObject t;
+
             t["field"] = static_cast<int> (f);
             t["text"]  = txt;
+
             textsArr.append (t);
         }
+
         o["texts"] = textsArr;
+
 
         return o;
     }
@@ -274,7 +285,10 @@ public:
         t.spacingVMm	 = o.value ("spacingVMm").toDouble (t.spacingVMm);
 
         t.styles.clear ();
+
+
         const QJsonArray stylesArr = o.value ("styles").toArray ();
+
         for (const QJsonValue &v : stylesArr)
         {
             const QJsonObject s = v.toObject ();
@@ -292,9 +306,12 @@ public:
             st.align	  = static_cast<TagTextAlign> (s.value ("align").toInt (static_cast<int> (TagTextAlign::Left)));
             t.styles.insert (static_cast<TagField> (fieldInt), st);
         }
+
         t.texts.clear ();
 
+
         const QJsonArray textsArr = o.value ("texts").toArray ();
+
         for (const QJsonValue &v : textsArr)
         {
             const QJsonObject to = v.toObject ();
@@ -306,6 +323,7 @@ public:
             const QString txt = to.value ("text").toString (defaultText (static_cast<TagField> (fieldInt)));
             t.texts.insert (static_cast<TagField> (fieldInt), txt);
         }
+
 
         return t;
     }

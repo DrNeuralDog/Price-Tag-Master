@@ -3,51 +3,120 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QStandardPaths>
 
 
-QString ConfigManager::templateConfigFilePath ()
+namespace
 {
-    // Prefer storing next to the executable on Windows for portability
-    // On Unix-like systems, use writable AppData location
+    QString tagTemplateFileName () { return QStringLiteral ("TagTemplate.json"); }
+
+    bool ensureDirExists (QDir &dir)
+    {
+        if (! dir.exists ())
+            return dir.mkpath (".");
+
+
+        return true;
+    }
+
+
 #if defined(Q_OS_WIN)
-    const QString exeDir = QCoreApplication::applicationDirPath ();
-    QDir dir (exeDir);
-    if (! dir.exists ()) dir.mkpath (".");
-    return dir.filePath ("TagTemplate.json");
+    QString buildWindowsTemplatePath ()
+    {
+        const QString exeDir = QCoreApplication::applicationDirPath ();
+        QDir dir (exeDir);
+        ensureDirExists (dir);
+        return dir.filePath (tagTemplateFileName ());
+    }
 #else
-    const QString configDir = QStandardPaths::writableLocation (QStandardPaths::AppDataLocation);
-    QDir dir (configDir);
-    if (! dir.exists ()) dir.mkpath (".");
-    return dir.filePath ("TagTemplate.json");
+    QString buildUnixTemplatePath ()
+    {
+        const QString configDir = QStandardPaths::writableLocation (QStandardPaths::AppDataLocation);
+        QDir dir (configDir);
+        ensureDirExists (dir);
+        return dir.filePath (tagTemplateFileName ());
+    }
 #endif
-}
+
+    QString buildTemplatePathForCurrentOs ()
+    {
+#if defined(Q_OS_WIN)
+        return buildWindowsTemplatePath ();
+#else
+        return buildUnixTemplatePath ();
+#endif
+    }
+
+    bool readFileAll (const QString &path, QByteArray &outData)
+    {
+        QFile f (path);
+
+        if (! f.exists ())
+            return false;
+
+        if (! f.open (QIODevice::ReadOnly))
+            return false;
+
+        outData = f.readAll ();
+        f.close ();
+
+
+        return true;
+    }
+
+    bool writeFileAll (const QString &path, const QByteArray &data)
+    {
+        QDir dir = QFileInfo (path).dir ();
+
+        if (! ensureDirExists (dir))
+            return false;
+
+        QFile f (path);
+
+        if (! f.open (QIODevice::WriteOnly | QIODevice::Truncate))
+            return false;
+
+        const qint64 written = f.write (data);
+
+        f.close ();
+
+        return written >= 0;
+    }
+
+    bool parseTagTemplateFromJson (const QByteArray &data, TagTemplate &outTemplate)
+    {
+        QJsonParseError err{};
+
+        const QJsonDocument doc = QJsonDocument::fromJson (data, &err);
+
+        if (err.error != QJsonParseError::NoError || ! doc.isObject ())
+            return false;
+
+        outTemplate = TagTemplate::fromJson (doc.object ());
+
+
+        return true;
+    }
+} // namespace
+
+
+QString ConfigManager::templateConfigFilePath () { return buildTemplatePathForCurrentOs (); }
 
 
 bool ConfigManager::loadTemplate (TagTemplate &outTemplate)
 {
     const QString path = templateConfigFilePath ();
-    QFile f (path);
 
-    if (! f.exists ())
-        return false;
-    if (! f.open (QIODevice::ReadOnly))
-        return false;
+    QByteArray data;
 
-    const QByteArray data = f.readAll ();
-    f.close ();
+    if (! readFileAll (path, data))
 
-    QJsonParseError err{};
-    const QJsonDocument doc = QJsonDocument::fromJson (data, &err);
-
-    if (err.error != QJsonParseError::NoError || ! doc.isObject ())
         return false;
 
-    outTemplate = TagTemplate::fromJson (doc.object ());
 
-
-    return true;
+    return parseTagTemplateFromJson (data, outTemplate);
 }
 
 
@@ -55,16 +124,10 @@ bool ConfigManager::saveTemplate (const TagTemplate &tpl)
 {
     const QString path = templateConfigFilePath ();
     const QJsonDocument doc (tpl.toJson ());
-    QFile f (path);
-    QDir dir = QFileInfo (path).dir ();
+    const QByteArray bytes = doc.toJson (QJsonDocument::Indented);
 
-    if (! dir.exists ())
-        dir.mkpath (".");
-    if (! f.open (QIODevice::WriteOnly | QIODevice::Truncate))
+    if (! writeFileAll (path, bytes))
         return false;
-
-    f.write (doc.toJson (QJsonDocument::Indented));
-    f.close ();
 
     qDebug () << "Template saved to" << path;
 
