@@ -84,6 +84,10 @@ int main (int argc, char *argv[])
 {
     QApplication app (argc, argv);
 
+    // Ensure QSettings picks correct scope: set identity BEFORE creating QSettings
+    app.setApplicationName ("Price Tag Master");
+    app.setOrganizationName ("Price Tag DrND Inc.");
+    app.setOrganizationDomain ("");
 
     QSettings settings;
     const QIcon appIcon = buildAppIcon ();

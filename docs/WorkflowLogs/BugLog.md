@@ -1,3 +1,4 @@
+[2025-10-16 12:05:00] Настройки темы/языка не сохранялись между перезапусками - Причина: QSettings создавался до setApplicationName/OrganizationName (неверное хранилище); Решение: перенести установку имён приложения/организации до создания QSettings в main.cpp - Исправлено
 [REVERTED 2025-10-03] Запись снята: предложенное решение (A4 -10%, пунктирные рамки) отменено; требуется альтернативный подход
 [2025-09-30 19:06:31] Build error after refactor: calling non-const methods from const helper in ExcelParser (parseAllRows) - Fixed: marked findMaxDataRow/parseDataRow/validatePriceTag as const in header and cpp
 [2025-08-09 10:35:00] build error: Use of undeclared identifier 'refreshPreviewButton' in `src/mainwindow.cpp:227` - Removed obsolete references after replacing Preview tab with Template Editor; build ok

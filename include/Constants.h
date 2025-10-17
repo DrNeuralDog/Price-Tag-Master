@@ -12,3 +12,5 @@ static double mmToRowHeightPt (double mm) { return mm * points; }
 // Constants (A4 Portrait)
 const double pageA4WidthMm	= 210.0;
 const double pageA4HeightMm = 297.0;
+const double excelHeaderMm	= 7.62;
+const double excelFooterMm	= 7.62;

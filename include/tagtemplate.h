@@ -49,8 +49,8 @@ enum class TagField
 class TagTemplate
 {
 public:
-    double tagWidthMm	  = 50.0;
-    double tagHeightMm	  = 30.0;
+    double tagWidthMm	  = 46.0;
+    double tagHeightMm	  = 51.0;
     double marginLeftMm	  = 10.0;
     double marginTopMm	  = 10.0;
     double marginRightMm  = 10.0;

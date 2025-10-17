@@ -117,59 +117,75 @@ static QString replaceLeadingSpacesWithThin (const QString &s)
 
 
 // Compute how many tags fit per page taking into account the ACTUAL Excel row heights used
-static void computeGrid (const ExcelGenerator::ExcelLayoutConfig &cfg, int &nCols, int &nRows)
+static void computeGrid (const ExcelGenerator::ExcelLayoutConfig &cfg, int &nCols, int &nRows, double &pageUsedMm)
 {
-    // Physical page size (A4 portrait)
-    const double pageW = 210.0;
-    const double pageH = 297.0;
-
     // Excel default print margins (approx):
-    // Top/Bottom: 0.75 in = 19.05 mm; Left/Right: 0.7 in = 17.78 mm; Header/Footer: 0.3 in = 7.62 mm
-    const double excelTopMm	   = 19.05;
-    const double excelBottomMm = 19.05;
-    const double excelLeftMm   = 17.78;
-    const double excelRightMm  = 17.78;
-    const double excelHeaderMm = 7.62;
-    const double excelFooterMm = 7.62;
+    // Top/Bottom header/footer: 0.3 in = 7.62 mm; Left/Right non-printable ~1% of width
+    const double excelLeftMm  = pageA4WidthMm * .01;
+    const double excelRightMm = pageA4WidthMm * .01;
 
-    // Use the larger of our logical margins and Excel defaults to avoid optimistic overfill
-    const double effLeftMm	 = std::max (cfg.marginLeftMm, excelLeftMm);
-    const double effRightMm	 = std::max (cfg.marginRightMm, excelRightMm);
-    const double effTopMm	 = std::max (cfg.marginTopMm, excelTopMm);
-    const double effBottomMm = std::max (cfg.marginBottomMm, excelBottomMm);
+    // Use the larger of our logical side margins and Excel defaults to avoid optimistic overfill
+    const double effLeftMm	= std::max (cfg.marginLeftMm, excelLeftMm);
+    const double effRightMm = std::max (cfg.marginRightMm, excelRightMm);
 
-    // Available drawing area within printable region
-    const double availW = pageW - effLeftMm - effRightMm;
-    // Also subtract header/footer areas and one top blank row (originRow=2 -> ~4 mm)
+    // Top/bottom: user margins PLUS Excel header/footer zones (constant 7.62 mm each)
+    const double headerMm	 = 7.62;
+    const double footerMm	 = 7.62;
+    const double effTopMm	 = cfg.marginTopMm + headerMm;
+    const double effBottomMm = cfg.marginBottomMm + footerMm;
+
+    // Available drawing width; height also subtracts a small origin blank row (~4 mm)
+    const double availW			  = pageA4WidthMm - effLeftMm - effRightMm;
     const double originTopBlankMm = 4.0;
-    const double availH			  = pageH - effTopMm - effBottomMm - excelHeaderMm - excelFooterMm - originTopBlankMm;
+    const double pageH			  = pageA4HeightMm - effTopMm - effBottomMm - originTopBlankMm;
 
     const double effectiveHorizSpacingMm = 0.0;
 
     nCols = std::max (1, static_cast<int> (std::floor ((availW + effectiveHorizSpacingMm) / (cfg.tagWidthMm + effectiveHorizSpacingMm))));
 
-    // Vertical sizing: we set explicit row heights for each tag row using fixed point values (pt).
-    // Sum those row heights to get the real tag height in points, then convert to millimeters.
+    // Vertical sizing: prefer template-driven tag height (cfg.tagHeightMm); fallback to base sum of row heights
     const double rhPts[11] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 13.50, 9.75, 9.75};
-    double tagHeightPt	   = 0.0;
+    double baseTagPt	   = 0.0;
 
     for (double v : rhPts)
-        tagHeightPt += v;
+        baseTagPt += v;
 
-    const double tagHeightMmActual = tagHeightPt / points;
+    const double baseTagMm		   = baseTagPt / points;
+    const double tagHeightMmActual = (cfg.tagHeightMm > 0.0) ? cfg.tagHeightMm : baseTagMm;
 
     const double effectiveVertSpacingMm = 0.0;
-
-    // Add a small safety margin to eliminate edge-case overflows from rounding/printing
-    const double safetyMm = 2.0;
-    // Additional conservative margin to ensure no row spills to next page
-    const double pageSafetyMm = 1.0;
+    const double minGapMm				= 1.0; // keep minimal 1mm gap per page
 
     const double denom	   = tagHeightMmActual + effectiveVertSpacingMm;
-    const double numerator = std::max (0.0, availH - safetyMm - pageSafetyMm) + effectiveVertSpacingMm;
+    const double numerator = std::max (0.0, pageH - minGapMm) + effectiveVertSpacingMm;
+
 
     nRows = (denom > 0.0) ? static_cast<int> (std::floor (numerator / denom)) : 1;
     nRows = std::max (1, nRows);
+
+    pageUsedMm = nRows * tagHeightMmActual;
+
+
+    qDebug () << "T tagHeightMmActual: " << tagHeightMmActual;
+    qDebug () << "T pageH: " << pageH;
+    qDebug () << "T denom: " << denom;
+    qDebug () << "T numerator: " << numerator;
+    qDebug () << "T nRows: " << nRows;
+}
+
+// Compute printable height per page in millimeters (align with computeGrid logic)
+static double printableHeightMm (const ExcelGenerator::ExcelLayoutConfig &cfg)
+{
+    // Header/Footer constants (7.62 mm each) added to user top/bottom margins
+    const double headerMm	 = 7.62;
+    const double footerMm	 = 7.62;
+    const double effTopMm	 = cfg.marginTopMm + headerMm;
+    const double effBottomMm = cfg.marginBottomMm + footerMm;
+
+    const double originTopBlankMm = 4.0;
+
+
+    return std::max (0.0, pageA4HeightMm - effTopMm - effBottomMm - originTopBlankMm);
 }
 
 // Draw a dashed rectangle around a logical page area to visualize page boundaries
@@ -344,12 +360,21 @@ static void configureColumnsForTagWidth (QXlsx::Document &xlsx, int col, const E
     xlsx.setColumnWidth (col + 3, w3);
 }
 
-static void setTagRowHeights (QXlsx::Document &xlsx, int row, int tagRows)
+static void setTagRowHeights (QXlsx::Document &xlsx, int row, int tagRows, const ExcelGenerator::ExcelLayoutConfig &layoutConfig)
 {
     const double rhPts[11] = {16.50, 16.50, 16.50, 12.75, 12.75, 12.75, 15.75, 16.50, 13.50, 9.75, 9.75};
+    // Scale row heights to match desired tag height from template editor
+    double basePt = 0.0;
+
+    for (int i = 0; i < tagRows; ++i)
+        basePt += rhPts[i];
+
+    const double baseMm	   = basePt / points; // points -> mm
+    const double desiredMm = layoutConfig.tagHeightMm > 0.0 ? layoutConfig.tagHeightMm : baseMm;
+    const double k		   = (baseMm > 0.0) ? (desiredMm / baseMm) : 1.0;
 
     for (int r = 0; r < tagRows; ++r)
-        xlsx.setRowHeight (row + r, rhPts[r]);
+        xlsx.setRowHeight (row + r, rhPts[r] * k);
 }
 
 static void writeCompanyHeaderRow (QXlsx::Document &xlsx, int row, int col, int tagCols, const TagTemplate &tagTemplate,
@@ -611,7 +636,7 @@ static void renderTag (QXlsx::Document &xlsx, int row, int col, int tagCols, int
 
     configureColumnsForTagWidth (xlsx, col, layoutConfig);
 
-    setTagRowHeights (xlsx, row, tagRows);
+    setTagRowHeights (xlsx, row, tagRows, layoutConfig);
 
     writeCompanyHeaderRow (xlsx, row, col, tagCols, tagTemplate, tf);
     writeBrandRow (xlsx, row, col, tagCols, tag, tf);
@@ -635,7 +660,8 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
     // Refactored orchestration (no logic change)
     int nCols = 1, nRows = 1;
-    computeGrid (layoutConfig, nCols, nRows);
+    double pageUsedMm = 0.0;
+    computeGrid (layoutConfig, nCols, nRows, pageUsedMm);
 
     const int originCol = 2;
     const int originRow = 2;
@@ -651,13 +677,15 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
 
 
     int tagIndex = 0;
-    // Use one row less than theoretical fit to ensure no row spills to next page
-    const int rowsPerPage = std::max (1, nRows - 1);
+
+    const int rowsPerPage = std::max (1, nRows);
     for (const PriceTag &tag : priceTags)
     {
+        const int perPage = nCols * rowsPerPage;
+        qDebug () << "perPage: " << perPage;
+
         for (int q = 0; q < tag.getQuantity (); ++q)
         {
-            const int perPage	= nCols * rowsPerPage;
             const int pageIdx	= tagIndex / perPage;
             const int idxInPage = tagIndex % perPage;
             const int gridRow	= idxInPage / nCols; // 0..rowsPerPage-1
@@ -666,13 +694,26 @@ bool ExcelGenerator::generateExcelDocument (const QList<PriceTag> &priceTags, co
             int col = 0, row = 0, tagCols = 0, tagRows = 0;
             placeTagCellRange (layoutConfig, gridCol, gridRow, originCol, originRow, col, row, tagCols, tagRows);
 
-            const int pageGapRows = 1; // single very thin gap row between pages
+            const int pageGapRows = 1; // base one-row gap between pages
             row += pageIdx * (rowsPerPage * tagRows + pageGapRows);
 
-            // After the last tag on a page, make the following gap row minimal
-            // so the page break lands in the tiny spacer, not inside a tag
+
+            qDebug () << "idxInPage: " << idxInPage;
+
+            // After the last tag on a page, add one visible blank row (default ~4mm)
+            // so there is a clear one-row gap before the next page block
             if (idxInPage == perPage - 1)
-                xlsx.setRowHeight (row + tagRows, 1.0);
+            {
+                // Dynamic gap height: fill remaining printable area with a small safety pad
+                const double pageH		 = printableHeightMm (layoutConfig);
+                const double safetyPadMm = 6.5; // tiny pad to counter print rounding
+                double gapMm			 = pageH - pageUsedMm + safetyPadMm;
+
+                if (gapMm < 2.)
+                    gapMm = 6.5; // ensure at least a thin visible gap
+
+                xlsx.setRowHeight (row + tagRows, mmToRowHeightPt (gapMm));
+            }
 
             qDebug () << "Creating price tag" << tagIndex << "at position (" << row << "," << col << ")";
 

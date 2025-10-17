@@ -57,8 +57,11 @@ void TemplateEditorWidget::configureSpinBoxes ()
         s->setSingleStep (1.0);
     }
 
-    spinTagW->setValue (50.0);
-    spinTagH->setValue (30.0);
+    // Height requires 2 decimals to represent 53.97 mm precisely
+    spinTagH->setDecimals (2);
+
+    spinTagW->setValue (46.);
+    spinTagH->setValue (51.);
     spinMarginL->setValue (10.0);
     spinMarginT->setValue (10.0);
     spinMarginR->setValue (10.0);
