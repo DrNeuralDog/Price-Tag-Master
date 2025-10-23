@@ -5,18 +5,52 @@ PriceTagMasterProject_ver2/
 - 3rdparty/
   - qxlsx/                # Bundled QXlsx library (do not modify vendored core unless upgrading)
 - include/                # Public headers for core modules
-  - excelgenerator.h
-  - excelparser.h
-  - mainwindow.h
-  - pricetag.h
-  - wordgenerator.h
+  - Common.h                   # common platform helpers
+  - Constants.h                # layout/measurement helpers (inline constexpr)
+  - pricetag.h                 # shim -> includes models/pricetag.h
+  - models/
+    - pricetag.h               # domain model header
+  - excelGeneration/
+    - ExcelGenerator.h         # public API for Excel export
+  - excelParsing/
+    - ExcelParser.h            # public API for Excel parsing
+  - wordGeneration/
+    - WordGenerator.h          # public API for DOCX export
+  - ui/
+    - mainwindow.h
+    - templateeditor.h
+    - templateeditordialog.h
+    - thememanager.h
+    - trimmedhittoolbutton.h
+    - pixmaputils.h
 - src/                    # Implementations
-  - excelgenerator.cpp
-  - excelparser.cpp
   - main.cpp
-  - mainwindow.cpp
-  - pricetag.cpp
-  - wordgenerator.cpp
+  - excelParsing/
+    - ExcelParser.cpp
+  - wordGeneration/
+    - WordGenerator.cpp
+  - models/
+    - pricetag.cpp             # domain model impl
+  - templateEditor/
+    - TemplateEditor_Facade.cpp
+    - TemplateEditor_Ui.cpp
+    - TemplateEditor_Renderer.cpp
+    - TemplateEditor_Interactions.cpp
+    - TemplateEditor_Localization.cpp
+    - TemplateEditorDialog.cpp
+  - ui/
+    - MainWindow.cpp
+    - ThemeManager.cpp
+    - TrimmedHitToolButton.cpp
+    - PixmapUtils.cpp
+    - tagtemplate.cpp
+  - excelGeneration/
+    - ExcelUtils.*            # text helpers, padding, splitting
+    - ExcelLayout.*           # grid/geometry computations
+    - ExcelFormats.*          # QXlsx formats/styles
+    - ExcelWriters.*          # row writers
+    - ExcelRenderer.*         # renderTag orchestrator
+    - ExcelGenerator.*        # generateExcelDocument orchestration
 - resources/              # Icons and Qt resources
   - icons/
   - resources.qrc

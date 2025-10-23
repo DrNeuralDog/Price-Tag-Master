@@ -1,22 +1,41 @@
-#include <QApplication>
-#include <QDebug>
-#include <QFile>
-#include <QIcon>
-#include <QPixmap>
-#include <QSettings>
-#include <QTranslator>
 #include "mainwindow.h"
 #include "thememanager.h"
 
+
 static QTranslator appTranslator;
+
+
+static void setupIdentity (QApplication &app)
+{
+    app.setApplicationName ("Price Tag Master");
+    app.setOrganizationName ("Price Tag DrND Inc.");
+    app.setOrganizationDomain ("");
+}
+
+
+static void migrateUiSettingsIfMissing (QSettings &current)
+{
+    QSettings legacy (QSettings::UserScope, "Price Tag Inc.", "Price Tag Master");
+
+    if (! current.contains ("ui/theme") && legacy.contains ("ui/theme"))
+        current.setValue ("ui/theme", legacy.value ("ui/theme"));
+
+    if (! current.contains ("ui/language") && legacy.contains ("ui/language"))
+        current.setValue ("ui/language", legacy.value ("ui/language"));
+
+
+    current.sync (); // Ensure persistence
+}
+
 
 static QIcon buildAppIcon ()
 {
     QIcon icon;
+    QPixmap base;
+
     const QString pngPath = ":/icons/PriceTagManagerIcon.png";
     const QString icoPath = ":/icons/PriceTagManagerIcon.ico";
 
-    QPixmap base;
 
     if (QFile::exists (pngPath))
         base = QPixmap (pngPath);
@@ -39,15 +58,26 @@ static QIcon buildAppIcon ()
             icon.addFile (icoPath);
     }
 
+
     return icon;
 }
 
+
+static void setupMainWindow (MainWindow &mainWindow, const QIcon &appIcon, QSettings &settings)
+{
+    const QString lang = settings.value ("ui/language", "EN").toString ();
+
+    mainWindow.setUiLanguage (lang);
+    mainWindow.setWindowTitle ("Price Tag Master");
+    mainWindow.setWindowIcon (appIcon);
+    mainWindow.resize (800, 600);
+
+    mainWindow.show ();
+}
+
+
 static void setupApplication (QApplication &app, QSettings &settings)
 {
-    app.setApplicationName ("Price Tag Master");
-    app.setOrganizationName ("Price Tag Inc.");
-    app.setOrganizationDomain ("pricetagmaster.com");
-
     const AppTheme theme = ThemeManager::loadThemeFromSettings (settings);
     ThemeManager::applyThemeToApplication (theme);
 
@@ -68,15 +98,10 @@ static void setupTranslator (QApplication &app, QSettings &settings)
     }
 }
 
-static void setupMainWindow (MainWindow &mainWindow, const QIcon &appIcon, QSettings &settings)
+static void initializeApp (QApplication &app, QSettings &settings)
 {
-    const QString lang = settings.value ("ui/language", "EN").toString ();
-    mainWindow.setUiLanguage (lang);
-
-    mainWindow.setWindowTitle ("Price Tag Master");
-    mainWindow.setWindowIcon (appIcon);
-    mainWindow.resize (800, 600);
-    mainWindow.show ();
+    setupApplication (app, settings);
+    setupTranslator (app, settings);
 }
 
 
@@ -84,16 +109,14 @@ int main (int argc, char *argv[])
 {
     QApplication app (argc, argv);
 
-    // Ensure QSettings picks correct scope: set identity BEFORE creating QSettings
-    app.setApplicationName ("Price Tag Master");
-    app.setOrganizationName ("Price Tag DrND Inc.");
-    app.setOrganizationDomain ("");
+
+    setupIdentity (app);
 
     QSettings settings;
+    migrateUiSettingsIfMissing (settings);
     const QIcon appIcon = buildAppIcon ();
 
-    setupApplication (app, settings);
-    setupTranslator (app, settings);
+    initializeApp (app, settings);
 
     MainWindow mainWindow;
     setupMainWindow (mainWindow, appIcon, settings);

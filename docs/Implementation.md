@@ -108,6 +108,12 @@ Sub-steps:
 - Valid workbook renders correct tags honoring data rules (AC-1…AC-4)
 
 ## Resource Links
+[Note] Structure updates (2025-10-18):
+- UI headers relocated to `include/ui` (`mainwindow.h`, `templateeditor.h`, `templateeditordialog.h`) with compatibility shims left in `include/`.
+- Excel parsing header is now `include/excelParsing/ExcelParser.h` (shim `include/excelparser.h` preserved).
+- Word generation header is now `include/wordGeneration/WordGenerator.h` (shim `include/wordgenerator.h` preserved).
+- Removed deprecated legacy shim `src/excelgenerator.cpp` (real Excel implementation remains under `src/excelGeneration/*`).
+- CMake updated: added explicit TemplateEditor split sources and include directories for new subfolders.
 - [Qt 6 Documentation](https://doc.qt.io)
 - [CMake Documentation](https://cmake.org)
 - [QXlsx (GitHub)](https://github.com/QtExcel/QXlsx)

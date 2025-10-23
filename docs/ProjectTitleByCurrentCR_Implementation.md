@@ -15,3 +15,4 @@ Updated: 2025-08-08
 
 ## Notes
 - This file tracks active tasks only. Completed actions are logged in `docs/WorkflowLogs/DevelopmentLog.md`.
+- 2025-10-20: CMake обновлён — авто-GLOB для src/include; удалён ручной target_sources; include-пути собираются динамически; линковка Qt/QXlsx без изменений.

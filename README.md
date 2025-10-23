@@ -1,4 +1,4 @@
-# PriceTagMaster — Your Ultimate Price Tag Generator! 🏷️✨
+# PriceTagMaster — Your Ultimate Price Tag Generator! 🏷️
 
 **Imagine this: Upload an Excel file with your invoice data, and boom — in seconds, you've got print-ready price tags on A4 paper!** No more tedious manual design — just style, speed, and professional results. PriceTagMaster is a powerful desktop app built with C++ v17 and Qt 6 that transforms your data into stunning price tags with flexible templates, live preview, and export to DOCX or XLSX. Perfect for retail, small businesses, and anyone dealing with products!
 
@@ -28,20 +28,15 @@ PriceTagMaster is super easy to use! Here's a quick walkthrough — from install
 1. **Installation:**
 
    - Download the archive for your OS (Windows/Linux) from [our repo](https://example.com/download).
-   - Unzip to any folder. No installer needed — it's portable!  
-     **Our Icon:**  
-     ![PriceTagMaster Icon](docs/DesignScrins/PriceTagManagerIcon.jpg)  
-     *Spot our sleek icon in your apps — it's unforgettable!*
+   - Unzip to any folder. No installer needed — it's portable!**Our Icon:**![PriceTagMaster Icon](docs/DesignScrins/PriceTagManagerIcon.jpg)*Spot our sleek icon in your apps — it's unforgettable!*
    - Requirements: Windows 10+ or Linux (x86_64), 100MB space. Dependencies are baked in with Qt 6.
 2. **First Launch:**
 
    - Run `PriceTagMaster.exe` (Windows) or `./PriceTagMaster` (Linux).
    - Pick your theme: Light or Dark in settings.
-     - **Light Theme (Main Window):**  
-       ![Main Window Light](docs/DesignScrins/MainWindowLight.png)  
-       *Bright and clean — perfect for daytime work!*
-     - **Dark Theme (Main Window):**  
-       ![Main Window Dark](docs/DesignScrins/MainWindow.png)  
+     - **Light Theme (Main Window):**![Main Window Light](docs/DesignScrins/MainWindowLight.png)*Bright and clean — perfect for daytime work!*
+     - **Dark Theme (Main Window):**
+       ![Main Window Dark](docs/DesignScrins/MainWindow.png)
        *Sleek and easy on the eyes for late-night sessions!*
 3. **Load Your Data:**
 
@@ -52,20 +47,16 @@ PriceTagMaster is super easy to use! Here's a quick walkthrough — from install
 4. **Generate Price Tags:**
 
    - Open the "Template Editor" — here's how it looks:
-     - **Light Theme (Template Editor):**  
-       ![Template Editor Light](docs/DesignScrins/TemplateEditorLight.png)  
-       *Customize every detail with live preview!*
-     - **Dark Theme (Template Editor):**  
-       ![Template Editor Dark](docs/DesignScrins/TemplateEditorBlack.png)  
+     - **Light Theme (Template Editor):**![Template Editor Light](docs/DesignScrins/TemplateEditorLight.png)*Customize every detail with live preview!*
+     - **Dark Theme (Template Editor):**
+       ![Template Editor Dark](docs/DesignScrins/TemplateEditorBlack.png)
        *Creative flow in the dark — pure inspiration!*
    - Tweak: tag size (mm), fonts, fields, colors.
    - Check the preview for A4 pagination — see how it fits!
    - Want stats? Head to "Statistics" for charts — check out these views:
-     - **Light Theme (Statistics):**  
-       ![Statistics Light](docs/DesignScrins/StatisticsWindowLight.png)  
-       *Analyze sales data with clarity!*
-     - **Dark Theme (Statistics):**  
-       ![Statistics Dark](docs/DesignScrins/StatisticsWindow.png)  
+     - **Light Theme (Statistics):**![Statistics Light](docs/DesignScrins/StatisticsWindowLight.png)*Analyze sales data with clarity!*
+     - **Dark Theme (Statistics):**
+       ![Statistics Dark](docs/DesignScrins/StatisticsWindow.png)
        *Insights that pop in the dark!*
 5. **Export & Print:**
 

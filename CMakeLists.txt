@@ -79,7 +79,8 @@ else ()
     set(QT_VERSION_MAJOR 5)
 endif ()
 
-# Try to find Qt Charts optionally
+
+# Попытка найти Qt Charts - по необходимости
 find_package(Qt${QT_VERSION_MAJOR} QUIET COMPONENTS Charts)
 set(HAVE_QT_CHARTS OFF)
 if (TARGET Qt${QT_VERSION_MAJOR}::Charts)
@@ -100,20 +101,37 @@ get_target_property(QtPrintSupport_Include_Dir Qt${QT_VERSION_MAJOR}::PrintSuppo
 # =====================================================================================================================
 # ПОДГОТОВКА ФАЙЛОВ ПРОЕКТА И ПУТЕЙ ВКЛЮЧЕНИЯ
 
-file(GLOB_RECURSE ALL_PROJECT_FILES "src/*.h" "src/*.cpp" "src/*.ui" "include/*.h" "include/*.cpp" "include/*.ui" "resources/*.qrc")
+file(GLOB_RECURSE MAIN_PROJECT_FILES CONFIGURE_DEPENDS
+        "src/*.cpp" "src/*.cxx" "src/*.cc" "src/*.c"
+        "src/*.h" "src/*.hpp" "src/*.tpp" "src/*.inl"
+        "src/*.ui"
+        "include/*.h" "include/*.hpp" "include/*.tpp" "include/*.inl" "include/*.cpp"
+        "resources/*.qrc"
+)
 
-# Сбор путей к директориям проекта для include
+# Сбор путей к директориям проекта для include (только src/ и include/)
 set(PROJECT_PATHS "")
-file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true "src/*")
+foreach (ROOT_DIR IN ITEMS "src" "include")
+    file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true "${ROOT_DIR}/*")
+    list(FILTER SUBDIRS EXCLUDE REGEX ".*\\.git.*")
 
-foreach (SUBDIR IN LISTS SUBDIRS)
-    get_filename_component(ABS_SUBDIR "${SUBDIR}" ABSOLUTE)
-    if (IS_DIRECTORY "${ABS_SUBDIR}")
-        list(APPEND PROJECT_PATHS "${ABS_SUBDIR}")
-    endif ()
+    foreach (SUBDIR IN LISTS SUBDIRS)
+        get_filename_component(ABS_SUBDIR "${SUBDIR}" ABSOLUTE)
+
+        if (IS_DIRECTORY "${ABS_SUBDIR}")
+            list(APPEND PROJECT_PATHS "${ABS_SUBDIR}")
+        endif ()
+    endforeach ()
 endforeach ()
 
-list(APPEND PROJECT_PATHS "src/")
+list(APPEND PROJECT_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+list(REMOVE_DUPLICATES PROJECT_PATHS)
+
+message(STATUS "PROJECT_PATHS contains:")
+
+foreach (PATH IN LISTS PROJECT_PATHS)
+    message(STATUS "  ${PATH}")
+endforeach ()
 
 # =====================================================================================================================
 
@@ -125,8 +143,9 @@ list(APPEND PROJECT_PATHS "src/")
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(
             ${PROJECT_NAME} MANUAL_FINALIZATION
-            ${ALL_PROJECT_FILES}
+            ${MAIN_PROJECT_FILES}
     )
+
     # Define target properties for Android with Qt 6 as:
     set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
             ${CMAKE_CURRENT_SOURCE_DIR}/android)
@@ -140,7 +159,7 @@ else ()
     else ()
         add_executable(
                 ${PROJECT_NAME}
-                ${ALL_PROJECT_FILES}
+                ${MAIN_PROJECT_FILES}
                 include/Constants.h
                 include/Common.h
         )
@@ -175,7 +194,7 @@ target_link_libraries(
         QXlsx
 )
 
-
+ 
 
 # Подключение Qt Charts если доступен
 if (HAVE_QT_CHARTS)

@@ -1,3 +1,7 @@
+[2025-10-18 20:00] Запрос подтверждения: удалить легаси-шим `src/excelgenerator.cpp` и перенести файлы по подпапкам `include/ui`, `src/ui`, `include/excelParsing`, `src/excelParsing`, `include/wordGeneration`, `src/wordGeneration` с добавлением shim-хедеров и обновлением CMake/доков - Ожидается подтверждение пользователя
+[2025-10-18 00:00] Пользователь подтвердил продолжение рефакторинга TemplateEditor/ExcelGenerator - Продолжаю реализацию плана
+[2025-10-18 00:30] Пользователь запросил надёжное сохранение UI при собственных App/Org - Внесена миграция настроек и унификация; ожидаем подтверждения после перезапуска
+[2025-10-18 00:00] Подтвердили выполнение плана завершения рефакторинга (charts/gear/template editor) - В работе, часть задач выполнена
 [2025-10-16 12:00:00] Запрос: починить сохранение темы/языка между перезапусками - Принято, начата правка порядка инициализации QSettings в src/main.cpp
 [2025-10-16 12:05:00] Исполнение: обновлён src/main.cpp (setApplicationName/OrganizationName до QSettings) - Успешно
  [REVERTED 2025-10-03] Запись снята: изменения отменены по запросу пользователя, возвращено предыдущее поведение Excel-генерации
@@ -34,6 +38,8 @@
 [2025-08-09 10:00:00] User reported theme/UX mismatch with Figma spec - Applied token-based QPalette+QSS, updated toolbar/dropzone/button styles; theme toggle persists - Fixed
 [2025-08-12 00:00:00] User requested Stage 2 — correct XLSX export - Implemented mm-based A4 grid, correct column/row sizing, and print area in Excel export - Success
 [2025-08-12 13:30:00] User requested Stage 3 — correct DOCX export (match PriceTagExample.png) - Implemented OpenXML DOCX writer with A4 pages and grid; awaiting user build verification
+[2025-10-22 00:05:00] User requested address split refactor in Excel — initial change made in ExcelGenerator.cpp by mistake - Reverted
+[2025-10-22 00:10:00] User requested to move split refactor to ExcelUtils.cpp — Implemented comma-based two-line splitter with newline normalization
 [2025-08-14 00:00:00] User asked to apply single outer border for whole XLSX price tag and remove duplicate edge formatting from inner cells - Implemented in src/excelgenerator.cpp
 [2025-08-14 14:00:00] User requested precise XLSX cell dimensions (cols: 7, 3.57, 3.57, 3.43; rows: 16.5, 16.5, 16.5, 12.75, 12.75, 12.75, 15.75, 16.5, 10.5, 13.5, 9.75, 9.75) - Updated implementation in src/excelgenerator.cpp - Done
 [2025-08-14 14:20:00] User requested fine-tune: col1 ≈ 7.71 cm, col4 ≈ 2.71 cm; split Supplier row into two cells; for two prices remove label and strike old price with diagonal slash - Implemented in src/excelgenerator.cpp - Done
@@ -107,8 +113,16 @@
 [2025-10-01 19:40:00] Пользователь сообщил о повторной ошибке поиска файла иконки - Исправлено: указан относительный путь ../resources/icons/PriceTagMangerIcon.ico от build директории к исходным файлам
 [2025-10-01 19:45:00] Пользователь сообщил о повторной ошибке поиска файла иконки - Исправлено: изменен путь на ../../resources/icons/PriceTagMangerIcon.ico для корректного доступа из build/Debug директории
 [2025-10-01 19:50:00] Пользователь сообщил о повторной ошибке поиска файла иконки - Применен абсолютный путь к файлу иконки в app_icon.rc для надежной работы windres.exe независимо от рабочей директории
+[2025-10-20 22:58] Подтвержден и выполнен план миграции структуры: перенос .cpp в PascalCase и по подпапкам src/**, перемещение include/pixmaputils.h → include/ui/pixmaputils.h. Сборка по запросу пользователя не запускалась; ожидается локальная проверка
 [2025-10-02 14:30:00] Запрос пользователя: структурировать CMakeLists.txt файл с четкими разделителями формата ===================================================================================================================== для лучшей читаемости - Выполнено: файл переструктурирован с ясными разделами для базовых настроек, зависимостей, конфигурации проекта и платформенных особенностей
+[2025-10-18 18:40] Запрос пользователя: исправить ошибки компиляции после рефакторинга (дубли Constants, недостающие Qt-заголовки и <cmath>) - Принято; обновлены include-пути, константы переведены в inline constexpr, удалена амальгамация TemplateEditor; ожидаем пересборку
 [2025-10-02 15:00:00] Пользователь сообщил об ошибках сборки после реструктуризации CMakeLists.txt - Исправлено: перемещен блок конфигурации цели после её создания, теперь проект конфигурируется без ошибок
 [2025-10-02 17:05:00] Пользователь сообщил: Excel-генератор переносит последние строки ценника на новую страницу - Выполнено: пересчитана сетка по реальным высотам строк и убран мнимый вертикальный/горизонтальный spacing; добавлен safety 0.5 мм для предотвращения надломов строк
 [
 2025-10-03 18:26:36] Пользователь сообщил: ошибка сборки windres — ICON: No such file or directory (resources/windows/app_icon.rc) - Исправлено: путь к иконке заменён на относительный `../../resources/icons/PriceTagManagerIcon.ico`; пересборка прошла успешно
+[2025-10-20 12:00:00] Запрос пользователя: автоматизировать CMake (GLOB для src/include, убрать target_sources) - Выполнено: обновлён CMakeLists.txt; авто-GLOB src/include, динамические include-пути; линковка Qt/QXlsx без изменений
+[2025-10-20 12:15:00] Пользователь сообщил: не линкуется проект (undefined reference к TagTemplate::*). Действия: добавлен `src/ui/tagtemplate.cpp` с реализациями методов (дефолтные стили/тексты, JSON to/from). Результат: ошибка линковки устранена
+[2025-10-22 00:00] Пользователь запросил рефакторинг TemplateEditorWidget::updateFormLabels (выделение подметодов для geomForm/typoForm) - Выполнено без изменения логики
+[2025-10-22 16:09] Пользователь сообщил о падении сборки (setLabelForField) после рефакторинга - Исправлено: helper перенесён в метод класса, добавлен параметр lang в вызовы
+[2025-10-23 00:00:00] Запрос пользователя: объяснить назначение локального блока {} в конструкторе MainWindow - Ответ дан: про локальную область видимости, RAII, управляемый срок жизни и группировку; оверхеда нет
+[2025-10-23 00:30:00] Запрос пользователя: оставить splitAddressIntoLines функцией и вынести дублирующий цикл в отдельный file-scope подметод без изменения логики — Выполнено
