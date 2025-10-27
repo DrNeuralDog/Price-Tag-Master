@@ -349,6 +349,11 @@ build/
 .idea/
 .cursor/
 styles/
+
+# Ignore entire docs directory
+docs/
+docs/*
+
 docs/OtherHelpfulFiles/*.txt
 docs/DesignPreview/*.txt
 docs/Examples/*.txt

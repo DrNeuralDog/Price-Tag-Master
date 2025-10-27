@@ -1,12 +1,16 @@
 #pragma once
 
-#include <xlsxzipreader_p.h>
-#include "xlsxabstractsheet.h"
-#include "xlsxcell.h"
+#include <QObject>
+
+// QXlsx includes - needed for method signatures
 #include "xlsxcellrange.h"
 #include "xlsxdocument.h"
 
-#include "pricetag.h"
+// Forward declarations
+class PriceTag;
+class QString;
+template <typename T> class QList;
+template <typename K, typename V> class QMap;
 
 
 class ExcelParser: public QObject

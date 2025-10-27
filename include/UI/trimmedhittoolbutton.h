@@ -1,6 +1,15 @@
 #pragma once
 
-#include "CommonIncludes.h"
+#include <QToolButton>
+
+// Forward declarations
+class QWidget;
+class QMouseEvent;
+class QPoint;
+class QPaintEvent;
+class QResizeEvent;
+class QObject;
+class QEvent;
 
 
 class TrimmedHitToolButton: public QToolButton

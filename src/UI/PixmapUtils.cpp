@@ -1,5 +1,13 @@
 #include "pixmaputils.h"
 
+#include <QIcon>
+#include <QImage>
+#include <QPixmap>
+#include <QRect>
+#include <QRegion>
+#include <QSize>
+#include <QToolButton>
+
 
 namespace PixmapUtils
 {

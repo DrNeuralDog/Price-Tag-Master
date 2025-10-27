@@ -1,5 +1,15 @@
 #include "trimmedhittoolbutton.h"
 
+#include <QEvent>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QPixmap>
+#include <QRect>
+#include <QResizeEvent>
+#include <QSize>
+#include <QWidget>
+
 
 TrimmedHitToolButton::TrimmedHitToolButton (QWidget *parent) : QToolButton (parent) {}
 

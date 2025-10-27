@@ -1,7 +1,13 @@
 #pragma once
 
-#include "pricetag.h"
+#include <QObject>
+
 #include "tagtemplate.h"
+
+// Forward declarations
+class PriceTag;
+class QString;
+template <typename T> class QList;
 
 
 class ExcelGenerator: public QObject

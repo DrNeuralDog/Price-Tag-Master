@@ -1,5 +1,22 @@
 #include "templateeditor.h"
 
+#include <cmath>
+#include <QBrush>
+#include <QColor>
+#include <QDoubleSpinBox>
+#include <QFont>
+#include <QGraphicsItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
+#include <QGraphicsView>
+#include <QPainter>
+#include <QPen>
+#include <QRectF>
+#include <QScrollBar>
+
+#include "Constants.h"
+
 
 namespace
 {

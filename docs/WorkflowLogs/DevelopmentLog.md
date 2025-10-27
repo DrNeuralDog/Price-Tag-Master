@@ -1,3 +1,5 @@
+[2025-10-24 14:24] Окончательно удалён Common.h - мёртвый код, никем не использовался - Успешно
+[2025-10-24 13:12] Масштабный рефакторинг инклюдов: удалены CommonIncludes.h и Common.h; применены forward declarations во всех заголовках (.h); инклюды перенесены в .cpp файлы; оптимизировано время компиляции за счёт минимизации зависимостей в заголовках - Успешно
 [2025-10-18 21:40] Удалены deprecated shim-заголовки (templateeditor.h, templateeditordialog.h, mainwindow.h, wordgenerator.h, pricetag.h), перенесены UI-хедеры в include/ui/* и модели в include/models/*; обновлены все include-пути по проекту; перенесены TagTemplate/ThemeManager/TrimmedHitToolButton в include/ui/* - Успешно
 [2025-10-18 21:28] Удалён дублирующий исходник src/pricetag.cpp после переноса в src/models/pricetag.cpp — устранены multiple definition при линковке - Успешно
 [2025-10-18 20:10] Удалён легаси-шим src/excelgenerator.cpp; добавлены структурные заголовки include/ui/*, include/excelParsing/ExcelParser.h, include/wordGeneration/WordGenerator.h, настроены shim-хедеры (mainwindow.h, templateeditor.h, templateeditordialog.h, excelparser.h, wordgenerator.h) и обновлены инклюды в исходниках; CMake расширен путями и явными файлами TemplateEditor_*; обновлён docs/project_structure.md - Успешно
@@ -143,3 +145,16 @@
 [2025-10-22 00:00] Рефакторинг: в TemplateEditor_Localization вынесены подметоды updateGeometryFormLabels/updateTypographyFormLabels и helper setLabelForField; updateFormLabels теперь оркестрирует вызовы. Логика и тексты не изменены - Успешно
 [2025-10-22 16:10:00] Исправление сборки: helper setLabelForField перенесён в метод класса TemplateEditorWidget и все вызовы обновлены с передачей lang. Ошибка компиляции устранена - Успешно
 [2025-10-23 00:30:00] Рефакторинг: вынесен общий цикл адреса в file-scope функцию fillAddressLine; splitAddressIntoLines переведён на её вызовы без изменения логики и названий - Успешно
+[2025-10-24 00:00:00] README: заменена Mermaid-схема на GIF и удалена ссылка на HTML; теперь вставлено прямое изображение docs/DesignScrins/TimeComparisonChart.gif в секции «Сравнение времени» - Успешно
+[2025-10-24 16:20:00] README: удалена секция «Примеры кода», раздел «Контакты» заменён на единственный email neural_dog@proton.me - Успешно
+[2025-10-24 16:35:00] README: иконка в заголовке уменьшена в 4 раза; markdown-изображение заменено на <img width=170> для корректного рендера на GitHub - Успешно
+[2025-10-24 16:50:00] README: добавлено второе изображение ("PriceTagManager – text without background.png") справа от иконки через HTML-таблицу для надёжного позиционирования - Успешно
+[2025-10-24 17:05:00] README: исправлено отображение верхнего логотипа — удалены обратные кавычки вокруг тега <img>, заменено на центрированный <img> одного файла PriceTagManagerLogoTestVar2 – wothout background.png - Успешно
+[2025-10-24 17:20:00] README: заменён логотип на PriceTagManagerLogoTestVar3.png; раздел «Техническая архитектура» перерисован — компактная Mermaid с subgraph UI/Core/Parsing/Generation/Output - Успешно
+[2025-10-24 17:35:00] README: Mermaid-диаграмма заменена на ASCII-схему модулей (UI → Core/Models → Parsing/Generation → Output) - Успешно
+[2025-10-24 18:50:00] README: переписан блок «Техническая архитектура» — добавлены компоненты, поток данных, инварианты и кросс-срезы — Успешно
+[2025-10-24 19:06:00] README: раздел «Демонстрация функционала» упрощён (удалены лишние скрины), добавлены описания; создан новый раздел «Результат работы» с примерами DOCX/XLSX — Успешно
+[2025-10-24 20:05:30] README: исправлена Mermaid-схема потока данных (заменены <> и стрелки Unicode на совместимые подписи; безопасный ID у subgraph) - Успешно
+[2025-10-24 14:45:00] HTML: добавлен невидимый датасет-прокладка 'Spacer' между двумя барами, скрыт из легенды и tooltip; зазор теперь равен ширине столбца. Изменён файл `docs/DesignScrins/time_comparison_perfect.html` - Успешно
+[2025-10-24 14:58:00] HTML/CSS: фон карточек .stat-card под графиком заменён со зеленоватого градиента на светло-серый (#f3f4f6) и граница на #e2e8f0. Файл `docs/DesignScrins/time_comparison_perfect.html` - Успешно
+[2025-10-24 15:05:00] HTML: заменён рендер Chart.js на статический GIF. Canvas скрыт через CSS, в контейнер добавлено `<img src="TimeComparisonChart.gif">`. Файл `docs/DesignScrins/time_comparison_perfect.html` - Успешно

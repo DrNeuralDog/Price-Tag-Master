@@ -1,6 +1,12 @@
 #pragma once
 
-#include "CommonIncludes.h"
+// Forward declarations
+class QPixmap;
+class QRegion;
+class QToolButton;
+class QIcon;
+class QSize;
+class QWidget;
 
 
 namespace PixmapUtils

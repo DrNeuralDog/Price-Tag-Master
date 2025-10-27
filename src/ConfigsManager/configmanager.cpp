@@ -1,5 +1,18 @@
 #include "configmanager.h"
 
+#include <QByteArray>
+#include <QCoreApplication>
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
+#include <QStandardPaths>
+#include <QString>
+
 
 namespace
 {

@@ -1,5 +1,22 @@
 #include "templateeditor.h"
 
+#include <QComboBox>
+#include <QCursor>
+#include <QDoubleSpinBox>
+#include <QEvent>
+#include <QGraphicsItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QInputDialog>
+#include <QLineEdit>
+#include <QMouseEvent>
+#include <QPoint>
+#include <QPointF>
+#include <QRectF>
+#include <QScrollBar>
+#include <QWheelEvent>
+
 
 bool TemplateEditorWidget::handleMouseButtonDblClick (QObject *obj, QMouseEvent *mouseEvent)
 {

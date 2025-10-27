@@ -1,14 +1,41 @@
 #pragma once
 
-#include "CommonIncludes.h"
+#include <QList>
+#include <QMainWindow>
+#include <QMap>
+#include <QPoint>
+#include <QSet>
+#include <QSettings>
+#include <QString>
 
-#include "ExcelGenerator.h"
-#include "ExcelParser.h"
-#include "WordGenerator.h"
-#include "configmanager.h"
-#include "templateeditor.h"
-#include "templateeditordialog.h"
-#include "thememanager.h"
+#include "tagtemplate.h"
+
+// Forward declarations
+class ExcelGenerator;
+class ExcelParser;
+class WordGenerator;
+class TemplateEditorDialog;
+class PriceTag;
+
+class QWidget;
+class QTabWidget;
+class QToolBar;
+class QAction;
+class QPushButton;
+class QToolButton;
+class QLabel;
+class QProgressBar;
+class QTextEdit;
+class QComboBox;
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDragLeaveEvent;
+class QDropEvent;
+class QEvent;
+class QObject;
+class QMimeData;
+class QIcon;
+class QHBoxLayout;
 
 
 struct StatisticsData

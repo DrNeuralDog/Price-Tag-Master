@@ -1,6 +1,9 @@
 #pragma once
 
-#include "CommonIncludes.h"
+// Forward declarations
+class QSettings;
+class QPalette;
+class QString;
 
 
 enum class AppTheme

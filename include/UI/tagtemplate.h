@@ -1,6 +1,11 @@
 #pragma once
 
-#include "CommonIncludes.h"
+#include <QList>
+#include <QMap>
+#include <QString>
+
+// Forward declarations
+class QJsonObject;
 
 
 enum class TagTextAlign

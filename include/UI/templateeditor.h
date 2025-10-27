@@ -1,6 +1,37 @@
 #pragma once
 
+#include <QList>
+#include <QMap>
+#include <QPointF>
+#include <QRectF>
+#include <QString>
+#include <QWidget>
+
 #include "tagtemplate.h"
+
+// Forward declarations
+class QGraphicsView;
+class QGraphicsScene;
+class QDoubleSpinBox;
+class QGroupBox;
+class QFormLayout;
+class QComboBox;
+class QFontComboBox;
+class QSpinBox;
+class QCheckBox;
+class QLineEdit;
+class QSlider;
+class QPushButton;
+class QGraphicsItem;
+class QGraphicsRectItem;
+class QSplitter;
+class QVBoxLayout;
+class QMouseEvent;
+class QWheelEvent;
+class QObject;
+class QEvent;
+class QResizeEvent;
+class QShowEvent;
 
 
 class TemplateEditorWidget: public QWidget

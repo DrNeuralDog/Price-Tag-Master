@@ -1,10 +1,15 @@
 #include "ExcelGenerator.h"
 
+#include <QDebug>
+#include <QList>
+#include <QString>
+
 #include <xlsxcellrange.h>
 #include <xlsxdocument.h>
 #include <xlsxworksheet.h>
 
 #include "Constants.h"
+#include "pricetag.h"
 
 #include "ExcelFormats.h"
 #include "ExcelLayout.h"

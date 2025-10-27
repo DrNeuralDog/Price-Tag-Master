@@ -1,4 +1,12 @@
 #include "templateeditordialog.h"
+
+#include <QDialogButtonBox>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QString>
+#include <QVBoxLayout>
+#include <QWidget>
+
 #include "configmanager.h"
 #include "mainwindow.h"
 #include "templateeditor.h"

@@ -2,6 +2,9 @@
 
 #include "tagtemplate.h"
 
+// Forward declarations
+class QString;
+
 
 class ConfigManager
 {

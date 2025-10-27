@@ -1,9 +1,17 @@
 #pragma once
 
-#include <xlsxzipwriter_p.h>
+#include <QObject>
 
-#include "pricetag.h"
 #include "tagtemplate.h"
+
+// Forward declarations
+class PriceTag;
+class QString;
+template <typename T> class QList;
+
+namespace QXlsx {
+class ZipWriter;
+}
 
 
 class WordGenerator: public QObject

@@ -1,6 +1,57 @@
 #include "mainwindow.h"
+
+#include <QAction>
+#include <QApplication>
+#include <QComboBox>
+#include <QDebug>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QEvent>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QHBoxLayout>
+#include <QIcon>
+#include <QLabel>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QPainter>
+#include <QPixmap>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QToolBar>
+#include <QToolButton>
+#include <QUrl>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#ifdef USE_QT_CHARTS
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QValueAxis>
+
+QT_BEGIN_NAMESPACE
+namespace QtCharts {}
+QT_END_NAMESPACE
+using namespace QtCharts;
+#endif
+
 #include "ExcelGenerator.h"
+#include "ExcelParser.h"
+#include "WordGenerator.h"
+#include "configmanager.h"
 #include "pixmaputils.h"
+#include "pricetag.h"
+#include "templateeditor.h"
+#include "templateeditordialog.h"
+#include "thememanager.h"
 #include "trimmedhittoolbutton.h"
 
 

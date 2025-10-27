@@ -1,5 +1,11 @@
 #include "thememanager.h"
 
+#include <QApplication>
+#include <QColor>
+#include <QPalette>
+#include <QSettings>
+#include <QString>
+
 
 namespace
 {

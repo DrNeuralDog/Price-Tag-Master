@@ -1,5 +1,13 @@
 #include "templateeditor.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFontComboBox>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QSpinBox>
+
 
 TemplateEditorWidget::TemplateEditorWidget (QWidget *parent) :
     QWidget (parent), view (new QGraphicsView (this)), scene (new QGraphicsScene (this)), spinTagW (new QDoubleSpinBox (this)),

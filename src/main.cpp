@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "thememanager.h"
 
+#include <QApplication>
+#include <QDebug>
+#include <QFile>
+#include <QTranslator>
 
 static QTranslator appTranslator;
 

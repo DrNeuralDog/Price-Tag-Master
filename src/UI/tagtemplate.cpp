@@ -1,5 +1,11 @@
 #include "tagtemplate.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QLatin1String>
+#include <QMap>
+
 
 namespace
 {

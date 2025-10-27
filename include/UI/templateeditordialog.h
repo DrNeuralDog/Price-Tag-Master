@@ -1,9 +1,13 @@
 #pragma once
 
-#include "CommonIncludes.h"
+#include <QDialog>
 
-
+// Forward declarations
 class TemplateEditorWidget;
+class QString;
+class QWidget;
+class QDialogButtonBox;
+class QPushButton;
 
 
 class TemplateEditorDialog: public QDialog

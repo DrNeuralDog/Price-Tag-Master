@@ -1,5 +1,7 @@
 #include "ExcelLayout.h"
 
+#include <cmath>
+
 #include <xlsxcellrange.h>
 #include <xlsxdocument.h>
 #include <xlsxworksheet.h>

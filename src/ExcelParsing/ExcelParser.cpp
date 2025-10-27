@@ -1,5 +1,19 @@
 #include "ExcelParser.h"
 
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QList>
+#include <QMap>
+#include <QRegularExpression>
+#include <QString>
+
+#include <xlsxzipreader_p.h>
+#include "xlsxabstractsheet.h"
+#include "xlsxcell.h"
+
+#include "pricetag.h"
+
 
 ExcelParser::ExcelParser (QObject *parent) : QObject (parent) {}
 

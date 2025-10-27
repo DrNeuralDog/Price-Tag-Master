@@ -1,8 +1,21 @@
 #include "WordGenerator.h"
 
+#include <QDateTime>
+#include <QDebug>
+#include <QFile>
+#include <QList>
+#include <QString>
+#include <cmath>
+
+#include <xlsxzipwriter_p.h>
+
+#include "pricetag.h"
+
 
 using namespace QXlsx;
 
+
+// ====================================================== Support functions  ======================================================
 
 // Remove XML 1.0 invalid chars: 0x0-0x8, 0xB, 0xC, 0xE-0x1F
 static QString sanitizeForXml (const QString &s)
@@ -485,6 +498,8 @@ static QString makeInnerTagTable (const PriceTag &t, const TagTemplate &tpl, int
 
     return xml;
 }
+
+// ================================================================================================================================
 
 
 WordGenerator::WordGenerator (QObject *parent) : QObject (parent) {}

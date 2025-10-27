@@ -161,7 +161,6 @@ else ()
                 ${PROJECT_NAME}
                 ${MAIN_PROJECT_FILES}
                 include/Constants.h
-                include/Common.h
         )
     endif ()
 endif ()

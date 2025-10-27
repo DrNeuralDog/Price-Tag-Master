@@ -1,5 +1,23 @@
 #include "templateeditor.h"
 
+#include <cmath>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFontComboBox>
+#include <QFormLayout>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QSplitter>
+#include <QVBoxLayout>
+
 
 void TemplateEditorWidget::initializeUi ()
 {
