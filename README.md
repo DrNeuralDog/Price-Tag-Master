@@ -2,17 +2,17 @@
 
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17) [![Qt6](https://img.shields.io/badge/Qt-6-green.svg)](https://www.qt.io) [![CMake](https://img.shields.io/badge/CMake-3.16%2B-brightgreen.svg)](https://cmake.org)
 
-## Описание проблемы и решения 🎯
+## Problem Statement & Solution 🎯
 
-В розничной торговле создание ценников из товарных накладных — это рутинная задача, которая занимает 5-8 часов ручной работы в Excel или Word. PriceTagMaster автоматизирует процесс: парсит входные данные, применяет шаблоны и генерирует готовые к печати документы за секунды.
+In retail environments, creating price tags from product invoices is a tedious routine that consumes 5-8 hours of manual labor in Excel or Word. PriceTagMaster automates the entire workflow: it parses input data, applies customizable templates, and generates print-ready documents in seconds.
 
-| До                                                  | После                                                                                    |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 5-8 часов ручной верстки            | Секунды на генерацию                                                        |
-| Ошибки в layout и расчетах            | Точная A4-оптимизация, без clipping                                       |
-| Зависимость от ручного ввода | Автоматический парсинг с правилами (carry-down, concatenation) |
+| Before                                             | After                                                                                    |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 5-8 hours of manual formatting                     | Seconds to generate                                                                      |
+| Layout errors and calculation mistakes             | Precise A4 optimization with zero clipping                                               |
+| Dependency on manual data entry                    | Automated parsing with smart rules (carry-down, concatenation)                           |
 
-Это решает реальную бизнес-задачу для магазинов, экономя 96.4% рабочего времени в неделю. Проект создан на C++17 с Qt6 для кроссплатформенности (Windows/Linux), в модульной архитектуре и с высоким уровнем оптимизации.
+This solves a real business challenge for retail stores, saving 96.4% of weekly work time. Built with C++17 and Qt6 for cross-platform compatibility (Windows/Linux), featuring modular architecture and high-performance optimization.
 
 ## 🌟 Why PriceTagMaster is Your Must-Have App?
 
@@ -27,84 +27,84 @@
 
 **Perfect for:** Sellers, store managers, and anyone tired of manual price tag creation. Save time and sanity - automate the grind!
 
-## Достижения проекта 🏆
+## Project Achievements 🏆
 
-- Решена реальная задача: автоматизация ценников для розницы.
-- Метрики: 96.4% экономии времени, обработка больших файлов без сбоев.
-- Технические вызовы: Точная генерация DOCX и XLSX без внешних либ, кросс-платформенный UI с темами.
+- **Solves a Real-World Problem:** Complete price tag automation for retail operations.
+- **Proven Metrics:** 96.4% time savings, reliable processing of large datasets without crashes.
+- **Technical Challenges Overcome:** Precise DOCX and XLSX generation without external libraries, cross-platform UI with theme support.
 
-### Сравнение времени на задачу ⏳
+### Time Comparison ⏳
 
 ![Time Comparison](docs/DesignScrins/TimeComparisonChart.gif)
 
-## Технические особенности 🔧
+## Technical Highlights 🔧
 
-- **A4-оптимизация**: Алгоритм расчета N_cols/N_rows предотвращает clipping, используя mmToTwips для точности.
-- **Кроссплатформенность**: CMake для сборки, Qt6 для GUI с темами.
-- **Шаблоны**: JSON-сохранение/загрузка, редактор с live preview, актуальный для любого формата генерации ценников.
-- **Производительность**: Парсинг 5k строк < 3 сек, память < 300 MB.
+- **A4 Layout Optimization:** Smart N_cols/N_rows calculation prevents clipping, using mmToTwips conversions for precision.
+- **Cross-Platform Architecture:** CMake build system, Qt6 for native GUI with theming support.
+- **Template System:** JSON serialization/deserialization, visual editor with live preview, supports any tag generation format.
+- **High Performance:** Parses 5k rows in < 3 seconds, memory footprint < 300 MB.
 
-Использованы best practices: RAII, SOLID, clang-format для стиля.
+Built with industry best practices: RAII, SOLID principles, clang-format for consistent code style.
 
-## Инструкции по сборке 🛠️
+## Build Instructions 🛠️
 
-### Требования
+### Requirements
 
-- C++17 компилятор (GCC/Clang/MSVC)
-- Qt5.15 или Qt6 (Core, Gui, Widgets, Concurrent, PrintSupport)
+- C++17 compiler (GCC/Clang/MSVC)
+- Qt5.15 or Qt6 (Core, Gui, Widgets, Concurrent, PrintSupport)
 - CMake 3.16+
 
-### Сборка на Windows
+### Building on Windows
 
-1. Установите Qt6, либо Qt5.15 и CMake.
+1. Install Qt6 (or Qt5.15) and CMake.
 2. `mkdir build & cd build`
 3. `cmake .. -DCMAKE_PREFIX_PATH="path/to/Qt6"`
 4. `cmake --build . --config Release`
 
-### Сборка на Linux
+### Building on Linux
 
-1. Установите Qt6 и зависимости: `sudo apt install qt6-base-dev libqt6widgets6 libqt6gui6 libqt6core6 cmake`
+1. Install Qt6 and dependencies: `sudo apt install qt6-base-dev libqt6widgets6 libqt6gui6 libqt6core6 cmake`
 2. `mkdir build && cd build`
 3. `cmake ..`
 4. `make`
 
-Запуск: `./PriceTagMaster`
+Launch: `./PriceTagMaster`
 
-## Демонстрация функционала 📋
+## Feature Showcase 📋
 
-- **Главное окно (тёмная тема):**                                             ![MainBlackEng](docs/DesignScrins/MainBlackEng.png)                                                                        Стартовый экран. Поддерживает drag‑and‑drop Excel, быстрый доступ к редактору шаблонов, переключение темы/языка.
-- **Главное окно (светлая тема):**				![MainLightEng](docs/DesignScrins/MainLightEng.png)
+- **Main Window (Dark Theme):**                                             ![MainBlackEng](docs/DesignScrins/MainBlackEng.png)                                                                        Startup screen with drag-and-drop Excel support, quick access to template editor, theme/language switching.
+- **Main Window (Light Theme):**				![MainLightEng](docs/DesignScrins/MainLightEng.png)
 
-  Аналогичные элементы в светлой палитре. Контрастные акценты и подсветка зоны перетаскивания.
-- **Статистика:**																	![StatisticDark](docs/DesignScrins/StatisticDark.png)
+  Same features in light color scheme. Contrast accents and highlighted drop zone.
+- **Statistics:**																	![StatisticDark](docs/DesignScrins/StatisticDark.png)
 
-  Сводные графики по брендам и категориям, которые были во входных данных – товарных накладных, строятся после импорта. Графики зависят от данных.
+  Auto-generated charts showing brand and category distribution from imported invoice data. Charts adapt to your dataset.
 
-## Результат работы🏷️
+## Output Results 🏷️
 
-- **DOCX (Word):** ![WordTagsExample](docs/DesignScrins/WordTagsExample.png)A4‑пагинация, единый внешний бордер тега, совпадение с предпросмотром ≤ 1 мм. Готово к печати.
-- **XLSX (Excel):												**![ExcelTagsExample](docs/DesignScrins/ExcelTagsExample.png)
+- **DOCX (Word):** ![WordTagsExample](docs/DesignScrins/WordTagsExample.png)A4 pagination, unified tag borders, matches preview within ≤ 1 mm. Print-ready.
+- **XLSX (Excel):**												![ExcelTagsExample](docs/DesignScrins/ExcelTagsExample.png)
 
-  Заданная область печати и поля; высоты/ширины ячеек калиброваны под мм. Ничего не обрезается.
+  Defined print area and margins; cell heights/widths calibrated to millimeters. Zero clipping.
 
-## Архитектурные решения 📐
+## Architectural Design 📐
 
-Модульность для расширяемости: UI отделено от бизнес-логики. Выбрана Qt6 для нативного GUI, есть поддержка Qt5 версии начиная с 5.15, CMake для portability. Обоснование: фокус на производительности. Ниже — целевая схема модулей и потоков данных.
+Modularity for extensibility: UI is separated from business logic. Qt6 chosen for native GUI with Qt5.15+ support maintained for compatibility. CMake ensures portability across platforms. Design rationale: performance-first approach. Below is the target module and data flow schema.
 
-### Компоненты
+### Components
 
-- UI слой: `MainWindow`, `TemplateEditorDialog` (редактор шаблонов), `PreviewWidget` (постраничный предпросмотр).
-- Модели: `PriceTag` (данные ценника), `TagTemplate` (геометрия в мм, поля, стили).
-- Сервисы:
-  - `ExcelParser` — чтение XLSX по именам заголовков, carry‑down Supplier/Address.
-  - `LayoutEngine` — расчёт сетки A4: N_cols/N_rows, пагинация, единицы — мм.
-  - `ExcelGenerator` — экспорт в XLSX через QXlsx: ширины/высоты, печатная область.
-  - `WordGenerator` — экспорт в DOCX (Open XML), точное совпадение с предпросмотром.
-  - `ThemeManager` — светлая/тёмная тема, QSettings.
-  - `ConfigManager` — недавние файлы, последняя тема/шаблон.
-- 3rd‑party: `QXlsx` (в `3rdparty/qxlsx/`), Qt6 Widgets.
+- **UI Layer:** `MainWindow`, `TemplateEditorDialog` (template editor), `PreviewWidget` (paginated preview).
+- **Models:** `PriceTag` (tag data), `TagTemplate` (geometry in mm, margins, styles).
+- **Services:**
+  - `ExcelParser` — reads XLSX by header names, implements carry-down for Supplier/Address.
+  - `LayoutEngine` — calculates A4 grid: N_cols/N_rows, pagination, units in mm.
+  - `ExcelGenerator` — exports to XLSX via QXlsx: widths/heights, print area.
+  - `WordGenerator` — exports to DOCX (Open XML), exact match with preview.
+  - `ThemeManager` — light/dark theme, QSettings persistence.
+  - `ConfigManager` — recent files, last theme/template.
+- **3rd-party:** `QXlsx` (bundled in `3rdparty/qxlsx/`), Qt6 Widgets.
 
-### Поток данных (рантайм)
+### Data Flow (Runtime)
 
 ```mermaid
 flowchart TD
@@ -125,26 +125,26 @@ flowchart TD
     K -->|XLSX| M[Excel File]
 ```
 
-### Инварианты и единицы измерения
+### Invariants and Units
 
-- Геометрия и отступы — в мм; шрифты — в pt. Единственный источник истины — `TagTemplate`.
-- Формула раскладки A4: N_cols/N_rows вычисляются по габаритам ценника, полям и межстрочным/межколоночным отступам.
-- Экспорты обязаны совпадать с предпросмотром с погрешностью ≤ 1 мм.
+- **Geometry and margins** in mm; **fonts** in pt. Single source of truth: `TagTemplate`.
+- **A4 layout formula:** N_cols/N_rows calculated from tag dimensions, page margins, and row/column spacing.
+- **Exports must match preview** with tolerance ≤ 1 mm.
 
-### Кросс‑срезы
+### Cross-Cutting Concerns
 
-- Темизация и локальные настройки — через `ThemeManager` + `QSettings`.
-- Обработка ошибок парсинга — ненавязчивые баннеры в UI, продолжение с валидными данными.
+- **Theming and settings** managed via `ThemeManager` + `QSettings`.
+- **Parsing error handling:** Non-intrusive UI notifications, graceful continuation with valid data.
 
-Выбрана структура с фокусом на SOLID: UI отделён от бизнес‑логики, раскладка переиспользуется предпросмотром и экспортерами.
+Architecture emphasizes SOLID principles: UI is decoupled from business logic, layout logic is reused by preview and exporters.
 
-## Планы развития 📈
+## Roadmap 📈
 
-- Поддержка QR-кодов;
-- Расширение возможностей редактирования ценников;
-- Расширение наменклатуры типов входных накладных документов с товарами;
-- Интеграция с БД.
+- QR code support for tags
+- Enhanced tag editing capabilities
+- Support for additional invoice document formats
+- Database integration
 
-## Контакты 📫
+## Contact 📫
 
-Пишите на email: neural_dog@proton.me
+Email: neural_dog@proton.me
