@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Tag Automation - Time Savings</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 45px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 950px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 34px;
+            font-weight: 700;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 35px;
+            font-size: 17px;
+        }
+        .chart-wrapper {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        #chartContainer {
+            position: relative;
+            height: 420px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 35px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 22px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%);
+            border: 2px solid #86efac;
+            min-width: 160px;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        .stat-value {
+            font-size: 38px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            color: #4a5568;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .efficiency-badge {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 25px auto;
+            font-weight: bold;
+            font-size: 22px;
+            text-align: center;
+            width: fit-content;
+            display: block;
+            box-shadow: 0 5px 20px rgba(72, 187, 120, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+        .highlight {
+            color: #059669;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏷️ Price Tag Automation Impact</h1>
+        <p class="subtitle">Weekly time investment comparison for retail price tag creation</p>
+        
+        <div class="chart-wrapper">
+            <div id="chartContainer">
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="efficiency-badge">
+            ⚡ 28× Productivity Boost
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">96.4%</div>
+                <div class="stat-label">Time Reduction</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6.75h</div>
+                <div class="stat-label">Weekly Savings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">351h</div>
+                <div class="stat-label">Annual Savings</div>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            📅 Process frequency: <span class="highlight">Once per week</span> when new inventory arrives<br>
+            💡 Annual calculation: 52 weeks × 6.75 hours saved = 351 hours (≈44 working days)
+        </div>
+    </div>
+
+    <script>
+        // Get canvas context
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        
+        // Create gradients
+        const gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientRed.addColorStop(0, 'rgba(248, 113, 113, 0.65)');
+        gradientRed.addColorStop(0.5, 'rgba(239, 68, 68, 0.75)');
+        gradientRed.addColorStop(1, 'rgba(220, 38, 38, 0.85)');
+        
+        const gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientGreen.addColorStop(0, '#48bb78');
+        gradientGreen.addColorStop(0.5, '#22c55e');
+        gradientGreen.addColorStop(1, '#059669');
+
+        // Chart configuration with proper spacing
+        const config = {
+            type: 'bar',
+            data: {
+                labels: ['Process Time Comparison'],
+                datasets: [
+                    {
+                        label: 'Manual Process',
+                        data: [420], // 7 hours
+                        backgroundColor: gradientRed,
+                        borderColor: 'rgba(220, 38, 38, 0.9)',
+                        borderWidth: 3,
+                        borderRadius: 12,
+                        barThickness: 85,
+                        categoryPercentage: 0.5,
+                        barPercentage: 0.6,
+                    },
+                    {
+                        label: 'Spacer',
+                        data: [0],
+                        backgroundColor: 'rgba(0,0,0,0)',
+                        borderWidth: 0,
+                        barThickness: 85,
+                        categoryPercentage: 0.5,
+                        barPercentage: 0.6,
+                        datalabels: { display: false }
+                    },
+                    {
+                        label: 'Automated Process',
+                        data: [15], // 15 minutes
+                        backgroundColor: gradientGreen,
+                        borderColor: '#059669',
+                        borderWidth: 3,
+                        borderRadius: 12,
+                        barThickness: 85,
+                        categoryPercentage: 0.5,
+                        barPercentage: 0.6,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 40,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 25,
+                            font: {
+                                size: 15,
+                                weight: '600'
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 15,
+                            boxHeight: 15,
+                            filter: function(item) {
+                                return item.text !== 'Spacer';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        filter: function(context) {
+                            return context.dataset.label !== 'Spacer';
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const minutes = context.parsed.y;
+                                const hours = Math.floor(minutes / 60);
+                                const mins = minutes % 60;
+                                
+                                if (hours > 0) {
+                                    return label + ': ' + hours + ' hours ' + (mins > 0 ? mins + ' minutes' : '');
+                                } else {
+                                    return label + ': ' + mins + ' minutes';
+                                }
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 14,
+                        cornerRadius: 10,
+                        titleFont: {
+                            size: 15,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 14
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 10,
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        formatter: function(value) {
+                            const hours = Math.floor(value / 60);
+                            const mins = value % 60;
+                            if (hours > 0) {
+                                return hours + 'h ' + (mins > 0 ? mins + 'm' : '');
+                            }
+                            return mins + ' min';
+                        },
+                        color: function(context) {
+                            return context.datasetIndex === 0 ? '#dc2626' : '#059669';
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 480, // 8 hours
+                        title: {
+                            display: true,
+                            text: 'Time Required',
+                            font: {
+                                size: 15,
+                                weight: '600'
+                            },
+                            padding: 10
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                const hours = Math.floor(value / 60);
+                                const mins = value % 60;
+                                if (value === 0) return '0';
+                                if (mins === 0) return hours + ' hours';
+                                return hours + 'h ' + mins + 'm';
+                            },
+                            stepSize: 60,
+                            font: {
+                                size: 13
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.06)',
+                            lineWidth: 1
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 15,
+                                weight: '600'
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2500,
+                    easing: 'easeInOutQuart'
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        // Create chart
+        const timeChart = new Chart(ctx, config);
+
+        // Animate statistics
+        function animateValue(element, start, end, duration, format = 'number') {
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function updateValue(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const value = start + (range * easeOutQuart(progress));
+                
+                switch(format) {
+                    case 'percent':
+                        element.textContent = value.toFixed(1) + '%';
+                        break;
+                    case 'hours':
+                        element.textContent = Math.round(value) + 'h';
+                        break;
+                    case 'time':
+                        element.textContent = value.toFixed(2) + 'h';
+                        break;
+                    default:
+                        element.textContent = Math.round(value);
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateValue);
+                }
+            }
+            
+            function easeOutQuart(t) {
+                return 1 - Math.pow(1 - t, 4);
+            }
+            
+            requestAnimationFrame(updateValue);
+        }
+
+        // Start animations
+        setTimeout(() => {
+            const statValues = document.querySelectorAll('.stat-value');
+            animateValue(statValues[0], 0, 96.4, 2200, 'percent');
+            animateValue(statValues[1], 0, 6.75, 2200, 'time');
+            animateValue(statValues[2], 0, 351, 2200, 'hours');
+        }, 600);
+    </script>
+</body>
+</html>

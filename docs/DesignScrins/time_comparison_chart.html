@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сравнение затрат времени на создание ценников</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f7fafc;
+            min-width: 150px;
+            margin: 10px;
+        }
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #48bb78;
+        }
+        .stat-label {
+            color: #4a5568;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        #chartContainer {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .efficiency-badge {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 20px auto;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            width: fit-content;
+            display: block;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏷️ Революция в создании ценников</h1>
+        <p class="subtitle">Сравнение затрат времени до и после автоматизации</p>
+        
+        <div id="chartContainer">
+            <canvas id="timeChart"></canvas>
+        </div>
+        
+        <div class="efficiency-badge">
+            ⚡ Ускорение в 28 раз!
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">96.4%</div>
+                <div class="stat-label">Экономия времени</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6ч 45м</div>
+                <div class="stat-label">Сэкономлено в день</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1755ч</div>
+                <div class="stat-label">Сэкономлено в год</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные для диаграммы
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        
+        // Градиенты для столбцов
+        const gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientRed.addColorStop(0, '#ef4444');
+        gradientRed.addColorStop(1, '#dc2626');
+        gradientRed.globalAlpha = 0.8;
+        
+        const gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientGreen.addColorStop(0, '#48bb78');
+        gradientGreen.addColorStop(1, '#2f855a');
+
+        const timeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Время на создание ценников'],
+                datasets: [
+                    {
+                        label: 'Раньше (ручная работа)',
+                        data: [420], // 7 часов в минутах
+                        backgroundColor: gradientRed,
+                        borderColor: 'rgba(220, 38, 38, 0.7)',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        barThickness: 80,
+                        categoryPercentage: 0.6,
+                        barPercentage: 0.5,
+                    },
+                    {
+                        label: 'Сейчас (с программой)',
+                        data: [15], // 15 минут
+                        backgroundColor: gradientGreen,
+                        borderColor: '#2f855a',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        barThickness: 80,
+                        categoryPercentage: 0.6,
+                        barPercentage: 0.5,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14,
+                                weight: '500'
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                const minutes = context.parsed.y;
+                                const hours = Math.floor(minutes / 60);
+                                const mins = minutes % 60;
+                                
+                                if (hours > 0) {
+                                    label += hours + ' ч ' + mins + ' мин';
+                                } else {
+                                    label += mins + ' минут';
+                                }
+                                return label;
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    },
+                    // Добавляем подписи значений на столбцах
+                    datalabels: {
+                        display: true,
+                        color: 'white',
+                        font: {
+                            weight: 'bold',
+                            size: 16
+                        },
+                        formatter: (value) => {
+                            const hours = Math.floor(value / 60);
+                            const mins = value % 60;
+                            if (hours > 0) {
+                                return hours + ' ч ' + mins + ' мин';
+                            }
+                            return mins + ' мин';
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Время (минуты)',
+                            font: {
+                                size: 14,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 60) {
+                                    const hours = Math.floor(value / 60);
+                                    const mins = value % 60;
+                                    return hours + ' ч' + (mins > 0 ? ' ' + mins + ' м' : '');
+                                }
+                                return value + ' мин';
+                            },
+                            stepSize: 60,
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 14,
+                                weight: '500'
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+
+        // Анимация чисел в статистике
+        function animateValue(element, start, end, duration, suffix = '') {
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function updateValue(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const value = start + (range * easeOutQuart(progress));
+                element.textContent = Math.round(value) + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateValue);
+                }
+            }
+            
+            function easeOutQuart(t) {
+                return 1 - Math.pow(1 - t, 4);
+            }
+            
+            requestAnimationFrame(updateValue);
+        }
+
+        // Запускаем анимацию статистики
+        setTimeout(() => {
+            const statValues = document.querySelectorAll('.stat-value');
+            animateValue(statValues[0], 0, 96.4, 2000, '%');
+            animateValue(statValues[1], 0, 6, 2000, 'ч 45м');
+            animateValue(statValues[2], 0, 1755, 2000, 'ч');
+        }, 500);
+    </script>
+</body>
+</html>
